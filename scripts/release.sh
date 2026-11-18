@@ -10,6 +10,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG="${1:?Usage: scripts/release.sh release-notes/vX.Y.Z.json}"
 cd "$ROOT"
 
+: "${GH_TOKEN:?Set GH_TOKEN to a GitHub token with repo access}"
+
 NOTES="$(mktemp)"
 trap 'rm -f "$NOTES"' EXIT
 
@@ -19,7 +21,7 @@ bash android/build.sh
 
 git add -A
 git commit -m "Release v$VERSION"
-git push
+git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push
 
 gh release create "v$VERSION" exam-buddy-lite.apk \
   --title "Exam Buddy Pro v$VERSION" \

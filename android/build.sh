@@ -40,7 +40,7 @@ aapt2 link \
 javac -source 8 -target 8 -encoding UTF-8 \
   -bootclasspath "$ANDROID_JAR" \
   -d "$BUILD/classes" \
-  "$ROOT/src/com/exambuddy/lite/MainActivity.java" \
+  $(find "$ROOT/src" -name '*.java' | sort) \
   "$BUILD/gen/com/exambuddy/lite/R.java"
 
 jar cf "$BUILD/classes.jar" -C "$BUILD/classes" .

@@ -183,7 +183,7 @@ html[lang="si"] body {
   background: linear-gradient(90deg, #22d3ee, #6366f1, #a855f7, #f472b6);
   background-size: 200% 100%;
   box-shadow: 0 0 16px rgba(167,139,250,0.7);
-  animation: splashFill 1.5s ease forwards, splashBarShine 1.2s linear infinite;
+  animation: splashFill 5s linear forwards, splashBarShine 1.2s linear infinite;
 }
 .splash-credit {
   margin-top: 1rem;
@@ -1182,6 +1182,15 @@ input[type="search"] { flex: 1 1 140px; min-width: 0; }
   color: var(--faint);
   font-size: 0.8rem;
   margin: 0.9rem 0 0;
+}
+
+.background-status {
+  margin: 0.35rem 0 0.9rem;
+  line-height: 1.4;
+}
+
+.background-status.ok {
+  color: var(--success);
 }
 
 kbd {

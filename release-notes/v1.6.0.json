@@ -1,0 +1,21 @@
+{
+  "versionCode": 7,
+  "versionName": "1.6",
+  "changelog": {
+    "en": [
+      "The loading screen now finishes cleanly within 5 seconds every time.",
+      "Focus, short break and long break timers keep running when you switch tabs or leave the app.",
+      "Timers are restored correctly after closing or restarting the app.",
+      "New background timer notification, plus Android prompts for notification, background and battery access.",
+      "Back now keeps the running session alive in the background instead of resetting it."
+    ],
+    "si": [
+      "යෙදුම විවෘත කරන විට එන loading screen එක දැන් සෑම විටම තත්පර 5කින් අවසන් වේ.",
+      "Focus, කෙටි විවේක සහ දිගු විවේක කාලමාන ටැබ් මාරු කළත් යෙදුමෙන් පිටව ගියත් දිගටම ධාවනය වේ.",
+      "යෙදුම වසා නැවත විවෘත කළත් කාලමානය නිවැරදිව යථා තත්ත්වයට පත් වේ.",
+      "පසුබිම් කාලමාන දැනුම්දීමක් සහ දැනුම්දීම්, පසුබිම් හා බැටරි අවසර ඉල්ලීම් එකතු විය.",
+      "Back එබූ විට සැසිය නැවත සකස් නොවී පසුබිමේ දිගටම ක්‍රියා කරයි."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v1.6\n\n### What's new\n- The loading screen now finishes cleanly within 5 seconds every time.\n- Focus, short break and long break timers keep running when you switch tabs or leave the app.\n- Timers are restored correctly after closing or restarting the app.\n- New background timer notification, plus Android prompts for notification, background and battery access.\n- Back now keeps the running session alive in the background instead of resetting it.\n\n### අලුතෙන් එන දේ\n- යෙදුම විවෘත කරන විට එන loading screen එක දැන් සෑම විටම තත්පර 5කින් අවසන් වේ.\n- Focus, කෙටි විවේක සහ දිගු විවේක කාලමාන ටැබ් මාරු කළත් යෙදුමෙන් පිටව ගියත් දිගටම ධාවනය වේ.\n- යෙදුම වසා නැවත විවෘත කළත් කාලමානය නිවැරදිව යථා තත්ත්වයට පත් වේ.\n- පසුබිම් කාලමාන දැනුම්දීමක් සහ දැනුම්දීම්, පසුබිම් හා බැටරි අවසර ඉල්ලීම් එකතු විය.\n- Back එබූ විට සැසිය නැවත සකස් නොවී පසුබිමේ දිගටම ක්‍රියා කරයි.\n\n### Install\nDownload `exam-buddy-lite.apk` below and install it over your current version. Your exams, tasks and settings stay on your device.\n"
+}

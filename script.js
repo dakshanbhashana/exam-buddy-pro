@@ -26,8 +26,8 @@ const CIRCUMFERENCE = 2 * Math.PI * 104;
 const DAY_MS = 1000 * 60 * 60 * 24;
 const SNAPSHOT_VERSION = 3;
 
-const APP_VERSION_NAME = "1.5";
-const APP_VERSION_CODE = 6;
+const APP_VERSION_NAME = "1.6";
+const APP_VERSION_CODE = 7;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -191,6 +191,11 @@ const I18N = {
     autoBreaks: "Auto-start breaks",
     autoFocus: "Auto-start focus",
     sound: "Completion chime",
+    backgroundAccess: "Background running access",
+    backgroundAllowed: "Background timer is allowed.",
+    backgroundBlocked: "Allow background activity and battery access so the timer keeps running.",
+    backgroundUnavailable: "Background timer is available in the Android app.",
+    backgroundHint: "Your timer keeps running in the background.",
     saveSettings: "Save settings",
     todaySessions: "Today's Sessions",
     sessionsEmpty: "Finish a focus session to see it here.",
@@ -262,7 +267,7 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
-    version: "Version 1.5",
+    version: "Version 1.6",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -453,6 +458,11 @@ const I18N = {
     autoBreaks: "විවේක ස්වයංක්‍රීයව ආරම්භ කරන්න",
     autoFocus: "අවධානය ස්වයංක්‍රීයව ආරම්භ කරන්න",
     sound: "සම්පූර්ණ වීමේ ශබ්දය",
+    backgroundAccess: "පසුබිම් ක්‍රියාකාරීත්ව අවසරය",
+    backgroundAllowed: "පසුබිම් කාලමානයට අවසර ඇත.",
+    backgroundBlocked: "යෙදුමෙන් පිටව ගියත් කාලමානය දිගටම ධාවනය වීමට පසුබිම් සහ බැටරි අවසර දෙන්න.",
+    backgroundUnavailable: "පසුබිම් කාලමානය Android යෙදුම තුළ ඇත.",
+    backgroundHint: "කාලමානය පසුබිමේ දිගටම ධාවනය වේ.",
     saveSettings: "සැකසුම් සුරකින්න",
     todaySessions: "අද සැසි",
     sessionsEmpty: "මෙහි දැක ගැනීමට අවධාන සැසියක් සම්පූර්ණ කරන්න.",
@@ -524,7 +534,7 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
-    version: "Version 1.5",
+    version: "Version 1.6",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -720,6 +730,77 @@ function nativeFile() {
   return null;
 }
 
+function nativeTimer() {
+  try {
+    if (window.ExamBuddyNative && window.ExamBuddyNative.isAvailable()) {
+      return window.ExamBuddyNative;
+    }
+  } catch {
+  }
+  return null;
+}
+
+function startNativeTimer() {
+  const bridge = nativeTimer();
+  if (!bridge || !timer.running || !timer.endsAt) return;
+  try {
+    const modeLabel = t(MODES[timer.mode].label);
+    const completeTitle = timer.mode === "focus" ? t("focusDone") : t("breakDone");
+    bridge.startTimer(
+      timer.mode,
+      timer.endsAt,
+      modeLabel,
+      completeTitle,
+      t("appTitle"),
+      getLanguage(),
+      pomodoro.settings.sound
+    );
+  } catch {
+  }
+}
+
+function stopNativeTimer() {
+  const bridge = nativeTimer();
+  if (!bridge) return;
+  try {
+    bridge.stopTimer();
+  } catch {
+  }
+}
+
+function requestBackgroundAccess() {
+  const bridge = nativeTimer();
+  if (!bridge) {
+    showToast(t("backgroundUnavailable"));
+    return;
+  }
+  try {
+    bridge.requestBackgroundAccess();
+  } catch {
+  }
+}
+
+function updateBackgroundStatus() {
+  const status = document.getElementById("background-status");
+  if (!status) return;
+  const bridge = nativeTimer();
+  if (!bridge) {
+    status.textContent = t("backgroundUnavailable");
+    status.classList.remove("ok");
+    return;
+  }
+  let battery = false;
+  let notifications = true;
+  try {
+    battery = !!bridge.isIgnoringBatteryOptimizations();
+    notifications = !!bridge.areNotificationsEnabled();
+  } catch {
+  }
+  const ready = battery && notifications;
+  status.textContent = ready ? t("backgroundAllowed") : t("backgroundBlocked");
+  status.classList.toggle("ok", ready);
+}
+
 function readCache() {
   const data = {};
   Object.entries(STORAGE_KEYS).forEach(([name, key]) => {
@@ -774,13 +855,24 @@ function readFileSnapshot() {
   }
 }
 
+function snapshotTime(snapshot) {
+  const savedAt = snapshot && typeof snapshot.savedAt === "string" ? Date.parse(snapshot.savedAt) : NaN;
+  return Number.isFinite(savedAt) ? savedAt : 0;
+}
+
 function initialSnapshot() {
   const fromFile = readFileSnapshot();
+  const fromCache = readCache();
+  if (fromFile && fromCache) {
+    const chosen = snapshotTime(fromCache) > snapshotTime(fromFile) ? fromCache : fromFile;
+    if (chosen === fromFile) writeCache(fromFile);
+    return chosen;
+  }
   if (fromFile) {
     writeCache(fromFile);
     return fromFile;
   }
-  return readCache();
+  return fromCache;
 }
 
 const startup = initialSnapshot();
@@ -1017,6 +1109,7 @@ function switchTab(tab) {
   buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
   if (tab === "insights") renderInsights();
+  if (timer.running) resumeAppTimer();
   forceScrollTop();
   requestAnimationFrame(forceScrollTop);
 }
@@ -1625,7 +1718,9 @@ function setupTheme() {
 
 function startTicking() {
   stopTicking();
+  if (!timer.running) return;
   timerInterval = setInterval(tick, 250);
+  tick();
 }
 
 function stopTicking() {
@@ -1650,6 +1745,7 @@ function startTimer() {
   if (timer.remaining <= 0) timer.remaining = durationFor(timer.mode);
   timer.running = true;
   timer.endsAt = Date.now() + timer.remaining * 1000;
+  startNativeTimer();
   saveTimer();
   renderTimer();
   startTicking();
@@ -1660,6 +1756,7 @@ function pauseTimer() {
   timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
   timer.running = false;
   timer.endsAt = null;
+  stopNativeTimer();
   saveTimer();
   renderTimer();
   stopTicking();
@@ -1669,6 +1766,7 @@ function resetTimer() {
   timer.running = false;
   timer.endsAt = null;
   timer.remaining = durationFor(timer.mode);
+  stopNativeTimer();
   saveTimer();
   renderTimer();
   stopTicking();
@@ -1681,6 +1779,7 @@ function setMode(mode, keepRunning = false) {
     timer.running = false;
     timer.endsAt = null;
     stopTicking();
+    stopNativeTimer();
   }
   timer.mode = mode;
   timer.remaining = durationFor(mode);
@@ -1797,6 +1896,11 @@ function setupPomodoro() {
   });
   document.getElementById("reset-timer").addEventListener("click", resetTimer);
   document.getElementById("skip-timer").addEventListener("click", () => completeSession(false));
+  const backgroundButton = document.getElementById("background-access-btn");
+  if (backgroundButton) {
+    backgroundButton.addEventListener("click", requestBackgroundAccess);
+  }
+  updateBackgroundStatus();
 
   document.getElementById("pomodoro-settings").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1822,6 +1926,7 @@ function setupPomodoro() {
 
     saveData();
     renderTimer();
+    if (timer.running) startNativeTimer();
     showToast(t("settingsSaved"), "success");
   });
 
@@ -1851,13 +1956,50 @@ function restoreTimer() {
     if (timer.endsAt <= Date.now()) {
       timer.running = false;
       timer.endsAt = null;
+      stopNativeTimer();
       completeSession(true);
     } else {
+      timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+      startNativeTimer();
       startTicking();
     }
+  } else {
+    timer.running = false;
+    timer.endsAt = null;
+    stopNativeTimer();
   }
   renderTimer();
 }
+
+function resumeAppTimer() {
+  if (!timer.running || !timer.endsAt) {
+    renderTimer();
+    updateBackgroundStatus();
+    return;
+  }
+  if (timer.endsAt <= Date.now()) {
+    timer.running = false;
+    timer.endsAt = null;
+    stopNativeTimer();
+    completeSession(true);
+    return;
+  }
+  timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  renderTimer();
+  startNativeTimer();
+  startTicking();
+  updateBackgroundStatus();
+}
+
+window.ExamBuddyOnResume = resumeAppTimer;
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) resumeAppTimer();
+});
+window.addEventListener("pageshow", () => resumeAppTimer());
+window.addEventListener("focus", () => {
+  if (document.visibilityState !== "hidden") resumeAppTimer();
+});
 
 function setupBackToTop() {
   const btn = document.getElementById("back-to-top");
@@ -1884,7 +2026,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 1.5</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 1.6</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -1952,19 +2094,14 @@ function hideSplash() {
   setTimeout(() => { if (splash.parentNode) splash.remove(); }, 500);
 }
 
+const SPLASH_DURATION_MS = 5000;
+
 function setupSplash() {
-  const start = Date.now();
-  const minMs = 900;
-  const finish = () => {
-    const wait = Math.max(0, minMs - (Date.now() - start));
-    setTimeout(hideSplash, wait);
-  };
-  if (document.readyState === "complete") {
-    finish();
-  } else {
-    window.addEventListener("load", finish, { once: true });
-  }
-  setTimeout(hideSplash, 3200);
+  const navStart = window.performance && performance.timing && performance.timing.navigationStart;
+  const start = Number.isFinite(navStart) && navStart > 0 ? navStart : Date.now();
+  const wait = Math.max(0, SPLASH_DURATION_MS - (Date.now() - start));
+  setTimeout(hideSplash, wait);
+  setTimeout(hideSplash, SPLASH_DURATION_MS + 600);
 }
 
 function setupAbout() {

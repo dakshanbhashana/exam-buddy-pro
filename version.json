@@ -1,24 +1,26 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 6,
-  "versionName": "1.5",
+  "versionCode": 7,
+  "versionName": "1.6",
   "minSdk": 21,
   "publishedAt": "2026-11-18",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "Built-in update checker: the app now tells you when a new version is available.",
-      "Read the full changelog in English or Sinhala before installing.",
-      "One-tap download of the latest APK straight from GitHub Releases.",
-      "Version details are now shown consistently across the whole app."
+      "The loading screen now finishes cleanly within 5 seconds every time.",
+      "Focus, short break and long break timers keep running when you switch tabs or leave the app.",
+      "Timers are restored correctly after closing or restarting the app.",
+      "New background timer notification, plus Android prompts for notification, background and battery access.",
+      "Back now keeps the running session alive in the background instead of resetting it."
     ],
     "si": [
-      "යෙදුම තුළම යාවත්කාලීන පරීක්ෂාව: නව සංස්කරණයක් ඇති විට දැන් යෙදුමෙන්ම දන්වයි.",
-      "ස්ථාපනයට පෙර සිංහල හෝ ඉංග්‍රීසි භාෂාවෙන් සම්පූර්ණ වෙනස්කම් කියවන්න.",
-      "GitHub Releases වෙතින් අලුත්ම APK එක එක් ස්පර්ශයකින් බාගන්න.",
-      "සංස්කරණ විස්තර දැන් යෙදුම පුරාම එකම ලෙස පෙන්වයි."
+      "යෙදුම විවෘත කරන විට එන loading screen එක දැන් සෑම විටම තත්පර 5කින් අවසන් වේ.",
+      "Focus, කෙටි විවේක සහ දිගු විවේක කාලමාන ටැබ් මාරු කළත් යෙදුමෙන් පිටව ගියත් දිගටම ධාවනය වේ.",
+      "යෙදුම වසා නැවත විවෘත කළත් කාලමානය නිවැරදිව යථා තත්ත්වයට පත් වේ.",
+      "පසුබිම් කාලමාන දැනුම්දීමක් සහ දැනුම්දීම්, පසුබිම් හා බැටරි අවසර ඉල්ලීම් එකතු විය.",
+      "Back එබූ විට සැසිය නැවත සකස් නොවී පසුබිමේ දිගටම ක්‍රියා කරයි."
     ]
   }
 }

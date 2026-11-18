@@ -3,7 +3,10 @@ package com.exambuddy.lite;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -13,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
@@ -39,6 +43,7 @@ public class MainActivity extends Activity {
 
     private static final int REQUEST_PERMISSIONS = 51;
     private static final int REQUEST_EXACT_ALARM = 52;
+    private static final int REQUEST_BACKGROUND_PERMISSIONS = 53;
 
     private static final String DATA_PREFS = "exam_buddy_data";
     private static final String SETTINGS_PREFS = "exam_buddy_settings";
@@ -52,6 +57,12 @@ public class MainActivity extends Activity {
     private ActivityResultLauncher exactAlarmLauncher;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean permissionsFlowStarted = false;
+    private boolean backPromptShown = false;
+    private static volatile boolean appVisible = false;
+
+    public static boolean isAppVisible() {
+        return appVisible;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +80,7 @@ public class MainActivity extends Activity {
         settings.setUseWideViewPort(true);
 
         webView.addJavascriptInterface(new DataBridge(), "ExamBuddyFileBridge");
+        webView.addJavascriptInterface(new TimerBridge(), "ExamBuddyNative");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -124,6 +136,105 @@ public class MainActivity extends Activity {
         } else {
             webView.loadUrl(BASE_URL);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        appVisible = true;
+        if (webView != null) {
+            webView.evaluateJavascript(
+                    "(function(){try{if(window.ExamBuddyOnResume)window.ExamBuddyOnResume();}catch(e){}})();",
+                    null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        appVisible = false;
+        super.onPause();
+    }
+
+    private boolean hasNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            return manager == null || manager.areNotificationsEnabled();
+        }
+        return true;
+    }
+
+    private boolean isIgnoringBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        return manager != null && manager.isIgnoringBatteryOptimizations(getPackageName());
+    }
+
+    private void requestBackgroundAccess() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission()) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_BACKGROUND_PERMISSIONS);
+            return;
+        }
+        proceedWithBatteryRequest();
+    }
+
+    private void proceedWithBatteryRequest() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !isIgnoringBatteryOptimizations()) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+                return;
+            } catch (Exception ignored) {
+            }
+            try {
+                startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void handleTimerBackPress() {
+        if (!backPromptShown && (!isIgnoringBatteryOptimizations() || !hasNotificationPermission())) {
+            backPromptShown = true;
+            boolean sinhala = "si".equals(settingsPrefs().getString(KEY_LANGUAGE, "en"));
+            String title = sinhala ? "පසුබිම් කාලමානය" : "Keep timer running";
+            String message = sinhala
+                    ? "ඔබ යෙදුමෙන් පිටව ගියත් focus හෝ විවේක කාලමානය දිගටම ක්‍රියා කිරීමට පසුබිම් ක්‍රියාකාරීත්වය සහ බැටරි ප්‍රශස්තකරණයෙන් නිදහස් කිරීම අවශ්‍යයි. දැන් අවසර දෙන්නද?"
+                    : "Allow background activity and ignore battery optimisation so your focus or break timer keeps running after you leave the app. Allow now?";
+            String allow = sinhala ? "අවසර දෙන්න" : "Allow";
+            String later = sinhala ? "පසුව" : "Later";
+            new AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(allow, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            requestBackgroundAccess();
+                        }
+                    })
+                    .setNegativeButton(later, null)
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    moveTaskToBack(true);
+                                }
+                            }, 600);
+                        }
+                    })
+                    .show();
+            return;
+        }
+        moveTaskToBack(true);
     }
 
     private void requestFirstOpenPermissions() {
@@ -184,6 +295,8 @@ public class MainActivity extends Activity {
         if (requestCode == REQUEST_PERMISSIONS) {
             settingsPrefs().edit().putBoolean(KEY_PERMISSIONS_REQUESTED, true).apply();
             requestExactAlarmIfNeeded();
+        } else if (requestCode == REQUEST_BACKGROUND_PERMISSIONS) {
+            proceedWithBatteryRequest();
         }
     }
 
@@ -407,6 +520,56 @@ public class MainActivity extends Activity {
         }
     }
 
+    private class TimerBridge {
+        @JavascriptInterface
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public void startTimer(final String mode, final long endsAt, final String modeLabel,
+                               final String completeTitle, final String completeBody,
+                               final String language, final boolean sound) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TimerService.start(MainActivity.this, mode, endsAt, modeLabel,
+                            completeTitle, completeBody, language, sound);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopTimer() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TimerService.stop(MainActivity.this);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean isIgnoringBatteryOptimizations() {
+            return MainActivity.this.isIgnoringBatteryOptimizations();
+        }
+
+        @JavascriptInterface
+        public boolean areNotificationsEnabled() {
+            return hasNotificationPermission();
+        }
+
+        @JavascriptInterface
+        public void requestBackgroundAccess() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MainActivity.this.requestBackgroundAccess();
+                }
+            });
+        }
+    }
+
     private class DataBridge {
         @JavascriptInterface
         public boolean isAvailable() {
@@ -459,6 +622,10 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (TimerService.isRunning()) {
+            handleTimerBackPress();
+            return;
+        }
         if (webView.canGoBack()) {
             webView.goBack();
         } else {

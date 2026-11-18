@@ -44,6 +44,7 @@ def main():
                   f'const APP_VERSION_NAME = "{version_name}";', text)
     text = re.sub(r'const APP_VERSION_CODE = \d+;',
                   f'const APP_VERSION_CODE = {version_code};', text)
+    text = re.sub(r'Version \d+(?:\.\d+)*', f'Version {version_name}', text)
     script.write_text(text, encoding="utf-8")
 
     index = ROOT / "index.html"

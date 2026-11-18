@@ -2,9 +2,9 @@
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
   "versionCode": 10,
-  "versionName": "1.9.0",
+  "versionName": "1.8",
   "minSdk": 21,
-  "publishedAt": "2026-11-18",
+  "publishedAt": "2026-11-19",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {

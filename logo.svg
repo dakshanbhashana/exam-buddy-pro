@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Exam Buddy logo">
+  <defs>
+    <linearGradient id="examBuddyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="55%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#examBuddyGradient)"/>
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.5"/>
+  <path d="M12 17.5c3.4-1.8 6.8-1.8 10.5 0V33c-3.7-1.8-7.1-1.8-10.5 0zM25.5 17.5c3.7-1.8 7.1-1.8 10.5 0V33c-3.4-1.8-6.8-1.8-10.5 0z" fill="#ffffff" fill-opacity="0.96"/>
+  <path d="M24 17v16.5" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-opacity="0.9"/>
+  <circle cx="35.5" cy="13.5" r="6.2" fill="#22c55e"/>
+  <path d="m32.7 13.6 1.9 1.9 3.8-4.2" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

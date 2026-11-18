@@ -1,0 +1,19 @@
+{
+  "versionCode": 6,
+  "versionName": "1.5",
+  "changelog": {
+    "en": [
+      "Built-in update checker: the app now tells you when a new version is available.",
+      "Read the full changelog in English or Sinhala before installing.",
+      "One-tap download of the latest APK straight from GitHub Releases.",
+      "Version details are now shown consistently across the whole app."
+    ],
+    "si": [
+      "යෙදුම තුළම යාවත්කාලීන පරීක්ෂාව: නව සංස්කරණයක් ඇති විට දැන් යෙදුමෙන්ම දන්වයි.",
+      "ස්ථාපනයට පෙර සිංහල හෝ ඉංග්‍රීසි භාෂාවෙන් සම්පූර්ණ වෙනස්කම් කියවන්න.",
+      "GitHub Releases වෙතින් අලුත්ම APK එක එක් ස්පර්ශයකින් බාගන්න.",
+      "සංස්කරණ විස්තර දැන් යෙදුම පුරාම එකම ලෙස පෙන්වයි."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v1.5\n\n### What's new\n- Built-in update checker: the app now tells you when a new version is available.\n- Read the full changelog in English or Sinhala before installing.\n- One-tap download of the latest APK straight from GitHub Releases.\n- Version details are now shown consistently across the whole app.\n\n### අලුතෙන් එන දේ\n- යෙදුම තුළම යාවත්කාලීන පරීක්ෂාව: නව සංස්කරණයක් ඇති විට දැන් යෙදුමෙන්ම දන්වයි.\n- ස්ථාපනයට පෙර සිංහල හෝ ඉංග්‍රීසි භාෂාවෙන් සම්පූර්ණ වෙනස්කම් කියවන්න.\n- GitHub Releases වෙතින් අලුත්ම APK එක එක් ස්පර්ශයකින් බාගන්න.\n- සංස්කරණ විස්තර දැන් යෙදුම පුරාම එකම ලෙස පෙන්වයි.\n\n### Install\nDownload `exam-buddy-lite.apk` below and install it. If Android asks, allow \"Install unknown apps\" for your browser or file manager.\n"
+}

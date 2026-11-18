@@ -1,0 +1,24 @@
+{
+  "app": "Exam Buddy Pro",
+  "package": "com.exambuddy.lite",
+  "versionCode": 6,
+  "versionName": "1.5",
+  "minSdk": 21,
+  "publishedAt": "2026-11-18",
+  "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
+  "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
+  "changelog": {
+    "en": [
+      "Built-in update checker: the app now tells you when a new version is available.",
+      "Read the full changelog in English or Sinhala before installing.",
+      "One-tap download of the latest APK straight from GitHub Releases.",
+      "Version details are now shown consistently across the whole app."
+    ],
+    "si": [
+      "යෙදුම තුළම යාවත්කාලීන පරීක්ෂාව: නව සංස්කරණයක් ඇති විට දැන් යෙදුමෙන්ම දන්වයි.",
+      "ස්ථාපනයට පෙර සිංහල හෝ ඉංග්‍රීසි භාෂාවෙන් සම්පූර්ණ වෙනස්කම් කියවන්න.",
+      "GitHub Releases වෙතින් අලුත්ම APK එක එක් ස්පර්ශයකින් බාගන්න.",
+      "සංස්කරණ විස්තර දැන් යෙදුම පුරාම එකම ලෙස පෙන්වයි."
+    ]
+  }
+}

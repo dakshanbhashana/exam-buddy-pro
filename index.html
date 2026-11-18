@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Exam Buddy Pro — plan exams, run focus sessions, track tasks and study smarter.">
+  <meta name="theme-color" content="#1e3a8a">
+  <title>Exam Buddy Pro</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    (function () {
+      try {
+        var mode = localStorage.getItem("examBuddy_theme") || "auto";
+        var dark = mode === "dark" || (mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        var lang = localStorage.getItem("examBuddy_language") || "en";
+        document.documentElement.lang = lang;
+      } catch (e) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-splash" class="app-splash" aria-label="Loading">
+    <div class="splash-inner">
+      <div class="splash-logo-wrap">
+        <img src="logo.svg" alt="" class="splash-logo">
+      </div>
+      <strong class="splash-name">Exam Buddy <span>Pro</span></strong>
+      <span class="splash-tag">Sinhala English study app</span>
+      <div class="splash-progress" aria-hidden="true"><div class="splash-progress-fill"></div></div>
+      <span class="splash-credit">Developed by Dakshan Bhashna</span>
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <img class="brand-logo" src="logo.svg" alt="">
+        </span>
+        <div class="brand-copy">
+          <h1><span data-i18n="brandName">Exam Buddy</span> <span class="pro-tag">Pro</span></h1>
+          <p class="subtitle" data-i18n="brandSubtitle">Plan smarter. Focus deeper. Ace every exam.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="language-toggle" class="theme-toggle lang-toggle" type="button" aria-label="Switch language" title="Switch language">
+          <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
+          <span class="lang-stack"><span class="lang-option active" data-lang-opt="en">EN</span><span class="lang-stack-divider" aria-hidden="true"></span><span class="lang-option" data-lang-opt="si">SI</span></span>
+        </button>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" data-i18n-title="themeToggleTitle" title="Switch theme">
+          <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
+          <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Main sections" data-i18n-aria="mainSections">
+    <button class="tab-btn active" data-tab="dashboard">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+      <span data-i18n="tab.dashboard">Dashboard</span>
+    </button>
+    <button class="tab-btn" data-tab="exams">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>
+      <span data-i18n="tab.exams">Exams</span>
+    </button>
+    <button class="tab-btn" data-tab="tasks">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"></path><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"></path></svg>
+      <span data-i18n="tab.tasks">Tasks</span>
+    </button>
+    <button class="tab-btn" data-tab="focus">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
+      <span data-i18n="tab.focus">Focus</span>
+    </button>
+    <button class="tab-btn" data-tab="insights">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+      <span data-i18n="tab.insights">Insights</span>
+    </button>
+    <button class="tab-btn" data-tab="about">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+      <span data-i18n="tab.about">About</span>
+    </button>
+  </nav>
+
+  <main>
+    <section id="dashboard" class="tab-panel active" aria-labelledby="dashboard-heading">
+      <div class="section-head">
+        <div>
+          <p id="greet-date" class="eyebrow" data-i18n="today">Today</p>
+          <h2 id="dashboard-heading" data-i18n="welcome">Welcome back</h2>
+        </div>
+        <button id="quick-add-exam" type="button" class="quick-btn" data-i18n="newExam">+ New exam</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.upcoming">Upcoming Exams</span>
+          <span id="stat-upcoming" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"></path><path d="m3 6 1.5 1.5L7 5"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.pending">Pending Tasks</span>
+          <span id="stat-pending" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.completed">Completed Exams</span>
+          <span id="stat-completed" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.doneTasks">Tasks Done</span>
+          <span id="stat-done-tasks" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"></path><path d="M12 7v5l3.5 2M21 3v6h-6"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.daysNext">Days to Next</span>
+          <span id="stat-days-left" class="stat-value">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.focusToday">Focus Today</span>
+          <span id="stat-focus-today" class="stat-value">0m</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.6 7-6.5 0-3-1.8-5.2-4-7.5V3h-6v5c-2.2 2.3-4 4.5-4 7.5C5 19.4 8 22 12 22Z"></path><path d="M12 22a2.5 2.5 0 0 1-2.5-2.5c0-1.8 2.5-4 2.5-4s2.5 2.2 2.5 4A2.5 2.5 0 0 1 12 22Z"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.streak">Study Streak</span>
+          <span id="stat-streak" class="stat-value">0 days</span>
+        </div>
+      </div>
+
+      <div class="dashboard-split">
+        <div class="card highlight-card next-card">
+          <div class="card-title-row">
+            <h3 data-i18n="nextExam">Next Exam</h3>
+            <span class="pill" data-i18n="liveCountdown">Live countdown</span>
+          </div>
+          <div id="next-exam" data-i18n="noUpcoming">No upcoming exams. Add one in the Exams tab.</div>
+          <div id="countdown" class="countdown hidden" data-i18n-aria="countdownLabel" aria-label="Time remaining until next exam">
+            <div class="cd-unit"><span id="cd-days">00</span><small data-i18n="countdown.days">days</small></div>
+            <div class="cd-unit"><span id="cd-hours">00</span><small data-i18n="countdown.hours">hrs</small></div>
+            <div class="cd-unit"><span id="cd-mins">00</span><small data-i18n="countdown.mins">min</small></div>
+            <div class="cd-unit"><span id="cd-secs">00</span><small data-i18n="countdown.secs">sec</small></div>
+          </div>
+          <div class="progress-track"><div id="next-progress" class="progress-fill"></div></div>
+          <p id="next-progress-text" class="item-meta" data-i18n="prepHint">Add an exam to start tracking your preparation.</p>
+        </div>
+
+        <div class="card quick-card">
+          <h3 data-i18n="quickActions">Quick Actions</h3>
+          <div class="quick-actions">
+            <button type="button" class="quick-action" data-quick="exams">
+              <span class="qa-icon">＋</span><span><strong data-i18n="quick.addExam">Add exam</strong><small data-i18n="quick.addExamHint">Track a new deadline</small></span>
+            </button>
+            <button type="button" class="quick-action" data-quick="tasks">
+              <span class="qa-icon">✓</span><span><strong data-i18n="quick.addTask">Add task</strong><small data-i18n="quick.addTaskHint">Plan your revision</small></span>
+            </button>
+            <button type="button" class="quick-action" data-quick="focus">
+              <span class="qa-icon">▷</span><span><strong data-i18n="quick.startFocus">Start focus</strong><small data-i18n="quick.startFocusHint">Begin a Pomodoro</small></span>
+            </button>
+            <button type="button" class="quick-action" data-quick="insights">
+              <span class="qa-icon">▥</span><span><strong data-i18n="quick.viewInsights">View insights</strong><small data-i18n="quick.viewInsightsHint">See your progress</small></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 data-i18n="todaysPlan">Today's Plan</h3>
+          <span class="item-meta" data-i18n="upcomingDeadlines">Upcoming deadlines &amp; tasks</span>
+        </div>
+        <div id="today-plan" class="today-plan"></div>
+      </div>
+    </section>
+
+    <section id="exams" class="tab-panel">
+      <h2 data-i18n="exams.title">Exams</h2>
+      <form id="exam-form" class="card form-card">
+        <div class="card-title-row">
+          <h3 id="exam-form-title" data-i18n="addExam">Add Exam</h3>
+          <button type="button" id="exam-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span data-i18n="subject">Subject</span>
+            <input type="text" id="exam-subject" required data-i18n-placeholder="subjectPlaceholder" data-i18n-aria="examName" placeholder="e.g. Mathematics" aria-label="Exam name">
+          </label>
+          <label>
+            <span data-i18n="date">Date</span>
+            <input type="date" id="exam-date" required data-i18n-aria="examDate" aria-label="Exam date">
+          </label>
+          <label>
+            <span data-i18n="category">Category</span>
+            <select id="exam-category">
+              <option value="General" data-i18n="category.general">General</option>
+              <option value="Mathematics" data-i18n="category.mathematics">Mathematics</option>
+              <option value="Science" data-i18n="category.science">Science</option>
+              <option value="Language" data-i18n="category.language">Language</option>
+              <option value="History" data-i18n="category.history">History</option>
+              <option value="Other" data-i18n="category.other">Other</option>
+            </select>
+          </label>
+          <label class="full-width">
+            <span data-i18n="notes">Notes (optional)</span>
+            <input type="text" id="exam-notes" data-i18n-placeholder="notesPlaceholder" placeholder="Chapters, topics, room...">
+          </label>
+        </div>
+        <button type="submit" id="exam-submit" class="primary-btn" data-i18n="addExam">Add Exam</button>
+      </form>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 data-i18n="examList">Exam List</h3>
+          <span id="exam-count" class="pill">0 exams</span>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="exam-search" data-i18n-placeholder="examSearchPlaceholder" data-i18n-aria="searchExams" placeholder="Search exams or notes..." aria-label="Search exams">
+          <select id="exam-filter" data-i18n-aria="filterExams" aria-label="Filter exams">
+            <option value="all" data-i18n="all">All</option>
+            <option value="upcoming" data-i18n="upcoming">Upcoming</option>
+            <option value="past" data-i18n="past">Past</option>
+            <option value="completed" data-i18n="completed">Completed</option>
+          </select>
+        </div>
+        <ul id="exam-list" class="item-list"></ul>
+        <p id="exam-empty" class="empty-state" data-i18n="examEmpty">No exams yet.</p>
+      </div>
+    </section>
+
+    <section id="tasks" class="tab-panel">
+      <p class="eyebrow" data-i18n="toDo">To-Do</p>
+      <h2 data-i18n="tasks.title">Study Tasks</h2>
+      <form id="task-form" class="card form-card">
+        <div class="card-title-row">
+          <h3 id="task-form-title" data-i18n="addTask">Add Task</h3>
+          <button type="button" id="task-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+        </div>
+        <div class="form-row">
+          <label class="grow">
+            <span data-i18n="taskLabel">Task</span>
+            <input type="text" id="task-text" required data-i18n-placeholder="taskPlaceholder" placeholder="e.g. Revise chapter 5">
+          </label>
+          <label>
+            <span data-i18n="priority">Priority</span>
+            <select id="task-priority">
+              <option value="low" data-i18n="low">Low</option>
+              <option value="medium" selected data-i18n="medium">Medium</option>
+              <option value="high" data-i18n="high">High</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="due">Due (optional)</span>
+            <input type="date" id="task-due">
+          </label>
+          <button type="submit" id="task-submit" class="primary-btn" data-i18n="addTask">Add Task</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 data-i18n="taskList">Task List</h3>
+          <button type="button" id="clear-completed" class="ghost-btn" data-i18n="clearCompleted">Clear completed</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="task-search" data-i18n-placeholder="taskSearchPlaceholder" data-i18n-aria="searchTasks" placeholder="Search tasks..." aria-label="Search tasks">
+          <select id="task-filter" data-i18n-aria="filterTasks" aria-label="Filter tasks">
+            <option value="all" data-i18n="all">All</option>
+            <option value="active" data-i18n="active">Active</option>
+            <option value="completed" data-i18n="completed">Completed</option>
+            <option value="high" data-i18n="highPriority">High priority</option>
+          </select>
+        </div>
+        <ul id="task-list" class="item-list"></ul>
+        <p id="task-empty" class="empty-state" data-i18n="taskEmpty">No tasks yet.</p>
+      </div>
+    </section>
+
+    <section id="focus" class="tab-panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="deepWork">Deep work studio</p>
+          <h2 data-i18n="focusTimer">Focus Timer</h2>
+        </div>
+        <span class="pill" data-i18n="pomodoroTechnique">Pomodoro technique</span>
+      </div>
+
+      <div class="focus-layout">
+        <div class="card timer-card">
+          <div class="mode-switch" role="group" data-i18n-aria="timerMode" aria-label="Timer mode">
+            <button type="button" class="mode-btn active" data-mode="focus" data-i18n="mode.focus">Focus</button>
+            <button type="button" class="mode-btn" data-mode="short" data-i18n="mode.short">Short break</button>
+            <button type="button" class="mode-btn" data-mode="long" data-i18n="mode.long">Long break</button>
+          </div>
+
+          <div class="ring-wrap">
+            <svg class="timer-ring" viewBox="0 0 240 240" aria-hidden="true">
+              <circle class="ring-track" cx="120" cy="120" r="104"></circle>
+              <circle id="timer-ring-progress" class="ring-progress" cx="120" cy="120" r="104"></circle>
+            </svg>
+            <div class="ring-center">
+              <span id="timer-mode-label" class="timer-mode" data-i18n="mode.focus">Focus</span>
+              <span id="timer-time" class="timer-time" aria-live="polite">25:00</span>
+              <span id="timer-status" class="timer-status" data-i18n="timerReady">Ready when you are</span>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button type="button" id="start-pause" class="primary-btn primary-lg" data-i18n="startFocus">Start focus</button>
+            <button type="button" id="reset-timer" class="secondary-btn icon-btn" data-i18n-aria="resetTimer" data-i18n-title="resetTimer" aria-label="Reset timer" title="Reset timer">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+            <button type="button" id="skip-timer" class="secondary-btn icon-btn" data-i18n-aria="skipTimer" data-i18n-title="skipTimer" aria-label="Skip session" title="Skip session">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 4 10 8-10 8V4Z"></path><path d="M19 5v14"></path></svg>
+            </button>
+          </div>
+
+          <div class="cycle-row">
+            <span class="item-meta" data-i18n="sessionsUntil">Sessions until long break</span>
+            <div id="session-dots" class="session-dots" data-i18n-aria="sessionDots" aria-label="Completed focus sessions in this cycle"></div>
+          </div>
+          <p class="hint" data-i18n="tipSpace">Tip: press Space on this tab to start or pause.</p>
+        </div>
+
+        <div class="focus-side">
+          <form id="pomodoro-settings" class="card settings-card">
+            <h3 data-i18n="pomodoroSettings">Pomodoro Settings</h3>
+            <div class="setting-grid">
+              <label><span data-i18n="focusMin">Focus (min)</span><input type="number" id="focus-duration" min="1" max="180" value="25"></label>
+              <label><span data-i18n="shortMin">Short break (min)</span><input type="number" id="short-duration" min="1" max="60" value="5"></label>
+              <label><span data-i18n="longMin">Long break (min)</span><input type="number" id="long-duration" min="1" max="90" value="15"></label>
+            </div>
+            <label class="switch-row"><span data-i18n="autoBreaks">Auto-start breaks</span>
+              <input type="checkbox" id="auto-start-breaks" class="switch-input">
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row"><span data-i18n="autoFocus">Auto-start focus</span>
+              <input type="checkbox" id="auto-start-focus" class="switch-input">
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row"><span data-i18n="sound">Completion chime</span>
+              <input type="checkbox" id="sound-enabled" class="switch-input" checked>
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+            <button type="submit" class="primary-btn full-btn" data-i18n="saveSettings">Save settings</button>
+          </form>
+
+          <div class="card">
+            <div class="card-title-row">
+              <h3 data-i18n="todaySessions">Today's Sessions</h3>
+              <span id="session-today-count" class="pill">0</span>
+            </div>
+            <ul id="today-sessions" class="mini-list"></ul>
+            <p id="sessions-empty" class="empty-state" data-i18n="sessionsEmpty">Finish a focus session to see it here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="insights" class="tab-panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="yourProgress">Your progress</p>
+          <h2 data-i18n="insights">Insights</h2>
+        </div>
+        <span class="pill" data-i18n="last7">Last 7 days</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-label" data-i18n="focusWeek">Focus This Week</span><span id="ins-focus-week" class="stat-value">0m</span></div>
+        <div class="stat-card"><span class="stat-label" data-i18n="sessions">Sessions</span><span id="ins-sessions-week" class="stat-value">0</span></div>
+        <div class="stat-card"><span class="stat-label" data-i18n="taskCompletion">Task Completion</span><span id="ins-completion" class="stat-value">0%</span></div>
+        <div class="stat-card"><span class="stat-label" data-i18n="examsTracked">Exams Tracked</span><span id="ins-exams-tracked" class="stat-value">0</span></div>
+      </div>
+
+      <div class="dashboard-split">
+        <div class="card">
+          <div class="card-title-row"><h3 data-i18n="focusMinutes">Focus Minutes</h3><span class="item-meta" data-i18n="daily">Daily</span></div>
+          <div id="focus-chart" class="bar-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title-row"><h3 data-i18n="taskBalance">Task Balance</h3><span class="item-meta" data-i18n="allTime">All time</span></div>
+          <div id="task-chart" class="progress-list"></div>
+        </div>
+      </div>
+
+      <div class="card tip-card">
+        <h3 data-i18n="coachesNote">Coach's Note</h3>
+        <p id="insight-tip" class="item-meta" data-i18n="insightEmpty">Add exams and tasks to unlock personalized study tips.</p>
+      </div>
+    </section>
+
+    <section id="about" class="tab-panel">
+      <div class="about-rq-tools">
+        <div class="about-rq-lang" role="group" data-i18n-aria="switchLanguage" aria-label="Switch language">
+          <button type="button" class="about-lang-btn active" data-lang-opt="en">EN</button>
+          <span class="about-lang-divider" aria-hidden="true"></span>
+          <button type="button" class="about-lang-btn" data-lang-opt="si">SI</button>
+        </div>
+        <div class="about-rq-theme" role="group" data-i18n-aria="theme" aria-label="Theme">
+          <button type="button" class="about-theme-btn" data-theme-choice="light" data-i18n-title="themeLight" data-i18n-aria="themeLight" title="Light" aria-label="Light">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+          </button>
+          <button type="button" class="about-theme-btn" data-theme-choice="dark" data-i18n-title="themeDark" data-i18n-aria="themeDark" title="Dark" aria-label="Dark">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <article class="about-rq-card about-app-card">
+        <span class="rq-label" data-i18n="about.label">ABOUT</span>
+        <div class="rq-app-center">
+          <span class="rq-app-logo"><img src="logo.svg" alt=""></span>
+          <h2 class="rq-app-name">Exam Buddy Pro</h2>
+          <p class="rq-app-sub" data-i18n="about.subtitle">Sinhala English study app</p>
+          <span class="rq-version" data-i18n="version">Version 1.5</span>
+        </div>
+        <div class="rq-mini-actions">
+          <button type="button" id="about-privacy-btn" class="rq-mini-btn" data-i18n="about.privacy">Privacy policy</button>
+          <button type="button" id="about-licences-btn" class="rq-mini-btn" data-i18n="about.licences">Licences and credits</button>
+          <button type="button" id="about-update-btn" class="rq-mini-btn" data-i18n="about.checkUpdates">Check for updates</button>
+        </div>
+      </article>
+
+
+      <article class="about-rq-card about-dev-card">
+        <span class="rq-label" data-i18n="developer.label">DEVELOPER</span>
+        <div class="rq-dev-head">
+          <span class="rq-dev-logo" aria-hidden="true"><svg viewBox="0 0 64 64" role="presentation"><defs><linearGradient id="dbGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"></stop><stop offset="1" stop-color="#f0abfc"></stop></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#dbGrad)"></rect><text x="32" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="27" font-weight="800" fill="#2e1065">DB</text></svg></span>
+          <div class="rq-dev-copy">
+            <h3 class="rq-dev-name">Dakshan Bhashna</h3>
+            <p class="rq-dev-role" data-i18n="developer.role">Developer and owner</p>
+          </div>
+        </div>
+        <p class="rq-dev-msg" data-i18n="developer.message">Questions ideas or a problem Message me</p>
+        <div class="rq-social-grid">
+          <a class="rq-social rq-whatsapp" href="https://wa.me/94743706283?text=Hello%20Dakshan" data-external-link="true">
+            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a9.9 9.9 0 0 0-8.5 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3.1.8.8-3-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.3-1.6-1.5-1.8-.2-.2 0-.3.1-.5l.4-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.4.2-1.5-.1-.2-.3-.3-.6-.4Z"></path></svg>
+            <span>WhatsApp</span>
+          </a>
+          <a class="rq-social rq-email" href="mailto:dakshanbhashana01@gmail.com?subject=Hello%20Dakshan" data-external-link="true">
+            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+            <span>Email</span>
+          </a>
+          <a class="rq-social rq-website" href="https://www.google.com/search?q=Dakshan+Bhashna" data-external-link="true">
+            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
+            <span data-i18n="developer.website">Website</span>
+          </a>
+          <a class="rq-social rq-youtube" href="https://www.youtube.com/results?search_query=Dakshan+Bhashna" data-external-link="true">
+            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2c-.2-1-1-1.8-2-2C17.9 4.8 12 4.8 12 4.8s-5.9 0-7.6.4c-1 .2-1.8 1-2 2C2 8.9 2 12 2 12s0 3.1.4 4.8c.2 1 1 1.8 2 2 1.7.4 7.6.4 7.6.4s5.9 0 7.6-.4c1-.2 1.8-1 2-2 .4-1.7.4-4.8.4-4.8s0-3.1-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"></path></svg>
+            <span>YouTube</span>
+          </a>
+        </div>
+      </article>
+
+      <div class="about-foot">
+        <span data-i18n="developedBy">Developed by Dakshan Bhashna</span>
+        <span data-i18n="version">Version 1.5</span>
+      </div>
+    </section>
+  </main>
+
+  <button type="button" id="back-to-top" class="back-to-top" data-i18n-aria="backToTop" data-i18n-title="backToTop" aria-label="Back to top" title="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg>
+  </button>
+
+  <footer class="app-footer">
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.5</span></p>
+  </footer>
+
+  <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
+    <div class="about-modal-backdrop" data-close-modal="true"></div>
+    <div class="about-modal-card">
+      <div class="about-modal-head">
+        <h3 id="about-modal-title"></h3>
+        <button type="button" id="about-modal-close" class="about-modal-close" aria-label="Close">×</button>
+      </div>
+      <div id="about-modal-body" class="about-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="update-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+    <div class="about-modal-backdrop" data-close-update="true"></div>
+    <div class="about-modal-card update-modal-card">
+      <div class="about-modal-head">
+        <h3 id="update-modal-title" data-i18n="update.title">Update available</h3>
+        <button type="button" id="update-modal-close" class="about-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="update-hero">
+        <span class="update-badge" aria-hidden="true">NEW</span>
+        <strong id="update-modal-version" class="update-version"></strong>
+      </div>
+      <p id="update-modal-body" class="update-intro"></p>
+      <p id="update-modal-current" class="update-current"></p>
+      <h4 id="update-modal-changelog-title" class="update-changelog-title">What's new</h4>
+      <ul id="update-modal-changelog" class="update-changelog"></ul>
+      <div class="update-actions">
+        <a id="update-notes-link" class="update-btn update-btn-ghost" href="#" data-external-link="true" data-i18n="update.releasePage">View release notes</a>
+        <button type="button" id="update-later-btn" class="update-btn update-btn-ghost" data-i18n="update.later">Later</button>
+        <a id="update-now-link" class="update-btn update-btn-primary" href="#" data-external-link="true" data-i18n="update.now">Update now</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

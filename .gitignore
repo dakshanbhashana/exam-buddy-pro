@@ -1,0 +1,14 @@
+# Build output
+android/build/
+android/assets/www/
+*.apk
+*.idsig
+
+# Signing material (never commit your keystore)
+*.jks
+*.keystore
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log

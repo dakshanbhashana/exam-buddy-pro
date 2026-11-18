@@ -1,32 +1,28 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 10,
-  "versionName": "1.8",
+  "versionCode": 11,
+  "versionName": "1.9",
   "minSdk": 21,
   "publishedAt": "2026-11-19",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "New rose and red-rose visual redesign with polished light and dark themes.",
-      "Permission setup now appears after the loading screen with Allow / Deny controls for notifications, alarms, battery, files and updates.",
-      "Fixed the focus timer resetting when switching between focus and break modes.",
-      "Dashboard cards and today rows now open focused detail sheets for the exact task or exam you tap.",
-      "Added tea, food and rest quick breaks that automatically adapt the study technique and remain editable.",
-      "New in-app updater downloads the new APK and opens the installer without visiting GitHub.",
-      "The updater verifies the APK signature before installing, and the WebView and file provider are hardened.",
-      "Hardened configuration and battery-friendly background timer handling."
+      "Fixed the page scrolling behind update, about and detail popups, including dashboard feature sheets.",
+      "The focus, short break and long break timers now keep their own progress and keep running while you switch between modes.",
+      "Redesigned every dropdown menu with a polished, touch-friendly picker that matches the light and dark themes.",
+      "Updates are now checked automatically as soon as the loading screen finishes, and a new version appears immediately.",
+      "In-app updates download and open the installer without visiting GitHub.",
+      "Improved the quick Start focus action and other small timer and layout fixes."
     ],
     "si": [
-      "ලස්සන රෝස් සහ රතු රෝස නිමාවක් සහිත නව අඳුරු/ආලෝක තේමා.",
-      "පැටවීමේ තිරයෙන් පසු දැනුම්දීම්, ඇලාම්, බැටරි, ගොනු සහ යාවත්කාලීන සඳහා අවසර දෙන්න/ප්‍රතික්ෂේප කරන්න පහසුකම.",
-      "focus සහ විවේක මාදිලි අතර මාරු වීමේදී කාලමානය reset වීමේ ගැටලුව විසඳා ඇත.",
-      "පාලක පුවරුවේ කාඩ්පත් සහ අද ලැයිස්තුවේ අයිතම තට්ටු කළ විට එම කාර්යය හෝ විභාගය පමණක් විස්තරව පෙන්වයි.",
-      "තේ, කෑම සහ විවේක ඉක්මන් විරාම එක් කිරීමෙන් අධ්‍යයන ක්‍රමය ස්වයංක්‍රීයව ගැළපෙන අතර පසුව සංස්කරණය කළ හැක.",
-      "GitHub වෙත නොයා යෙදුම තුළින්ම නව APK බාගෙන ස්ථාපකය විවෘත කරන නව යාවත්කාලීන ක්‍රමය.",
-      "ස්ථාපනයට පෙර APK අත්සන දෙවරක් පරීක්ෂා කරන අතර WebView සහ ගොනු සැපයුම්කරු ආරක්ෂිත කර ඇත.",
-      "Play Protect අනුකූල වීමට සහ බැටරි ඉතිරි කිරීමට වැඩිදියුණු කළ වින්‍යාසය."
+      "යාවත්කාලීන, පිළිබඳ සහ විස්තර පොප් අප් එක පිටුපස පිටුව scroll වීමේ ගැටලුව විසඳා ඇත. පාලක පුවරුවේ විස්තර තිර සඳහාද මෙය අදාළයි.",
+      "focus, කෙටි විවේකය සහ දිගු විවේකය යන කාලමාන දැන් තමන්ගේ ප්‍රගතිය වෙන වෙනම තබාගෙන මාදිලි මාරු කළත් දිගටම ධාවනය වේ.",
+      "සියලුම drop down මෙනු ආලෝක/අඳුරු තේමාවලට ගැළපෙන ලස්සන, පහසුවෙන් ස්පර්ශ කළ හැකි ආකාරයට නැවත නිර්මාණය කර ඇත.",
+      "පැටවීමේ තිරය අවසන් වූ වහාම යාවත්කාලීන ස්වයංක්‍රීයව පරීක්ෂා වන අතර නව සංස්කරණයක් ඇත්නම් වහාම පෙන්වයි.",
+      "GitHub වෙත නොයා යෙදුම තුළින්ම නව APK බාගෙන ස්ථාපකය විවෘත කරයි.",
+      "ඉක්මන් Start focus ක්‍රියාව සහ තවත් කුඩා කාලමාන හා පිරිසැලසුම් ගැටලු වැඩිදියුණු කර ඇත."
     ]
   }
 }

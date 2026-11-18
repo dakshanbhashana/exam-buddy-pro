@@ -1,0 +1,23 @@
+{
+  "versionCode": 11,
+  "versionName": "1.9",
+  "changelog": {
+    "en": [
+      "Fixed the page scrolling behind update, about and detail popups, including dashboard feature sheets.",
+      "The focus, short break and long break timers now keep their own progress and keep running while you switch between modes.",
+      "Redesigned every dropdown menu with a polished, touch-friendly picker that matches the light and dark themes.",
+      "Updates are now checked automatically as soon as the loading screen finishes, and a new version appears immediately.",
+      "In-app updates download and open the installer without visiting GitHub.",
+      "Improved the quick Start focus action and other small timer and layout fixes."
+    ],
+    "si": [
+      "යාවත්කාලීන, පිළිබඳ සහ විස්තර පොප් අප් එක පිටුපස පිටුව scroll වීමේ ගැටලුව විසඳා ඇත. පාලක පුවරුවේ විස්තර තිර සඳහාද මෙය අදාළයි.",
+      "focus, කෙටි විවේකය සහ දිගු විවේකය යන කාලමාන දැන් තමන්ගේ ප්‍රගතිය වෙන වෙනම තබාගෙන මාදිලි මාරු කළත් දිගටම ධාවනය වේ.",
+      "සියලුම drop down මෙනු ආලෝක/අඳුරු තේමාවලට ගැළපෙන ලස්සන, පහසුවෙන් ස්පර්ශ කළ හැකි ආකාරයට නැවත නිර්මාණය කර ඇත.",
+      "පැටවීමේ තිරය අවසන් වූ වහාම යාවත්කාලීන ස්වයංක්‍රීයව පරීක්ෂා වන අතර නව සංස්කරණයක් ඇත්නම් වහාම පෙන්වයි.",
+      "GitHub වෙත නොයා යෙදුම තුළින්ම නව APK බාගෙන ස්ථාපකය විවෘත කරයි.",
+      "ඉක්මන් Start focus ක්‍රියාව සහ තවත් කුඩා කාලමාන හා පිරිසැලසුම් ගැටලු වැඩිදියුණු කර ඇත."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v1.9\n\n### What's new\n- Fixed background page scrolling behind update, about and dashboard detail popups.\n- Focus, short break and long break timers now keep their own progress and keep running when you switch modes.\n- Redesigned all dropdown menus with a polished picker for light and dark themes.\n- Updates are checked automatically right after the loading screen, and a new version pops up immediately.\n- One-tap in-app update downloads the APK and opens the Android installer without visiting GitHub.\n- Improved the quick Start focus action and small timer and layout fixes.\n\n### අලුතෙන් එන දේ\n- යාවත්කාලීන, පිළිබඳ සහ විස්තර පොප් අප් එක පිටුපස පිටුව scroll වීම නවතා ඇත.\n- focus, කෙටි විවේකය සහ දිගු විවේකය කාලමාන මාදිලි මාරු කළත් දිගටම ධාවනය වේ.\n- සියලුම drop down මෙනු ලස්සන නව නිර්මාණයකින් යාවත්කාලීන කර ඇත.\n- පැටවීමේ තිරය අවසන් වූ වහාම යාවත්කාලීන ස්වයංක්‍රීයව පරීක්ෂා වේ.\n- GitHub වෙත නොයා යෙදුම තුළින්ම APK බාගෙන ස්ථාපනය කරගත හැක.\n- ඉක්මන් Start focus ක්‍රියාව සහ කුඩා ගැටලු වැඩිදියුණු කර ඇත.\n"
+}

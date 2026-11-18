@@ -39,8 +39,8 @@ const STUDY_METHODS = ["none", "activeRecall", "spaced", "feynman", "interleavin
 const REMINDER_KINDS = ["start", "end"];
 const REMINDER_BREAK_LIMIT = 20;
 
-const APP_VERSION_NAME = "1.8";
-const APP_VERSION_CODE = 10;
+const APP_VERSION_NAME = "1.9";
+const APP_VERSION_CODE = 11;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -362,7 +362,7 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
-    version: "Version 1.8",
+    version: "Version 1.9",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -777,7 +777,7 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
-    version: "Version 1.8",
+    version: "Version 1.9",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -1005,6 +1005,7 @@ function applyLanguage() {
     headerButton.setAttribute("title", label);
   }
   document.title = t("appTitle");
+  syncPrettySelects();
   if (document.getElementById("break-list")) {
     renderBreakList();
     updateSchedulePreview();
@@ -1198,16 +1199,18 @@ function refreshPermissionUi() {
 function openPermissionOverlay() {
   const overlay = document.getElementById("permission-overlay");
   if (!overlay) return;
+  const wasHidden = overlay.classList.contains("hidden");
   renderPermissionOverlay();
   overlay.classList.remove("hidden");
-  document.body.classList.add("modal-open");
+  if (wasHidden) lockBodyScroll();
 }
 
 function closePermissionOverlay(snooze) {
   stopPermissionQueue();
   const overlay = document.getElementById("permission-overlay");
+  const wasOpen = overlay && !overlay.classList.contains("hidden");
   if (overlay) overlay.classList.add("hidden");
-  document.body.classList.remove("modal-open");
+  if (wasOpen) unlockBodyScroll();
   if (snooze) {
     try { localStorage.setItem(PERMISSION_SNOOZE_KEY, String(Date.now())); } catch {}
   }
@@ -1217,6 +1220,11 @@ function maybeShowPermissionOnboarding() {
   if (!nativePermissions()) return;
   const status = readPermissionStatus();
   if (permissionReady(status)) return;
+  const updateModal = document.getElementById("update-modal");
+  if (updateModal && !updateModal.classList.contains("hidden")) {
+    pendingStartupPermissions = true;
+    return;
+  }
   let snoozedAt = 0;
   try { snoozedAt = Number(localStorage.getItem(PERMISSION_SNOOZE_KEY) || 0) || 0; } catch {}
   if (snoozedAt && Date.now() - snoozedAt < 7 * 24 * 60 * 60 * 1000) return;
@@ -1335,11 +1343,12 @@ window.ExamBuddyPermissionsChanged = function () {
 function startNativeTimer() {
   const bridge = nativeTimer();
   if (!bridge || !timer.running || !timer.endsAt) return;
+  const activeMode = MODES[timer.activeMode] ? timer.activeMode : timer.mode;
   try {
-    const modeLabel = t(MODES[timer.mode].label);
-    const completeTitle = timer.mode === "focus" ? t("focusDone") : t("breakDone");
+    const modeLabel = t(MODES[activeMode].label);
+    const completeTitle = activeMode === "focus" ? t("focusDone") : t("breakDone");
     bridge.startTimer(
-      timer.mode,
+      activeMode,
       timer.endsAt,
       modeLabel,
       completeTitle,
@@ -1480,6 +1489,8 @@ let timerInterval = null;
 let editingExamId = null;
 let editingTaskId = null;
 let pendingUpdate = null;
+let pendingStartupPermissions = false;
+let startupUpdateChecked = false;
 let breakDraft = [];
 let autoTechnique = true;
 let firedReminders = new Set();
@@ -1813,6 +1824,7 @@ function applySuggestedTechnique(startMin, endMin, notify) {
     return;
   }
   select.value = key;
+  syncPrettySelects();
   if (note) {
     note.textContent = t("smart.autoApplied", { technique: techniqueLabel(key) });
     note.classList.remove("hidden");
@@ -2122,6 +2134,7 @@ function normalizeTimer(raw) {
   const savedDefaults = timerSavedDefaults();
   const base = {
     mode: "focus",
+    activeMode: null,
     remaining: savedDefaults.focus,
     running: false,
     endsAt: null,
@@ -2130,11 +2143,9 @@ function normalizeTimer(raw) {
   if (!raw || Array.isArray(raw) || typeof raw !== "object") return base;
 
   const mode = MODES[raw.mode] ? raw.mode : "focus";
-  const running = Boolean(raw.running) && Number.isFinite(raw.endsAt);
-  const rawRemaining = Number(raw.remaining);
-  const remaining = Number.isFinite(rawRemaining)
-    ? Math.max(0, Math.min(rawRemaining, durationFor(mode)))
-    : durationFor(mode);
+  const requestedActive = MODES[raw.activeMode] ? raw.activeMode : mode;
+  const running = Boolean(raw.running) && Number.isFinite(raw.endsAt) && MODES[requestedActive];
+  const activeMode = running ? requestedActive : null;
   const saved = { ...savedDefaults };
   if (raw.saved && typeof raw.saved === "object") {
     Object.keys(saved).forEach((key) => {
@@ -2144,16 +2155,73 @@ function normalizeTimer(raw) {
       }
     });
   }
-  const liveRemaining = running ? Math.max(0, Math.ceil((raw.endsAt - Date.now()) / 1000)) : remaining;
-  saved[mode] = liveRemaining;
+  const rawRemaining = Number(raw.remaining);
+  if (Number.isFinite(rawRemaining) && !running) {
+    saved[mode] = Math.max(0, Math.min(rawRemaining, durationFor(mode)));
+  }
+  if (running) {
+    saved[activeMode] = Math.max(0, Math.min(
+      Math.ceil((raw.endsAt - Date.now()) / 1000),
+      durationFor(activeMode)
+    ));
+  }
+
+  const displayRemaining = running && activeMode === mode
+    ? saved[mode]
+    : (saved[mode] > 0 ? saved[mode] : durationFor(mode));
 
   return {
     mode,
-    remaining: liveRemaining,
+    activeMode,
+    remaining: displayRemaining,
     running,
     endsAt: running ? raw.endsAt : null,
     saved
   };
+}
+
+let modalScrollLocks = 0;
+let modalScrollY = 0;
+
+function lockBodyScroll() {
+  if (modalScrollLocks === 0) {
+    modalScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + modalScrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+  }
+  modalScrollLocks += 1;
+  document.body.classList.add("modal-open");
+}
+
+function unlockBodyScroll() {
+  if (modalScrollLocks <= 0) {
+    modalScrollLocks = 0;
+    return;
+  }
+  modalScrollLocks -= 1;
+  if (modalScrollLocks > 0) return;
+  document.body.classList.remove("modal-open");
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  document.body.style.overflow = "";
+  const y = modalScrollY;
+  modalScrollY = 0;
+  const previousBehavior = document.documentElement.style.scrollBehavior;
+  document.documentElement.style.scrollBehavior = "auto";
+  try {
+    window.scrollTo(0, y);
+  } catch (e) {
+    document.documentElement.scrollTop = y;
+    document.body.scrollTop = y;
+  }
+  document.documentElement.style.scrollBehavior = previousBehavior;
 }
 
 function resetInnerScroll() {
@@ -2188,6 +2256,7 @@ function switchTab(tab) {
   const panels = document.querySelectorAll(".tab-panel");
   buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
+  closePrettySelectMenu();
   if (tab === "insights") renderInsights();
   if (timer.running) resumeAppTimer();
   forceScrollTop();
@@ -2515,6 +2584,7 @@ function populateTaskExamSelect(selectedId) {
   });
   select.innerHTML = options.join("");
   if (current && ordered.some((exam) => exam.id === current)) select.value = current;
+  syncPrettySelects();
 }
 
 function renderTodaySessions() {
@@ -2737,15 +2807,19 @@ function openDetail(kind, id) {
   detailState = { kind, id: id || "" };
   renderDetailModal();
   const modal = document.getElementById("detail-modal");
-  if (modal) modal.classList.remove("hidden");
-  document.body.classList.add("modal-open");
+  if (modal) {
+    const wasHidden = modal.classList.contains("hidden");
+    modal.classList.remove("hidden");
+    if (wasHidden) lockBodyScroll();
+  }
 }
 
 function closeDetailModal() {
   const modal = document.getElementById("detail-modal");
+  const wasOpen = modal && !modal.classList.contains("hidden");
   if (modal) modal.classList.add("hidden");
+  if (wasOpen) unlockBodyScroll();
   detailState = { kind: "", id: "" };
-  document.body.classList.remove("modal-open");
 }
 
 function setupDetailModal() {
@@ -2872,6 +2946,7 @@ function resetTaskForm() {
   if (note) note.classList.add("hidden");
   renderBreakList();
   updateSchedulePreview();
+  syncPrettySelects();
 }
 
 function startExamEdit(id) {
@@ -2886,6 +2961,7 @@ function startExamEdit(id) {
   setText("exam-submit", t("saveChanges"));
   document.getElementById("exam-cancel-edit").classList.remove("hidden");
   document.getElementById("exam-subject").focus();
+  syncPrettySelects();
 }
 
 function startTaskEdit(id, focusBreaks) {
@@ -2917,6 +2993,7 @@ function startTaskEdit(id, focusBreaks) {
   } else {
     document.getElementById("task-text").focus();
   }
+  syncPrettySelects();
 }
 
 function setupTaskPlanner() {
@@ -2994,6 +3071,7 @@ function setupForms() {
     saveData();
     e.target.reset();
     renderAll();
+    syncPrettySelects();
   });
 
   document.getElementById("task-form").addEventListener("submit", (e) => {
@@ -3179,6 +3257,217 @@ function setupFilters() {
   });
 }
 
+const prettySelectStates = new Map();
+let openPrettySelectState = null;
+
+function syncPrettySelectState(state) {
+  if (!state) return;
+  const select = state.select;
+  const option = select.options[select.selectedIndex];
+  state.label.textContent = option ? option.textContent.trim() : "";
+  state.wrap.classList.toggle("is-disabled", select.disabled);
+  state.wrap.classList.toggle("has-value", Boolean(select.value));
+  state.trigger.disabled = select.disabled;
+  if (openPrettySelectState === state) buildPrettySelectMenu(state);
+}
+
+function syncPrettySelects() {
+  prettySelectStates.forEach((state) => syncPrettySelectState(state));
+}
+
+function closePrettySelectMenu() {
+  if (!openPrettySelectState) return;
+  const state = openPrettySelectState;
+  openPrettySelectState = null;
+  if (state.menu && state.menu.parentNode) state.menu.parentNode.removeChild(state.menu);
+  state.menu = null;
+  state.wrap.classList.remove("open");
+  state.trigger.setAttribute("aria-expanded", "false");
+}
+
+function choosePrettyOption(state, index) {
+  const select = state.select;
+  if (index < 0 || index >= select.options.length) return;
+  select.selectedIndex = index;
+  try {
+    select.dispatchEvent(new Event("input", { bubbles: true }));
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  } catch (e) {
+  }
+  syncPrettySelectState(state);
+  closePrettySelectMenu();
+  state.trigger.focus();
+}
+
+function focusPrettyOption(state, index) {
+  if (!state.menu) return;
+  const options = state.menu.querySelectorAll(".pretty-option:not([disabled])");
+  if (!options.length) return;
+  const next = Math.max(0, Math.min(index, options.length - 1));
+  options[next].focus();
+}
+
+function buildPrettySelectMenu(state) {
+  closePrettySelectMenu();
+  const select = state.select;
+  const rect = state.trigger.getBoundingClientRect();
+  const menu = document.createElement("div");
+  menu.className = "pretty-select-menu";
+  menu.setAttribute("role", "listbox");
+  menu.setAttribute("aria-label", state.trigger.getAttribute("aria-label") || "");
+
+  Array.from(select.options).forEach((option, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pretty-option";
+    button.dataset.index = String(index);
+    button.setAttribute("role", "option");
+    button.setAttribute("aria-selected", index === select.selectedIndex ? "true" : "false");
+    button.disabled = option.disabled;
+    const check = document.createElement("span");
+    check.className = "pretty-option-check";
+    check.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"></path></svg>';
+    const text = document.createElement("span");
+    text.className = "pretty-option-text";
+    text.textContent = option.textContent.trim();
+    button.appendChild(check);
+    button.appendChild(text);
+    menu.appendChild(button);
+  });
+
+  menu.style.width = Math.max(170, Math.round(rect.width)) + "px";
+  menu.style.top = "-9999px";
+  menu.style.left = "-9999px";
+  document.body.appendChild(menu);
+
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+  const menuHeight = menu.offsetHeight;
+  const menuWidth = menu.offsetWidth;
+  const spaceBelow = viewportHeight - rect.bottom - 10;
+  const spaceAbove = rect.top - 10;
+  let top = rect.bottom + 6;
+  if (menuHeight > spaceBelow && spaceAbove > spaceBelow) top = rect.top - menuHeight - 6;
+  top = Math.max(8, Math.min(top, viewportHeight - menuHeight - 8));
+  let left = Math.max(8, Math.min(rect.left, viewportWidth - menuWidth - 8));
+  menu.style.top = Math.round(top) + "px";
+  menu.style.left = Math.round(left) + "px";
+
+  menu.addEventListener("click", (event) => {
+    const option = event.target.closest(".pretty-option");
+    if (!option) return;
+    choosePrettyOption(state, Number(option.dataset.index));
+  });
+  menu.addEventListener("keydown", (event) => {
+    const buttons = Array.from(menu.querySelectorAll(".pretty-option:not([disabled])"));
+    const current = buttons.indexOf(document.activeElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      const next = buttons[Math.min(buttons.length - 1, current + 1)];
+      if (next) next.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const prev = buttons[Math.max(0, current - 1)];
+      if (prev) prev.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      if (buttons[0]) buttons[0].focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      if (buttons.length) buttons[buttons.length - 1].focus();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closePrettySelectMenu();
+      state.trigger.focus();
+    }
+  });
+
+  state.menu = menu;
+  openPrettySelectState = state;
+  state.wrap.classList.add("open");
+  state.trigger.setAttribute("aria-expanded", "true");
+
+  const selected = menu.querySelector('.pretty-option[aria-selected="true"]');
+  if (selected) {
+    try { selected.focus({ preventScroll: true }); } catch (e) { selected.focus(); }
+    if (typeof selected.scrollIntoView === "function") {
+      selected.scrollIntoView({ block: "nearest" });
+    }
+  }
+}
+
+function enhancePrettySelect(select) {
+  if (!select || select.dataset.prettyReady === "true") return null;
+  select.dataset.prettyReady = "true";
+  const wrap = document.createElement("div");
+  wrap.className = "pretty-select";
+  select.parentNode.insertBefore(wrap, select);
+  wrap.appendChild(select);
+  select.classList.add("pretty-native");
+
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "pretty-select-trigger";
+  trigger.setAttribute("aria-haspopup", "listbox");
+  trigger.setAttribute("aria-expanded", "false");
+  const label = document.createElement("span");
+  label.className = "pretty-select-label";
+  const chevron = document.createElement("span");
+  chevron.className = "pretty-select-chevron";
+  chevron.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>';
+  trigger.appendChild(label);
+  trigger.appendChild(chevron);
+  wrap.appendChild(trigger);
+
+  const state = { select, wrap, trigger, label, menu: null };
+  prettySelectStates.set(select, state);
+
+  select.addEventListener("change", () => syncPrettySelectState(state));
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (select.disabled) return;
+    if (openPrettySelectState === state) {
+      closePrettySelectMenu();
+      return;
+    }
+    buildPrettySelectMenu(state);
+  });
+  trigger.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!openPrettySelectState) buildPrettySelectMenu(state);
+      const buttons = state.menu ? state.menu.querySelectorAll(".pretty-option:not([disabled])") : [];
+      if (buttons.length) buttons[0].focus();
+    }
+  });
+
+  if (typeof MutationObserver !== "undefined") {
+    const observer = new MutationObserver(() => syncPrettySelectState(state));
+    observer.observe(select, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["disabled"]
+    });
+    state.observer = observer;
+  }
+  syncPrettySelectState(state);
+  return state;
+}
+
+function setupPrettySelects() {
+  document.querySelectorAll("select").forEach((select) => enhancePrettySelect(select));
+  document.addEventListener("click", (event) => {
+    if (!openPrettySelectState) return;
+    if (!openPrettySelectState.wrap.contains(event.target)) closePrettySelectMenu();
+  });
+  document.addEventListener("reset", () => setTimeout(syncPrettySelects, 0), true);
+  window.addEventListener("resize", closePrettySelectMenu);
+  window.addEventListener("scroll", closePrettySelectMenu, { passive: true });
+}
+
 function setupQuickActions() {
   document.querySelectorAll("[data-quick]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -3186,9 +3475,9 @@ function setupQuickActions() {
       switchTab(tab);
       if (tab === "exams") setTimeout(() => document.getElementById("exam-subject").focus(), 0);
       if (tab === "tasks") setTimeout(() => document.getElementById("task-text").focus(), 0);
-      if (tab === "focus" && !timer.running) {
+      if (tab === "focus") {
         if (timer.mode !== "focus") setMode("focus");
-        startTimer();
+        if (activeTimerMode() !== "focus") startTimer();
       }
     });
   });
@@ -3281,12 +3570,29 @@ function setupTheme() {
   }
 }
 
+function activeTimerMode() {
+  return timer.running ? (MODES[timer.activeMode] ? timer.activeMode : timer.mode) : null;
+}
+
+function timerRemainingFor(mode) {
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  if (timer.running && activeTimerMode() === mode && timer.endsAt) {
+    return Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  }
+  const saved = Number(timer.saved[mode]);
+  return Number.isFinite(saved) && saved > 0 ? saved : durationFor(mode);
+}
+
 function rememberTimerRemaining() {
   if (!timer.saved) timer.saved = timerSavedDefaults();
-  const left = timer.running && timer.endsAt
-    ? Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000))
-    : Math.max(0, timer.remaining);
-  timer.remaining = left;
+  const active = activeTimerMode();
+  if (active) {
+    const left = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+    timer.saved[active] = left;
+    if (timer.mode === active) timer.remaining = left;
+    return left;
+  }
+  const left = Math.max(0, timer.remaining);
   timer.saved[timer.mode] = left;
   return left;
 }
@@ -3307,19 +3613,28 @@ function stopTicking() {
 
 function tick() {
   if (!timer.running || !timer.endsAt) return;
+  const active = activeTimerMode() || timer.mode;
   const left = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
-  if (left !== timer.remaining) {
-    timer.remaining = left;
-    if (!timer.saved) timer.saved = timerSavedDefaults();
-    timer.saved[timer.mode] = left;
-    renderTimer();
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  if (left !== timer.saved[active]) {
+    timer.saved[active] = left;
+    if (timer.mode === active) {
+      timer.remaining = left;
+      renderTimer();
+    }
   }
   if (left <= 0) completeSession(true);
 }
 
 function startTimer() {
-  if (timer.running) return;
+  if (timer.running) {
+    if (activeTimerMode() === timer.mode) return;
+    pauseTimer();
+  }
   if (timer.remaining <= 0) timer.remaining = durationFor(timer.mode);
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  timer.activeMode = timer.mode;
+  timer.saved[timer.mode] = timer.remaining;
   timer.running = true;
   timer.endsAt = Date.now() + timer.remaining * 1000;
   startNativeTimer();
@@ -3332,6 +3647,7 @@ function pauseTimer() {
   if (!timer.running) return;
   rememberTimerRemaining();
   timer.running = false;
+  timer.activeMode = null;
   timer.endsAt = null;
   stopNativeTimer();
   saveTimer();
@@ -3340,51 +3656,40 @@ function pauseTimer() {
 }
 
 function resetTimer() {
-  timer.running = false;
-  timer.endsAt = null;
+  const active = activeTimerMode();
+  if (active === timer.mode) {
+    timer.running = false;
+    timer.activeMode = null;
+    timer.endsAt = null;
+    stopNativeTimer();
+    stopTicking();
+  }
   timer.remaining = durationFor(timer.mode);
   if (!timer.saved) timer.saved = timerSavedDefaults();
   timer.saved[timer.mode] = timer.remaining;
-  stopNativeTimer();
   saveTimer();
   renderTimer();
-  stopTicking();
   showToast(t("timerReset"));
 }
 
-function setMode(mode, keepRunning = false) {
+function setMode(mode) {
   if (!MODES[mode]) return;
-  if (mode === timer.mode) {
-    renderTimer();
-    return;
-  }
-
-  // Save current progress before switching
-  rememberTimerRemaining();
-
-  const wasRunning = timer.running;
-  if (wasRunning) {
-    timer.running = false;
-    timer.endsAt = null;
-    stopTicking();
-    stopNativeTimer();
-  }
-
   if (!timer.saved) timer.saved = timerSavedDefaults();
   timer.mode = mode;
-
-  const saved = Number(timer.saved[mode]);
-  timer.remaining = Number.isFinite(saved) && saved > 0 ? saved : durationFor(mode);
-  timer.endsAt = null;
-
+  timer.remaining = timerRemainingFor(mode);
   saveTimer();
   renderTimer();
-  if (wasRunning && keepRunning) startTimer();
 }
 
 function completeSession(log) {
-  const finishedMode = timer.mode;
+  const finishedMode = activeTimerMode() || timer.mode;
   let nextMode;
+
+  timer.running = false;
+  timer.activeMode = null;
+  timer.endsAt = null;
+  stopTicking();
+  stopNativeTimer();
 
   if (log) {
     pomodoro.sessions.push({
@@ -3412,7 +3717,7 @@ function completeSession(log) {
     nextMode = "focus";
   }
 
-  setMode(nextMode, false);
+  setMode(nextMode);
   const autoStart = nextMode === "focus" ? pomodoro.settings.autoFocus : pomodoro.settings.autoBreaks;
   if (autoStart && log) startTimer();
 
@@ -3455,13 +3760,18 @@ function renderSessionDots() {
 
 function renderTimer() {
   const duration = durationFor(timer.mode);
+  const active = activeTimerMode();
+  const displayedRunning = Boolean(active && active === timer.mode);
+  if (displayedRunning && timer.endsAt) {
+    timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  }
   const remaining = Math.max(0, Math.min(timer.remaining, duration));
   setText("timer-time", formatClock(remaining));
   const modeLabel = t(MODES[timer.mode].label);
   setText("timer-mode-label", modeLabel);
   setText(
     "timer-status",
-    timer.running ? t("timerProgress") : remaining === duration ? t(MODES[timer.mode].status) : t("timerPaused")
+    displayedRunning ? t("timerProgress") : remaining >= duration ? t(MODES[timer.mode].status) : t("timerPaused")
   );
 
   const ring = document.getElementById("timer-ring-progress");
@@ -3473,23 +3783,26 @@ function renderTimer() {
   });
   setText(
     "start-pause",
-    timer.running ? t("pause") : remaining < duration ? t("resume") : t("startMode", { mode: modeLabel })
+    displayedRunning ? t("pause") : remaining < duration ? t("resume") : t("startMode", { mode: modeLabel })
   );
   renderSessionDots();
-  document.title = timer.running
-    ? `${formatClock(remaining)} · ${modeLabel} — ${t("appTitle")}`
-    : t("appTitle");
+  if (active) {
+    const activeLabel = t(MODES[active].label);
+    const activeRemaining = timerRemainingFor(active);
+    document.title = `${formatClock(activeRemaining)} · ${activeLabel} — ${t("appTitle")}`;
+  } else {
+    document.title = t("appTitle");
+  }
 }
 
 function setupPomodoro() {
   document.querySelectorAll(".mode-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (timer.running) rememberTimerRemaining();
-      setMode(btn.dataset.mode, false);
+      setMode(btn.dataset.mode);
     });
   });
   document.getElementById("start-pause").addEventListener("click", () => {
-    if (timer.running) pauseTimer();
+    if (activeTimerMode() === timer.mode) pauseTimer();
     else startTimer();
   });
   document.getElementById("reset-timer").addEventListener("click", resetTimer);
@@ -3514,9 +3827,18 @@ function setupPomodoro() {
     pomodoro.settings.autoFocus = document.getElementById("auto-start-focus").checked;
     pomodoro.settings.sound = document.getElementById("sound-enabled").checked;
 
-    if (!timer.running) timer.remaining = durationFor(timer.mode);
     timer.saved = timerSavedDefaults();
-    timer.saved[timer.mode] = timer.remaining;
+    if (timer.running) {
+      const active = activeTimerMode() || timer.mode;
+      const left = timer.endsAt
+        ? Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000))
+        : Math.max(0, timer.remaining);
+      timer.saved[active] = left;
+      if (timer.mode === active) timer.remaining = left;
+    } else {
+      timer.remaining = durationFor(timer.mode);
+      timer.saved[timer.mode] = timer.remaining;
+    }
     document.getElementById("focus-duration").value = pomodoro.settings.focus;
     document.getElementById("short-duration").value = pomodoro.settings.short;
     document.getElementById("long-duration").value = pomodoro.settings.long;
@@ -3535,7 +3857,7 @@ function setupPomodoro() {
     if (["input", "textarea", "select", "button"].includes(tag)) return;
     if (e.code === "Space" && document.getElementById("focus").classList.contains("active")) {
       e.preventDefault();
-      if (timer.running) pauseTimer();
+      if (activeTimerMode() === timer.mode) pauseTimer();
       else startTimer();
     }
   });
@@ -3550,21 +3872,30 @@ function applySettingsToForm() {
   document.getElementById("sound-enabled").checked = pomodoro.settings.sound;
 }
 
+function syncActiveTimerFromClock() {
+  const active = activeTimerMode();
+  if (!active || !timer.endsAt) return false;
+  if (timer.endsAt <= Date.now()) {
+    completeSession(true);
+    return true;
+  }
+  const left = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  timer.saved[active] = left;
+  if (timer.mode === active) timer.remaining = left;
+  return false;
+}
+
 function restoreTimer() {
   stopTicking();
   if (timer.running && timer.endsAt) {
-    if (timer.endsAt <= Date.now()) {
-      timer.running = false;
-      timer.endsAt = null;
-      stopNativeTimer();
-      completeSession(true);
-    } else {
-      timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+    if (!syncActiveTimerFromClock()) {
       startNativeTimer();
       startTicking();
     }
   } else {
     timer.running = false;
+    timer.activeMode = null;
     timer.endsAt = null;
     stopNativeTimer();
   }
@@ -3577,14 +3908,7 @@ function resumeAppTimer() {
     updateBackgroundStatus();
     return;
   }
-  if (timer.endsAt <= Date.now()) {
-    timer.running = false;
-    timer.endsAt = null;
-    stopNativeTimer();
-    completeSession(true);
-    return;
-  }
-  timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  if (syncActiveTimerFromClock()) return;
   renderTimer();
   startNativeTimer();
   startTicking();
@@ -3643,7 +3967,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 1.8</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 1.9</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -3653,12 +3977,16 @@ function openAboutModal(kind) {
       <p>Thank you for using Exam Buddy Pro.</p>
     `;
   }
+  const wasHidden = modal.classList.contains("hidden");
   modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
 }
 
 function closeAboutModal() {
   const modal = document.getElementById("about-modal");
-  if (modal) modal.classList.add("hidden");
+  if (!modal || modal.classList.contains("hidden")) return;
+  modal.classList.add("hidden");
+  unlockBodyScroll();
 }
 
 function setupExternalLinks() {
@@ -3709,7 +4037,14 @@ function hideSplash() {
   if (!splash || splash.classList.contains("done")) return;
   splash.classList.add("done");
   setTimeout(() => { if (splash.parentNode) splash.remove(); }, 500);
-  setTimeout(maybeShowPermissionOnboarding, 600);
+  setTimeout(maybeShowPermissionOnboarding, 700);
+  setTimeout(runStartupUpdateCheck, 180);
+}
+
+function runStartupUpdateCheck() {
+  if (startupUpdateChecked) return;
+  startupUpdateChecked = true;
+  checkForUpdates(false, { startup: true });
 }
 
 const SPLASH_DURATION_MS = 2200;
@@ -3782,12 +4117,20 @@ function openUpdateModal(info) {
   }
   const later = document.getElementById("update-later-btn");
   if (later) later.textContent = t("update.later");
+  const wasHidden = modal.classList.contains("hidden");
   modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
 }
 
 function closeUpdateModal() {
   const modal = document.getElementById("update-modal");
-  if (modal) modal.classList.add("hidden");
+  if (!modal || modal.classList.contains("hidden")) return;
+  modal.classList.add("hidden");
+  unlockBodyScroll();
+  if (pendingStartupPermissions) {
+    pendingStartupPermissions = false;
+    maybeShowPermissionOnboarding();
+  }
 }
 
 function isTrustedUpdateUrl(raw) {
@@ -3929,10 +4272,11 @@ function requestUpdateManifest() {
   });
 }
 
-function checkForUpdates(manual) {
+function checkForUpdates(manual, options) {
   if (manual) showToast(t("update.checking"), "info");
   return requestUpdateManifest()
     .then((manifest) => {
+      markUpdateCheckComplete();
       const code = Number(manifest && manifest.versionCode) || 0;
       const name = manifest && manifest.versionName ? String(manifest.versionName) : String(code);
       const info = {
@@ -3959,20 +4303,11 @@ function checkForUpdates(manual) {
     });
 }
 
-function maybeAutoCheckUpdates() {
-  let last = 0;
-  try {
-    last = Number(localStorage.getItem(UPDATE_CONFIG.lastCheckKey) || 0) || 0;
-  } catch {
-  }
-  if (Date.now() - last < UPDATE_CONFIG.checkIntervalMs) return;
+function markUpdateCheckComplete() {
   try {
     localStorage.setItem(UPDATE_CONFIG.lastCheckKey, String(Date.now()));
   } catch {
   }
-  setTimeout(() => {
-    checkForUpdates(false);
-  }, 2600);
 }
 
 function setupUpdates() {
@@ -3993,7 +4328,6 @@ function setupUpdates() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeUpdateModal();
   });
-  maybeAutoCheckUpdates();
 }
 
 
@@ -4006,6 +4340,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTaskPlanner();
   setupActions();
   setupFilters();
+  setupPrettySelects();
   setupQuickActions();
   setupPomodoro();
   setupBackToTop();

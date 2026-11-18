@@ -34,7 +34,7 @@ The app reads a small manifest at the root of this repository:
 https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json
 ```
 
-`version.json` contains the latest `versionCode`, `versionName`, the APK download URL and the changelog in English and Sinhala. When the installed app starts (at most once every 6 hours), it fetches this file and compares the remote `versionCode` with its own. If the remote version is newer, an update dialog appears showing exactly what changed and a one-tap **Update now** button. The app downloads the APK, verifies its package name, signing certificate and version, then opens the Android installer.
+`version.json` contains the latest `versionCode`, `versionName`, the APK download URL and the changelog in English and Sinhala. As soon as the loading screen finishes, the app fetches this file and compares the remote `versionCode` with its own. If the remote version is newer, an update dialog appears immediately with exactly what changed and a one-tap **Update now** button. The app downloads the APK, verifies its package name, signing certificate and version, then opens the Android installer — no need to visit GitHub.
 
 Users can also check manually from **About → Check for updates**.
 

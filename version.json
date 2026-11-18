@@ -1,26 +1,34 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 7,
-  "versionName": "1.6",
+  "versionCode": 8,
+  "versionName": "1.7",
   "minSdk": 21,
   "publishedAt": "2026-11-18",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "The loading screen now finishes cleanly within 5 seconds every time.",
-      "Focus, short break and long break timers keep running when you switch tabs or leave the app.",
-      "Timers are restored correctly after closing or restarting the app.",
-      "New background timer notification, plus Android prompts for notification, background and battery access.",
-      "Back now keeps the running session alive in the background instead of resetting it."
+      "Plan only your next 3 upcoming exams so the dashboard stays focused.",
+      "Create study tasks for an exam with a start date, start time and lesson finish time.",
+      "Add tea, food or rest breaks inside the study window and edit them anytime.",
+      "Auto-plan breaks using Pomodoro, deep work, ultradian, 52/17 or time-blocking rhythms.",
+      "Choose a study method such as active recall, spaced repetition, Feynman, interleaving or SQ3R.",
+      "Turn on alarms and notifications for task start, every break and lesson finish.",
+      "Android now delivers reminders in the background, even when the app is closed.",
+      "See today's study schedule on the dashboard.",
+      "Deleting, completing or rescheduling a task now cleans up its old reminders."
     ],
     "si": [
-      "යෙදුම විවෘත කරන විට එන loading screen එක දැන් සෑම විටම තත්පර 5කින් අවසන් වේ.",
-      "Focus, කෙටි විවේක සහ දිගු විවේක කාලමාන ටැබ් මාරු කළත් යෙදුමෙන් පිටව ගියත් දිගටම ධාවනය වේ.",
-      "යෙදුම වසා නැවත විවෘත කළත් කාලමානය නිවැරදිව යථා තත්ත්වයට පත් වේ.",
-      "පසුබිම් කාලමාන දැනුම්දීමක් සහ දැනුම්දීම්, පසුබිම් හා බැටරි අවසර ඉල්ලීම් එකතු විය.",
-      "Back එබූ විට සැසිය නැවත සකස් නොවී පසුබිමේ දිගටම ක්‍රියා කරයි."
+      "ඉදිරි විභාග 3ක් පමණක් සැලසුම් කර අවධානය එක තැනක තබා ගන්න.",
+      "විභාගයකට සම්බන්ධ අධ්‍යයන පැවරුමක් සඳහා ආරම්භක දිනය, ආරම්භක වේලාව සහ පාඩම අවසන් වේලාව ඇතුළත් කරන්න.",
+      "අධ්‍යයන කාලය තුළ තේ, කෑම හෝ විවේක විරාම එක් කර පසුව ඒවා සංස්කරණය කරන්න.",
+      "Pomodoro, ගැඹුරු වැඩ, ultradian, 52/17 හෝ කාල කොටස් ක්‍රම භාවිතයෙන් විරාම ස්වයංක්‍රීයව සැලසුම් කරන්න.",
+      "සක්‍රීය සිහිපත් කිරීම, විරාම පුනරාවර්තනය, Feynman, interleaving හෝ SQ3R වැනි අධ්‍යයන ක්‍රමයක් තෝරන්න.",
+      "පැවරුම ආරම්භය, සෑම විරාමයක් සහ පාඩම අවසානය සඳහා ඇලාම් සහ දැනුම්දීම් සක්‍රීය කරන්න.",
+      "යෙදුම වසා ඇති විටදී පවා Android පසුබිම් මතක් කිරීම් ලබා දෙයි.",
+      "අද දිනයේ අධ්‍යයන කාලසටහන පාලක පුවරුවේ පෙන්වයි.",
+      "පැවරුමක් මැකීම, සම්පූර්ණ කිරීම හෝ නැවත සැලසුම් කිරීමේදී පැරණි මතක් කිරීම් ඉවත් කරයි."
     ]
   }
 }

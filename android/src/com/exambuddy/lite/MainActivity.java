@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -44,6 +45,7 @@ public class MainActivity extends Activity {
     private static final int REQUEST_PERMISSIONS = 51;
     private static final int REQUEST_EXACT_ALARM = 52;
     private static final int REQUEST_BACKGROUND_PERMISSIONS = 53;
+    private static final int REQUEST_NOTIFICATIONS = 54;
 
     private static final String DATA_PREFS = "exam_buddy_data";
     private static final String SETTINGS_PREFS = "exam_buddy_settings";
@@ -81,6 +83,7 @@ public class MainActivity extends Activity {
 
         webView.addJavascriptInterface(new DataBridge(), "ExamBuddyFileBridge");
         webView.addJavascriptInterface(new TimerBridge(), "ExamBuddyNative");
+        webView.addJavascriptInterface(new ReminderBridge(), "ExamBuddyReminders");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -297,6 +300,8 @@ public class MainActivity extends Activity {
             requestExactAlarmIfNeeded();
         } else if (requestCode == REQUEST_BACKGROUND_PERMISSIONS) {
             proceedWithBatteryRequest();
+        } else if (requestCode == REQUEST_NOTIFICATIONS) {
+            requestExactAlarmIfNeeded();
         }
     }
 
@@ -517,6 +522,150 @@ public class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 activity.requestPermissions(permissions, requestCode);
             }
+        }
+    }
+
+    private static int taskReminderRequestCode(String taskId, String kind) {
+        String key = (taskId == null ? "" : taskId) + ":" + (kind == null ? "" : kind);
+        return 52000 + ((key.hashCode() & 0x7FFFFFFF) % 100000);
+    }
+
+    private PendingIntent taskReminderPendingIntent(String taskId, String kind, String title,
+                                                    String body, boolean sound, String language) {
+        Intent intent = new Intent(this, TaskReminderReceiver.class);
+        intent.setAction(TaskReminderReceiver.ACTION_TASK_REMINDER);
+        intent.putExtra(TaskReminderReceiver.EXTRA_TASK_ID, taskId);
+        intent.putExtra(TaskReminderReceiver.EXTRA_KIND, kind);
+        intent.putExtra(TaskReminderReceiver.EXTRA_TITLE, title);
+        intent.putExtra(TaskReminderReceiver.EXTRA_BODY, body);
+        intent.putExtra(TaskReminderReceiver.EXTRA_SOUND, sound);
+        intent.putExtra(TaskReminderReceiver.EXTRA_LANGUAGE, language);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        return PendingIntent.getBroadcast(
+                this,
+                taskReminderRequestCode(taskId, kind),
+                intent,
+                flags);
+    }
+
+    private void scheduleTaskReminder(String taskId, String kind, long triggerAt, String title,
+                                      String body, boolean sound, String language) {
+        if (triggerAt <= System.currentTimeMillis()) {
+            return;
+        }
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (manager == null) {
+            return;
+        }
+        PendingIntent pendingIntent =
+                taskReminderPendingIntent(taskId, kind, title, body, sound, language);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !manager.canScheduleExactAlarms()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+                } else {
+                    manager.set(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+            } else {
+                manager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+            }
+        } catch (SecurityException securityError) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+                } else {
+                    manager.set(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
+                }
+            } catch (Exception ignored) {
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void cancelTaskReminder(String taskId, String kind) {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (manager == null) {
+            return;
+        }
+        try {
+            manager.cancel(taskReminderPendingIntent(taskId, kind, null, null, true, "en"));
+        } catch (Exception ignored) {
+        }
+        try {
+            NotificationManager notifications =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notifications != null) {
+                notifications.cancel(TaskReminderReceiver.notificationId(taskId, kind));
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private class ReminderBridge {
+        @JavascriptInterface
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public boolean areNotificationsEnabled() {
+            return hasNotificationPermission();
+        }
+
+        @JavascriptInterface
+        public void requestNotificationPermission() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                            && !hasNotificationPermission()) {
+                        requestPermissions(
+                                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                REQUEST_NOTIFICATIONS);
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void schedule(final String taskId, final String kind, final long triggerAt,
+                             final String title, final String body, final boolean sound,
+                             final String language) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    scheduleTaskReminder(taskId, kind, triggerAt, title, body, sound, language);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void cancel(final String taskId, final String kind) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    cancelTaskReminder(taskId, kind);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void cancelAll(final String taskId) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    cancelTaskReminder(taskId, "start");
+                    cancelTaskReminder(taskId, "end");
+                    for (int i = 0; i < 20; i += 1) {
+                        cancelTaskReminder(taskId, "break-" + i);
+                    }
+                }
+            });
         }
     }
 

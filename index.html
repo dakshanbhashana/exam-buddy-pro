@@ -212,6 +212,7 @@
           </label>
         </div>
         <button type="submit" id="exam-submit" class="primary-btn" data-i18n="addExam">Add Exam</button>
+        <p id="exam-limit-hint" class="hint exam-limit-hint"></p>
       </form>
 
       <div class="card">
@@ -236,15 +237,21 @@
     <section id="tasks" class="tab-panel">
       <p class="eyebrow" data-i18n="toDo">To-Do</p>
       <h2 data-i18n="tasks.title">Study Tasks</h2>
-      <form id="task-form" class="card form-card">
+      <form id="task-form" class="card form-card task-form-card">
         <div class="card-title-row">
           <h3 id="task-form-title" data-i18n="addTask">Add Task</h3>
           <button type="button" id="task-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
         </div>
-        <div class="form-row">
-          <label class="grow">
+        <div class="form-grid">
+          <label class="full-width">
             <span data-i18n="taskLabel">Task</span>
             <input type="text" id="task-text" required data-i18n-placeholder="taskPlaceholder" placeholder="e.g. Revise chapter 5">
+          </label>
+          <label>
+            <span data-i18n="linkedExam">Exam (optional)</span>
+            <select id="task-exam">
+              <option value="" data-i18n="noExam">No exam</option>
+            </select>
           </label>
           <label>
             <span data-i18n="priority">Priority</span>
@@ -255,11 +262,70 @@
             </select>
           </label>
           <label>
+            <span data-i18n="startDate">Start date</span>
+            <input type="date" id="task-start-date">
+          </label>
+          <label>
+            <span data-i18n="startTime">Start time</span>
+            <input type="time" id="task-start-time">
+          </label>
+          <label>
+            <span data-i18n="endTime">Lesson finish time</span>
+            <input type="time" id="task-end-time">
+          </label>
+          <label>
             <span data-i18n="due">Due (optional)</span>
             <input type="date" id="task-due">
           </label>
-          <button type="submit" id="task-submit" class="primary-btn" data-i18n="addTask">Add Task</button>
+          <label>
+            <span data-i18n="technique">Study technique</span>
+            <select id="task-technique">
+              <option value="pomodoro" data-i18n="technique.pomodoro">Pomodoro 25/5</option>
+              <option value="deep50" data-i18n="technique.deep50">Deep work 50/10</option>
+              <option value="ultradian" data-i18n="technique.ultradian">Ultradian 90/20</option>
+              <option value="fiftyTwo" data-i18n="technique.fiftyTwo">52/17 focus</option>
+              <option value="timeblock" data-i18n="technique.timeblock">Time blocking</option>
+              <option value="custom" data-i18n="technique.custom">Custom plan</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="studyMethod">Study method</span>
+            <select id="task-method">
+              <option value="none" data-i18n="method.none">None</option>
+              <option value="activeRecall" data-i18n="method.activeRecall">Active recall</option>
+              <option value="spaced" data-i18n="method.spaced">Spaced repetition</option>
+              <option value="feynman" data-i18n="method.feynman">Feynman technique</option>
+              <option value="interleaving" data-i18n="method.interleaving">Interleaving</option>
+              <option value="sq3r" data-i18n="method.sq3r">SQ3R reading</option>
+            </select>
+          </label>
         </div>
+        <p id="technique-hint" class="hint technique-hint"></p>
+        <div class="reminder-toggles">
+          <label class="switch-row">
+            <span data-i18n="alarm">Alarm</span>
+            <input type="checkbox" id="task-alarm" class="switch-input">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span data-i18n="notification">Notification</span>
+            <input type="checkbox" id="task-notify" class="switch-input">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="break-editor">
+          <div class="card-title-row break-title-row">
+            <h4 data-i18n="breaks">Breaks</h4>
+            <div class="break-actions">
+              <button type="button" id="auto-plan-breaks" class="ghost-btn" data-i18n="autoPlan">Auto-plan</button>
+              <button type="button" id="add-break" class="ghost-btn" data-i18n="addBreak">+ Add break</button>
+            </div>
+          </div>
+          <div id="break-list" class="break-list"></div>
+          <p id="break-empty" class="hint" data-i18n="breakEmpty">Add tea, food or rest breaks inside your study window.</p>
+        </div>
+        <div id="task-schedule-preview" class="schedule-preview"></div>
+        <button type="submit" id="task-submit" class="primary-btn full-btn" data-i18n="addTask">Add Task</button>
       </form>
 
       <div class="card">
@@ -420,7 +486,7 @@
           <span class="rq-app-logo"><img src="logo.svg" alt=""></span>
           <h2 class="rq-app-name">Exam Buddy Pro</h2>
           <p class="rq-app-sub" data-i18n="about.subtitle">Sinhala English study app</p>
-          <span class="rq-version" data-i18n="version">Version 1.6</span>
+          <span class="rq-version" data-i18n="version">Version 1.7</span>
         </div>
         <div class="rq-mini-actions">
           <button type="button" id="about-privacy-btn" class="rq-mini-btn" data-i18n="about.privacy">Privacy policy</button>
@@ -462,7 +528,7 @@
 
       <div class="about-foot">
         <span data-i18n="developedBy">Developed by Dakshan Bhashna</span>
-        <span data-i18n="version">Version 1.6</span>
+        <span data-i18n="version">Version 1.7</span>
       </div>
     </section>
   </main>
@@ -472,7 +538,7 @@
   </button>
 
   <footer class="app-footer">
-    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.6</span></p>
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.7</span></p>
   </footer>
 
   <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">

@@ -24,10 +24,23 @@ const MODES = {
 
 const CIRCUMFERENCE = 2 * Math.PI * 104;
 const DAY_MS = 1000 * 60 * 60 * 24;
-const SNAPSHOT_VERSION = 3;
+const SNAPSHOT_VERSION = 4;
 
-const APP_VERSION_NAME = "1.6";
-const APP_VERSION_CODE = 7;
+const EXAM_LIMIT = 3;
+const TECHNIQUES = {
+  pomodoro: { focus: 25, short: 5, long: 15, cycle: 4 },
+  deep50: { focus: 50, short: 10, long: 20, cycle: 3 },
+  ultradian: { focus: 90, short: 20, long: 30, cycle: 2 },
+  fiftyTwo: { focus: 52, short: 17, long: 17, cycle: 3 },
+  timeblock: { focus: 0, short: 0, long: 0, cycle: 0 },
+  custom: { focus: 0, short: 0, long: 0, cycle: 0 }
+};
+const STUDY_METHODS = ["none", "activeRecall", "spaced", "feynman", "interleaving", "sq3r"];
+const REMINDER_KINDS = ["start", "end"];
+const REMINDER_BREAK_LIMIT = 20;
+
+const APP_VERSION_NAME = "1.7";
+const APP_VERSION_CODE = 8;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -157,6 +170,76 @@ const I18N = {
     overdue: "Overdue",
     dueToday: "Due today",
     dueOn: "Due {date}",
+    linkedExam: "Exam (optional)",
+    noExam: "No exam",
+    startDate: "Start date",
+    startTime: "Start time",
+    endTime: "Lesson finish time",
+    technique: "Study technique",
+    "technique.pomodoro": "Pomodoro 25/5",
+    "technique.deep50": "Deep work 50/10",
+    "technique.ultradian": "Ultradian 90/20",
+    "technique.fiftyTwo": "52/17 focus",
+    "technique.timeblock": "Time blocking",
+    "technique.custom": "Custom plan",
+    "technique.hint.pomodoro": "25 minutes of focus, a 5 minute break, and a 15 minute long break after 4 rounds.",
+    "technique.hint.deep50": "50 minutes of deep focus with a 10 minute break. Good for problem sets.",
+    "technique.hint.ultradian": "90 minutes of focus with a 20 minute break, following your natural energy cycle.",
+    "technique.hint.fiftyTwo": "52 minutes of focus and 17 minutes of rest, a researched desk-work rhythm.",
+    "technique.hint.timeblock": "One protected block. Add your own tea, food and rest breaks.",
+    "technique.hint.custom": "Build a plan that fits your day. Add your own breaks.",
+    studyMethod: "Study method",
+    "method.none": "None",
+    "method.activeRecall": "Active recall",
+    "method.spaced": "Spaced repetition",
+    "method.feynman": "Feynman technique",
+    "method.interleaving": "Interleaving",
+    "method.sq3r": "SQ3R reading",
+    "method.hint.none": "",
+    "method.hint.activeRecall": "Close the book and write what you remember, then check the gaps.",
+    "method.hint.spaced": "Review this lesson again after 1 day, 3 days and 7 days.",
+    "method.hint.feynman": "Explain the lesson in simple words as if teaching a friend.",
+    "method.hint.interleaving": "Mix this topic with a related topic instead of repeating one block.",
+    "method.hint.sq3r": "Survey, question, read, recite and review the chapter.",
+    alarm: "Alarm",
+    notification: "Notification",
+    breaks: "Breaks",
+    autoPlan: "Auto-plan",
+    addBreak: "+ Add break",
+    breakEmpty: "Add tea, food or rest breaks inside your study window.",
+    breakName: "Break name",
+    breakLabelPlaceholder: "Tea / Food / Rest",
+    breakDefaultTea: "Tea",
+    breakDefaultFood: "Food",
+    breakDefaultRest: "Rest",
+    needTimeWindow: "Add a start and finish time first.",
+    noAutoBreaks: "Choose a focus technique and a long enough time window.",
+    breaksPlanned: "{n} break(s) planned",
+    invalidTimeWindow: "Finish time must be after start time.",
+    invalidBreak: "Each break needs a start and finish time inside your study window.",
+    todaySchedule: "Today's schedule",
+    noSchedule: "No schedule",
+    examLimitHint: "Upcoming exams: {n}/{max}. Only the next {max} can be planned.",
+    examLimitReached: "Exam limit reached ({max}). Complete or delete one to add another.",
+    examLimitToast: "You can plan only the next {max} exams.",
+    alarmBadge: "Alarm",
+    notifyBadge: "Notify",
+    editBreaks: "Breaks",
+    reminderPermission: "Allow notifications so reminders can reach you.",
+    reminderNotSupported: "Reminders work in the Android app.",
+    reminderSaved: "Reminder scheduled",
+    reminderPending: "Alarm will be set when you save.",
+    reminderStartTitle: "Time to study: {task}",
+    reminderStartBody: "Your planned study block is starting now.",
+    reminderEndTitle: "Lesson time is over: {task}",
+    reminderEndBody: "Take a break or mark the task complete.",
+    reminderBreakTitle: "Break time: {task}",
+    reminderBreakBody: "{label} break is starting now.",
+    reminderBreakBodyDefault: "Take a short break now.",
+    needStartDate: "Add a start date for this task.",
+    scheduleTitle: "Plan",
+    focusBlock: "Focus",
+    breakBlock: "Break",
     deepWork: "Deep work studio",
     focusTimer: "Focus Timer",
     pomodoroTechnique: "Pomodoro technique",
@@ -267,7 +350,7 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
-    version: "Version 1.6",
+    version: "Version 1.7",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -424,6 +507,76 @@ const I18N = {
     overdue: "කල් ඉකුත් වී ඇත",
     dueToday: "අද දිනට",
     dueOn: "{date} දිනට",
+    linkedExam: "විභාගය (විකල්ප)",
+    noExam: "විභාගයක් නැත",
+    startDate: "ආරම්භක දිනය",
+    startTime: "ආරම්භක වේලාව",
+    endTime: "පාඩම අවසන් වන වේලාව",
+    technique: "අධ්‍යයන ක්‍රමය",
+    "technique.pomodoro": "පොමොදෝරෝ 25/5",
+    "technique.deep50": "ගැඹුරු වැඩ 50/10",
+    "technique.ultradian": "අල්ට්‍රාඩියන් 90/20",
+    "technique.fiftyTwo": "52/17 අවධානය",
+    "technique.timeblock": "කාල කොටස් කිරීම",
+    "technique.custom": "අභිරුචි සැලැස්ම",
+    "technique.hint.pomodoro": "මිනිත්තු 25ක අවධානයක්, මිනිත්තු 5ක විවේකයක් සහ වට 4කට පසු මිනිත්තු 15ක දිගු විවේකයක්.",
+    "technique.hint.deep50": "මිනිත්තු 50ක ගැඹුරු අවධානයක් සහ මිනිත්තු 10ක විවේකයක්. ගැටලු විසඳීමට සුදුසුයි.",
+    "technique.hint.ultradian": "ඔබේ ස්වාභාවික ශක්ති චක්‍රයට අනුව මිනිත්තු 90ක අවධානයක් සහ මිනිත්තු 20ක විවේකයක්.",
+    "technique.hint.fiftyTwo": "මිනිත්තු 52ක අවධානයක් සහ මිනිත්තු 17ක විවේකයක් — පර්යේෂණයෙන් තහවුරු වූ රිද්මයක්.",
+    "technique.hint.timeblock": "එක් ආරක්ෂිත කාල කොටසක්. තේ, කෑම සහ විවේක ඔබම එක් කරන්න.",
+    "technique.hint.custom": "ඔබේ දවසට ගැළපෙන සැලැස්මක් සාදන්න. විවේක ඔබම එක් කරන්න.",
+    studyMethod: "අධ්‍යයන ක්‍රමවේදය",
+    "method.none": "නැත",
+    "method.activeRecall": "සක්‍රීය සිහිපත් කිරීම",
+    "method.spaced": "විරාම පුනරාවර්තනය",
+    "method.feynman": "ෆේන්මන් ක්‍රමය",
+    "method.interleaving": "මිශ්‍ර කරමින් ඉගෙනීම",
+    "method.sq3r": "SQ3R කියවීම",
+    "method.hint.none": "",
+    "method.hint.activeRecall": "පොත වසා ඔබට මතක දේ ලියන්න, පසුව අඩුපාඩු පරීක්ෂා කරන්න.",
+    "method.hint.spaced": "මෙම පාඩම දින 1කට, 3කට සහ 7කට පසු නැවත පුනරීක්ෂණය කරන්න.",
+    "method.hint.feynman": "මිතුරෙකුට උගන්වනවා සේ සරල වචනවලින් පාඩම පැහැදිලි කරන්න.",
+    "method.hint.interleaving": "එකම කොටස නැවත නැවත නොකර, සම්බන්ධ මාතෘකාවක් සමඟ මිශ්‍ර කරන්න.",
+    "method.hint.sq3r": "පරිච්ඡේදය සමීක්ෂණය කර, ප්‍රශ්න අසා, කියවා, කියාපාර කර නැවත බලන්න.",
+    alarm: "ඇලාම්",
+    notification: "දැනුම්දීම",
+    breaks: "විවේක",
+    autoPlan: "ස්වයං සැලැස්ම",
+    addBreak: "+ විවේකයක් එක් කරන්න",
+    breakEmpty: "ඔබේ අධ්‍යයන කාලය තුළ තේ, කෑම හෝ විවේක එක් කරන්න.",
+    breakName: "විවේකයේ නම",
+    breakLabelPlaceholder: "තේ / කෑම / විවේක",
+    breakDefaultTea: "තේ",
+    breakDefaultFood: "කෑම",
+    breakDefaultRest: "විවේකය",
+    needTimeWindow: "පළමුව ආරම්භක සහ අවසන් වේලාවන් එක් කරන්න.",
+    noAutoBreaks: "focus ක්‍රමයක් සහ ප්‍රමාණවත් කාලයක් තෝරන්න.",
+    breaksPlanned: "විවේක {n}ක් සැලසුම් කර ඇත",
+    invalidTimeWindow: "අවසන් වේලාව ආරම්භක වේලාවට පසුව විය යුතුය.",
+    invalidBreak: "සෑම විවේකයකටම අධ්‍යයන කාලය තුළ ආරම්භක සහ අවසන් වේලාවක් අවශ්‍යයි.",
+    todaySchedule: "අද කාලසටහන",
+    noSchedule: "කාලසටහනක් නැත",
+    examLimitHint: "ඉදිරි විභාග: {n}/{max}. ඊළඟ {max}ක් පමණක් සැලසුම් කළ හැක.",
+    examLimitReached: "විභාග සීමාවට ළඟා වී ඇත ({max}). තවත් එකක් එක් කිරීමට එකක් සම්පූර්ණ කරන්න හෝ මකන්න.",
+    examLimitToast: "ඔබට සැලසුම් කළ හැක්කේ ඊළඟ විභාග {max}ක් පමණි.",
+    alarmBadge: "ඇලාම්",
+    notifyBadge: "දැනුම්දීම",
+    editBreaks: "විවේක",
+    reminderPermission: "මතක් කිරීම් ලැබීමට දැනුම්දීම්වලට අවසර දෙන්න.",
+    reminderNotSupported: "මතක් කිරීම් Android යෙදුම තුළ ක්‍රියා කරයි.",
+    reminderSaved: "මතක් කිරීම සකසා ඇත",
+    reminderPending: "සුරකින විට ඇලාම් සකසනු ඇත.",
+    reminderStartTitle: "අධ්‍යයනයට වේලාවයි: {task}",
+    reminderStartBody: "ඔබේ සැලසුම් කළ අධ්‍යයන කාලය දැන් ආරම්භ වේ.",
+    reminderEndTitle: "පාඩම් වේලාව අවසන්: {task}",
+    reminderEndBody: "විවේකයක් ගන්න හෝ කාර්යය සම්පූර්ණ කරන්න.",
+    reminderBreakTitle: "විවේක වේලාව: {task}",
+    reminderBreakBody: "{label} විවේකය දැන් ආරම්භ වේ.",
+    reminderBreakBodyDefault: "දැන් කෙටි විවේකයක් ගන්න.",
+    needStartDate: "මෙම කාර්යයට ආරම්භක දිනයක් එක් කරන්න.",
+    scheduleTitle: "සැලැස්ම",
+    focusBlock: "අවධානය",
+    breakBlock: "විවේකය",
     deepWork: "ගැඹුරු වැඩ චිත්‍රාගාරය",
     focusTimer: "අවධානය කාලමානය",
     pomodoroTechnique: "පොමොදෝරෝ ක්‍රමය",
@@ -534,7 +687,7 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
-    version: "Version 1.6",
+    version: "Version 1.7",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -686,6 +839,10 @@ function applyLanguage() {
     headerButton.setAttribute("title", label);
   }
   document.title = t("appTitle");
+  if (document.getElementById("break-list")) {
+    renderBreakList();
+    updateSchedulePreview();
+  }
 }
 
 function setLanguage(lang) {
@@ -701,6 +858,7 @@ function setLanguage(lang) {
   renderAll();
   renderTimer();
   persistSnapshot();
+  syncAllTaskReminders();
   showToast(t("languageChanged", { lang: next === "si" ? t("lang.sinhala") : t("lang.english") }), "success");
 }
 
@@ -880,7 +1038,7 @@ const startup = initialSnapshot();
 currentLanguage = detectLanguage(startup.language);
 
 let exams = Array.isArray(startup.exams) ? startup.exams : [];
-let tasks = Array.isArray(startup.tasks) ? startup.tasks : [];
+let tasks = Array.isArray(startup.tasks) ? startup.tasks.map(normalizeTask) : [];
 let pomodoro = normalizePomodoro(startup.pomodoro);
 let timer = normalizeTimer(startup.timer);
 
@@ -888,6 +1046,9 @@ let timerInterval = null;
 let editingExamId = null;
 let editingTaskId = null;
 let pendingUpdate = null;
+let breakDraft = [];
+let firedReminders = new Set();
+let reminderInterval = null;
 
 const ui = {
   examSearch: "",
@@ -1012,6 +1173,375 @@ function minutesLabel(minutes) {
   const h = Math.floor(minutes / 60);
   const rest = minutes % 60;
   return rest ? `${h}${t("hourShort")} ${rest}${t("minuteShort")}` : `${h}${t("hourShort")}`;
+}
+
+function parseTimeToMinutes(value) {
+  if (!value || typeof value !== "string") return NaN;
+  const parts = value.split(":");
+  if (parts.length < 2) return NaN;
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return NaN;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return NaN;
+  return hours * 60 + minutes;
+}
+
+function minutesToClock(totalMinutes) {
+  const value = ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
+  return pad(Math.floor(value / 60)) + ":" + pad(value % 60);
+}
+
+function normalizeClock(value) {
+  const minutes = parseTimeToMinutes(value);
+  return Number.isFinite(minutes) ? minutesToClock(minutes) : "";
+}
+
+function normalizeDateValue(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+}
+
+function normalizeBreakList(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      id: typeof item.id === "string" && item.id ? item.id : uid(),
+      label: typeof item.label === "string" ? item.label.slice(0, 60) : "",
+      start: normalizeClock(item.start),
+      end: normalizeClock(item.end)
+    }))
+    .filter((item) => item.label || item.start || item.end);
+}
+
+function normalizeTask(raw) {
+  const task = raw && typeof raw === "object" ? raw : {};
+  return {
+    ...task,
+    id: typeof task.id === "string" && task.id ? task.id : uid(),
+    text: typeof task.text === "string" ? task.text : "",
+    priority: ["low", "medium", "high"].includes(task.priority) ? task.priority : "medium",
+    due: normalizeDateValue(task.due),
+    completed: Boolean(task.completed),
+    createdAt: Number(task.createdAt) || Date.now(),
+    completedAt: Number(task.completedAt) || null,
+    examId: typeof task.examId === "string" ? task.examId : "",
+    startDate: normalizeDateValue(task.startDate),
+    startTime: normalizeClock(task.startTime),
+    endTime: normalizeClock(task.endTime),
+    technique: TECHNIQUES[task.technique] ? task.technique : "pomodoro",
+    method: STUDY_METHODS.includes(task.method) ? task.method : "none",
+    breaks: normalizeBreakList(task.breaks),
+    alarm: Boolean(task.alarm),
+    notify: Boolean(task.notify)
+  };
+}
+
+function techniqueLabel(key) {
+  return t("technique." + (TECHNIQUES[key] ? key : "pomodoro"));
+}
+
+function sortBreaks(raw) {
+  return normalizeBreakList(raw)
+    .map((item) => ({
+      ...item,
+      startMin: parseTimeToMinutes(item.start),
+      endMin: parseTimeToMinutes(item.end)
+    }))
+    .filter((item) => Number.isFinite(item.startMin) && Number.isFinite(item.endMin) && item.endMin > item.startMin)
+    .sort((a, b) => a.startMin - b.startMin);
+}
+
+function buildScheduleSegments(source) {
+  const startMin = parseTimeToMinutes(source && source.startTime);
+  const endMin = parseTimeToMinutes(source && source.endTime);
+  if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) return [];
+  const segments = [];
+  let cursor = startMin;
+  sortBreaks(source.breaks)
+    .filter((item) => item.startMin >= startMin && item.endMin <= endMin)
+    .forEach((item) => {
+      if (item.startMin > cursor) {
+        segments.push({ type: "focus", start: cursor, end: item.startMin });
+      }
+      segments.push({
+        type: "break",
+        start: item.startMin,
+        end: item.endMin,
+        label: item.label || t("breakBlock")
+      });
+      cursor = Math.max(cursor, item.endMin);
+    });
+  if (cursor < endMin) segments.push({ type: "focus", start: cursor, end: endMin });
+  return segments;
+}
+
+function scheduleChipsHtml(segments, limit) {
+  const max = Number.isFinite(limit) ? limit : 12;
+  if (!segments.length) return "";
+  return `<div class="schedule-chips">` + segments.slice(0, max).map((segment) => {
+    const label = segment.type === "focus" ? t("focusBlock") : (segment.label || t("breakBlock"));
+    return `<span class="schedule-chip ${segment.type}"><strong>${minutesToClock(segment.start)}–${minutesToClock(segment.end)}</strong> ${escapeHtml(label)}</span>`;
+  }).join("") + `</div>`;
+}
+
+function taskScheduleChips(task, limit) {
+  return scheduleChipsHtml(buildScheduleSegments(task), limit);
+}
+
+function makeBreakDraft(label, start, end) {
+  return { id: uid(), label: label || "", start: start || "", end: end || "" };
+}
+
+function renderBreakList() {
+  const list = document.getElementById("break-list");
+  const empty = document.getElementById("break-empty");
+  if (!list) return;
+  list.innerHTML = "";
+  breakDraft.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "break-row";
+    row.dataset.breakId = item.id;
+    row.innerHTML = `
+      <input type="text" class="break-label" maxlength="60" value="${escapeHtml(item.label)}" placeholder="${escapeHtml(t("breakLabelPlaceholder"))}" aria-label="${escapeHtml(t("breakName"))}">
+      <input type="time" class="break-start" value="${escapeHtml(item.start)}" aria-label="${escapeHtml(t("startTime"))}">
+      <span class="break-dash" aria-hidden="true">–</span>
+      <input type="time" class="break-end" value="${escapeHtml(item.end)}" aria-label="${escapeHtml(t("endTime"))}">
+      <button type="button" class="danger-btn break-remove" data-break-remove="${item.id}" aria-label="${escapeHtml(t("delete"))}">×</button>
+    `;
+    list.appendChild(row);
+  });
+  if (empty) empty.classList.toggle("hidden", breakDraft.length > 0);
+}
+
+function syncBreakDraftFromDom() {
+  document.querySelectorAll("#break-list .break-row").forEach((row) => {
+    const item = breakDraft.find((entry) => entry.id === row.dataset.breakId);
+    if (!item) return;
+    const label = row.querySelector(".break-label");
+    const start = row.querySelector(".break-start");
+    const end = row.querySelector(".break-end");
+    if (label) item.label = label.value.trim();
+    if (start) item.start = start.value;
+    if (end) item.end = end.value;
+  });
+}
+
+function addBreakDraft() {
+  syncBreakDraftFromDom();
+  breakDraft.push(makeBreakDraft("", "", ""));
+  renderBreakList();
+  updateSchedulePreview();
+  const rows = document.querySelectorAll("#break-list .break-row");
+  const last = rows[rows.length - 1];
+  if (last) {
+    const input = last.querySelector(".break-label");
+    if (input) input.focus();
+  }
+}
+
+function autoPlanBreaks() {
+  syncBreakDraftFromDom();
+  const startTime = document.getElementById("task-start-time").value;
+  const endTime = document.getElementById("task-end-time").value;
+  const techniqueKey = document.getElementById("task-technique").value;
+  const profile = TECHNIQUES[techniqueKey] || TECHNIQUES.pomodoro;
+  const startMin = parseTimeToMinutes(startTime);
+  const endMin = parseTimeToMinutes(endTime);
+  if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) {
+    showToast(t("needTimeWindow"), "error");
+    return;
+  }
+  if (!profile.focus || !profile.short) {
+    showToast(t("noAutoBreaks"), "error");
+    return;
+  }
+  const generated = [];
+  let cursor = startMin;
+  let round = 0;
+  while (cursor + profile.focus < endMin) {
+    cursor += profile.focus;
+    const isLong = profile.cycle > 0 && (round + 1) % profile.cycle === 0;
+    const duration = isLong ? profile.long : profile.short;
+    if (!duration || cursor + duration > endMin) break;
+    const label = duration >= 20 ? t("breakDefaultFood") : t("breakDefaultTea");
+    generated.push(makeBreakDraft(label, minutesToClock(cursor), minutesToClock(cursor + duration)));
+    cursor += duration;
+    round += 1;
+  }
+  if (!generated.length) {
+    showToast(t("noAutoBreaks"), "error");
+    return;
+  }
+  breakDraft = generated;
+  renderBreakList();
+  updateSchedulePreview();
+  showToast(t("breaksPlanned", { n: generated.length }), "success");
+}
+
+function validateBreakDraft() {
+  const startMin = parseTimeToMinutes(document.getElementById("task-start-time").value);
+  const endMin = parseTimeToMinutes(document.getElementById("task-end-time").value);
+  const hasWindow = Number.isFinite(startMin) && Number.isFinite(endMin) && endMin > startMin;
+  for (let i = 0; i < breakDraft.length; i += 1) {
+    const item = breakDraft[i];
+    if (!item.label && !item.start && !item.end) continue;
+    const breakStart = parseTimeToMinutes(item.start);
+    const breakEnd = parseTimeToMinutes(item.end);
+    if (!Number.isFinite(breakStart) || !Number.isFinite(breakEnd) || breakEnd <= breakStart) return false;
+    if (hasWindow && (breakStart < startMin || breakEnd > endMin)) return false;
+  }
+  return true;
+}
+
+function updateSchedulePreview() {
+  const container = document.getElementById("task-schedule-preview");
+  const hint = document.getElementById("technique-hint");
+  if (!container) return;
+  const techniqueKey = document.getElementById("task-technique").value;
+  const methodKey = document.getElementById("task-method").value;
+  if (hint) {
+    const parts = [t("technique.hint." + (TECHNIQUES[techniqueKey] ? techniqueKey : "pomodoro"))];
+    if (methodKey && methodKey !== "none") parts.push(t("method.hint." + methodKey));
+    hint.textContent = parts.filter(Boolean).join(" ");
+  }
+  syncBreakDraftFromDom();
+  const segments = buildScheduleSegments({
+    startTime: document.getElementById("task-start-time").value,
+    endTime: document.getElementById("task-end-time").value,
+    breaks: breakDraft
+  });
+  if (!segments.length) {
+    container.innerHTML = "";
+    return;
+  }
+  container.innerHTML = `<span class="schedule-label">${escapeHtml(t("scheduleTitle"))}</span>` + scheduleChipsHtml(segments);
+}
+
+function nativeReminder() {
+  try {
+    const bridge = window.ExamBuddyReminders;
+    if (bridge && typeof bridge.isAvailable === "function" && bridge.isAvailable()) return bridge;
+  } catch (e) {
+  }
+  return null;
+}
+
+function reminderTimestamp(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
+  const value = new Date(dateStr + "T" + timeStr + ":00").getTime();
+  return Number.isFinite(value) ? value : null;
+}
+
+function reminderEvents(task) {
+  const events = [];
+  if (!task.startDate) return events;
+  const startAt = reminderTimestamp(task.startDate, task.startTime);
+  if (startAt) {
+    events.push({
+      kind: "start",
+      at: startAt,
+      title: t("reminderStartTitle", { task: task.text }),
+      body: t("reminderStartBody")
+    });
+  }
+  const endAt = reminderTimestamp(task.startDate, task.endTime);
+  if (endAt) {
+    events.push({
+      kind: "end",
+      at: endAt,
+      title: t("reminderEndTitle", { task: task.text }),
+      body: t("reminderEndBody")
+    });
+  }
+  (task.breaks || []).forEach((item, index) => {
+    if (index >= REMINDER_BREAK_LIMIT) return;
+    const at = reminderTimestamp(task.startDate, item.start);
+    if (!at) return;
+    events.push({
+      kind: "break-" + index,
+      at,
+      title: t("reminderBreakTitle", { task: task.text }),
+      body: item.label ? t("reminderBreakBody", { label: item.label }) : t("reminderBreakBodyDefault")
+    });
+  });
+  return events;
+}
+
+function cancelTaskReminders(taskId) {
+  const bridge = nativeReminder();
+  if (!bridge) return;
+  try {
+    if (typeof bridge.cancelAll === "function") {
+      bridge.cancelAll(taskId);
+      return;
+    }
+    REMINDER_KINDS.forEach((kind) => bridge.cancel(taskId, kind));
+    for (let i = 0; i < REMINDER_BREAK_LIMIT; i += 1) bridge.cancel(taskId, "break-" + i);
+  } catch (e) {
+  }
+}
+
+function syncTaskReminders(task, requestPermission) {
+  cancelTaskReminders(task.id);
+  if (!task || !task.startDate) return;
+  if (!task.alarm && !task.notify) return;
+  if (daysUntil(task.startDate) < 0) return;
+
+  const bridge = nativeReminder();
+  const events = reminderEvents(task).filter((event) => event.at > Date.now());
+  if (!events.length) return;
+
+  if (bridge) {
+    try {
+      events.forEach((event) => {
+        bridge.schedule(task.id, event.kind, event.at, event.title, event.body, task.alarm, getLanguage());
+      });
+      if (requestPermission && (task.alarm || task.notify) && typeof bridge.areNotificationsEnabled === "function" && !bridge.areNotificationsEnabled()) {
+        if (typeof bridge.requestNotificationPermission === "function") bridge.requestNotificationPermission();
+        showToast(t("reminderPermission"));
+      }
+    } catch (e) {
+    }
+    return;
+  }
+
+  if (requestPermission && task.notify && typeof Notification !== "undefined" && Notification.permission === "default") {
+    try {
+      Notification.requestPermission();
+    } catch (e) {
+    }
+  }
+}
+
+function syncAllTaskReminders() {
+  tasks.forEach((task) => syncTaskReminders(task, false));
+}
+
+function checkTaskReminders() {
+  const now = Date.now();
+  tasks.forEach((task) => {
+    if (task.completed || !task.alarm && !task.notify) return;
+    if (!task.startDate || task.startDate !== todayKey()) return;
+    reminderEvents(task).forEach((event) => {
+      if (now < event.at || now - event.at > 60000) return;
+      const key = task.id + ":" + event.kind + ":" + event.at;
+      if (firedReminders.has(key)) return;
+      firedReminders.add(key);
+      showToast(event.title, "success");
+      if (task.alarm) playChime(true);
+      if (task.notify && !nativeReminder() && typeof Notification !== "undefined") {
+        try {
+          new Notification(event.title, { body: event.body });
+        } catch (e) {
+        }
+      }
+    });
+  });
+}
+
+function startReminderLoop() {
+  if (reminderInterval) clearInterval(reminderInterval);
+  reminderInterval = setInterval(checkTaskReminders, 20000);
 }
 
 function normalizePomodoro(raw) {
@@ -1247,6 +1777,18 @@ function renderTodayPlan() {
     .map((e) => `<div class="plan-row"><span class="plan-dot"></span><span>${escapeHtml(e.subject)}</span><span>${daysUntil(e.date) === 0 ? t("today") : daysUntil(e.date) + t("dayShort")}</span></div>`)
     .join("") || `<p class="item-meta">${t("noUpcomingShort")}</p>`;
 
+  const scheduledToday = tasks
+    .filter((task) => !task.completed && task.startDate === todayKey() && task.startTime && task.endTime)
+    .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+  const scheduledHtml = scheduledToday
+    .slice(0, 4)
+    .map((task) => {
+      const exam = taskExam(task);
+      const label = exam ? escapeHtml(task.text) + " · " + escapeHtml(exam.subject) : escapeHtml(task.text);
+      return `<div class="plan-row"><span class="plan-dot schedule"></span><span>${label}</span><span>${escapeHtml(task.startTime)}–${escapeHtml(task.endTime)}</span></div>`;
+    })
+    .join("") || `<p class="item-meta">${t("noSchedule")}</p>`;
+
   const pending = tasks
     .filter((t) => !t.completed)
     .sort((a, b) => (a.due || "9999-99-99").localeCompare(b.due || "9999-99-99") || b.createdAt - a.createdAt)
@@ -1256,8 +1798,14 @@ function renderTodayPlan() {
     .join("") || `<p class="item-meta">${t("noPendingTasks")}</p>`;
 
   container.innerHTML =
+    `<div class="plan-group"><h4>${t("todaySchedule")}</h4>${scheduledHtml}</div>` +
     `<div class="plan-group"><h4>${t("stat.upcoming")}</h4>${examsHtml}</div>` +
     `<div class="plan-group"><h4>${t("nextTasks")}</h4>${tasksHtml}</div>`;
+}
+
+function taskExam(task) {
+  if (!task || !task.examId) return null;
+  return exams.find((exam) => exam.id === task.examId) || null;
 }
 
 function examBadge(exam) {
@@ -1305,6 +1853,15 @@ function renderExams() {
   empty.textContent = exams.length && !sorted.length ? t("examNoMatch") : t("examEmpty");
   setText("exam-count", t("examCount", { n: exams.length }));
 
+  const upcomingCount = upcomingExams().length;
+  const limitHint = document.getElementById("exam-limit-hint");
+  if (limitHint) {
+    limitHint.textContent = upcomingCount >= EXAM_LIMIT
+      ? t("examLimitReached", { max: EXAM_LIMIT })
+      : t("examLimitHint", { n: upcomingCount, max: EXAM_LIMIT });
+    limitHint.classList.toggle("limit-reached", upcomingCount >= EXAM_LIMIT);
+  }
+
   sorted.forEach((exam) => {
     const li = document.createElement("li");
     li.className = "item" + (exam.completed ? " completed" : "");
@@ -1327,10 +1884,28 @@ function renderExams() {
   });
 }
 
+function taskScheduleMeta(task) {
+  const exam = taskExam(task);
+  const parts = [];
+  if (task.startTime && task.endTime) {
+    const when = task.startDate ? formatDate(task.startDate) + " · " : "";
+    parts.push(`<p class="item-meta task-schedule-line"><strong>${escapeHtml(t("scheduleTitle"))}:</strong> ${escapeHtml(when + task.startTime + "–" + task.endTime)} <span class="badge technique">${escapeHtml(techniqueLabel(task.technique))}</span>${task.method && task.method !== "none" ? ` <span class="badge method">${escapeHtml(t("method." + task.method))}</span>` : ""}</p>`);
+  }
+  if (exam) {
+    parts.push(`<p class="item-meta task-exam-line"><span class="badge exam">${escapeHtml(exam.subject)}</span></p>`);
+  }
+  const reminders = `${task.alarm ? `<span class="badge reminder">${escapeHtml(t("alarmBadge"))}</span>` : ""}${task.notify ? `<span class="badge reminder">${escapeHtml(t("notifyBadge"))}</span>` : ""}`;
+  if (reminders) parts.push(`<p class="item-meta task-reminder-line">${reminders}</p>`);
+  const chips = taskScheduleChips(task, 8);
+  if (chips) parts.push(chips);
+  return parts.join("");
+}
+
 function renderTasks() {
   const list = document.getElementById("task-list");
   const empty = document.getElementById("task-empty");
   list.innerHTML = "";
+  populateTaskExamSelect();
 
   const query = ui.taskSearch.trim().toLowerCase();
   const sorted = [...tasks]
@@ -1339,10 +1914,15 @@ function renderTasks() {
       if (ui.taskFilter === "completed" && !t.completed) return false;
       if (ui.taskFilter === "high" && t.priority !== "high") return false;
       if (!query) return true;
-      return String(t.text || "").toLowerCase().includes(query);
+      const exam = taskExam(t);
+      return [t.text, exam ? exam.subject : ""].some((value) => String(value || "").toLowerCase().includes(query));
     })
     .sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const aSchedule = a.startDate ? a.startDate + "T" + (a.startTime || "99:99") : "";
+      const bSchedule = b.startDate ? b.startDate + "T" + (b.startTime || "99:99") : "";
+      if (aSchedule && bSchedule) return aSchedule.localeCompare(bSchedule);
+      if (aSchedule !== bSchedule) return aSchedule ? -1 : 1;
       return b.createdAt - a.createdAt;
     });
 
@@ -1355,9 +1935,11 @@ function renderTasks() {
     li.innerHTML = `
       <div class="item-main">
         <p class="item-title">${escapeHtml(task.text)} ${taskBadge(task)}</p>
+        ${taskScheduleMeta(task)}
       </div>
       <div class="item-actions">
         <button class="secondary-btn" data-action="edit-task" data-id="${task.id}">${t("edit")}</button>
+        <button class="secondary-btn" data-action="edit-breaks" data-id="${task.id}">${t("editBreaks")}</button>
         <button class="secondary-btn" data-action="toggle-task" data-id="${task.id}">
           ${t(task.completed ? "undo" : "done")}
         </button>
@@ -1366,6 +1948,23 @@ function renderTasks() {
     `;
     list.appendChild(li);
   });
+}
+
+function populateTaskExamSelect(selectedId) {
+  const select = document.getElementById("task-exam");
+  if (!select) return;
+  const current = selectedId !== undefined ? selectedId : select.value;
+  const ordered = [...exams].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    return a.date.localeCompare(b.date);
+  });
+  const options = [`<option value="">${escapeHtml(t("noExam"))}</option>`];
+  ordered.forEach((exam) => {
+    const label = exam.subject + " · " + formatDate(exam.date);
+    options.push(`<option value="${escapeHtml(exam.id)}">${escapeHtml(label)}</option>`);
+  });
+  select.innerHTML = options.join("");
+  if (current && ordered.some((exam) => exam.id === current)) select.value = current;
 }
 
 function renderTodaySessions() {
@@ -1457,6 +2056,20 @@ function clearTaskEdit() {
   document.getElementById("task-cancel-edit").classList.add("hidden");
 }
 
+function resetTaskForm() {
+  clearTaskEdit();
+  const form = document.getElementById("task-form");
+  if (form) form.reset();
+  const technique = document.getElementById("task-technique");
+  const method = document.getElementById("task-method");
+  if (technique) technique.value = "pomodoro";
+  if (method) method.value = "none";
+  populateTaskExamSelect("");
+  breakDraft = [];
+  renderBreakList();
+  updateSchedulePreview();
+}
+
 function startExamEdit(id) {
   const exam = exams.find((x) => x.id === id);
   if (!exam) return;
@@ -1471,17 +2084,76 @@ function startExamEdit(id) {
   document.getElementById("exam-subject").focus();
 }
 
-function startTaskEdit(id) {
+function startTaskEdit(id, focusBreaks) {
   const task = tasks.find((x) => x.id === id);
   if (!task) return;
   editingTaskId = id;
+  populateTaskExamSelect(task.examId || "");
   document.getElementById("task-text").value = task.text;
   document.getElementById("task-priority").value = ["low", "medium", "high"].includes(task.priority) ? task.priority : "medium";
   document.getElementById("task-due").value = task.due || "";
+  document.getElementById("task-start-date").value = task.startDate || "";
+  document.getElementById("task-start-time").value = task.startTime || "";
+  document.getElementById("task-end-time").value = task.endTime || "";
+  document.getElementById("task-technique").value = TECHNIQUES[task.technique] ? task.technique : "pomodoro";
+  document.getElementById("task-method").value = STUDY_METHODS.includes(task.method) ? task.method : "none";
+  document.getElementById("task-alarm").checked = Boolean(task.alarm);
+  document.getElementById("task-notify").checked = Boolean(task.notify);
+  breakDraft = (task.breaks || []).map((item) => makeBreakDraft(item.label, item.start, item.end));
+  renderBreakList();
+  updateSchedulePreview();
   setText("task-form-title", t("editTask"));
   setText("task-submit", t("saveChanges"));
   document.getElementById("task-cancel-edit").classList.remove("hidden");
-  document.getElementById("task-text").focus();
+  if (focusBreaks) {
+    document.getElementById("task-text").focus();
+    const breakList = document.getElementById("break-list");
+    if (breakList) breakList.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else {
+    document.getElementById("task-text").focus();
+  }
+}
+
+function setupTaskPlanner() {
+  const addButton = document.getElementById("add-break");
+  if (addButton) addButton.addEventListener("click", addBreakDraft);
+  const autoButton = document.getElementById("auto-plan-breaks");
+  if (autoButton) autoButton.addEventListener("click", autoPlanBreaks);
+  const breakList = document.getElementById("break-list");
+  if (breakList) {
+    breakList.addEventListener("click", (e) => {
+      const remove = e.target.closest("[data-break-remove]");
+      if (!remove) return;
+      syncBreakDraftFromDom();
+      breakDraft = breakDraft.filter((item) => item.id !== remove.getAttribute("data-break-remove"));
+      renderBreakList();
+      updateSchedulePreview();
+    });
+    breakList.addEventListener("input", () => updateSchedulePreview());
+  }
+  ["task-start-time", "task-end-time", "task-technique", "task-method"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", updateSchedulePreview);
+  });
+  const alarm = document.getElementById("task-alarm");
+  if (alarm) {
+    alarm.addEventListener("change", () => {
+      if (alarm.checked) showToast(t("reminderPending"));
+    });
+  }
+  const notify = document.getElementById("task-notify");
+  if (notify) {
+    notify.addEventListener("change", () => {
+      const bridge = nativeReminder();
+      if (notify.checked && bridge && typeof bridge.areNotificationsEnabled === "function" && !bridge.areNotificationsEnabled()) {
+        showToast(t("reminderPermission"));
+      } else if (notify.checked && !bridge) {
+        showToast(t("reminderNotSupported"));
+      }
+    });
+  }
+  renderBreakList();
+  updateSchedulePreview();
 }
 
 function setupForms() {
@@ -1492,6 +2164,11 @@ function setupForms() {
     const notes = document.getElementById("exam-notes").value.trim();
     const category = document.getElementById("exam-category").value;
     if (!subject || !date) return;
+
+    if (!editingExamId && daysUntil(date) >= 0 && upcomingExams().length >= EXAM_LIMIT) {
+      showToast(t("examLimitToast", { max: EXAM_LIMIT }), "error");
+      return;
+    }
 
     if (editingExamId) {
       const exam = exams.find((x) => x.id === editingExamId);
@@ -1512,19 +2189,85 @@ function setupForms() {
     const text = document.getElementById("task-text").value.trim();
     const priority = document.getElementById("task-priority").value;
     const due = document.getElementById("task-due").value;
+    const examId = document.getElementById("task-exam").value;
+    const startDate = document.getElementById("task-start-date").value;
+    const startTime = document.getElementById("task-start-time").value;
+    const endTime = document.getElementById("task-end-time").value;
+    const technique = document.getElementById("task-technique").value;
+    const method = document.getElementById("task-method").value;
+    const alarm = document.getElementById("task-alarm").checked;
+    const notify = document.getElementById("task-notify").checked;
     if (!text) return;
 
+    syncBreakDraftFromDom();
+    const startMin = parseTimeToMinutes(startTime);
+    const endMin = parseTimeToMinutes(endTime);
+    if ((startTime || endTime) && (!startTime || !endTime)) {
+      showToast(t("needTimeWindow"), "error");
+      return;
+    }
+    if (startTime && endTime && !startDate) {
+      showToast(t("needStartDate"), "error");
+      return;
+    }
+    if (startTime && endTime && (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin)) {
+      showToast(t("invalidTimeWindow"), "error");
+      return;
+    }
+    const hasBreaks = breakDraft.some((item) => item.label || item.start || item.end);
+    if (hasBreaks && (!startTime || !endTime)) {
+      showToast(t("needTimeWindow"), "error");
+      return;
+    }
+    if (!validateBreakDraft()) {
+      showToast(t("invalidBreak"), "error");
+      return;
+    }
+    if ((alarm || notify) && !startDate) {
+      showToast(t("needStartDate"), "error");
+      return;
+    }
+    if ((alarm || notify) && !startTime) {
+      showToast(t("needTimeWindow"), "error");
+      return;
+    }
+
+    const payload = {
+      text,
+      priority,
+      due,
+      examId,
+      startDate,
+      startTime,
+      endTime,
+      technique: TECHNIQUES[technique] ? technique : "pomodoro",
+      method: STUDY_METHODS.includes(method) ? method : "none",
+      breaks: breakDraft
+        .filter((item) => item.label || item.start || item.end)
+        .map((item) => ({ id: item.id, label: item.label, start: item.start, end: item.end })),
+      alarm,
+      notify
+    };
+
+    let savedTask = null;
     if (editingTaskId) {
       const task = tasks.find((x) => x.id === editingTaskId);
-      if (task) Object.assign(task, { text, priority, due });
+      if (task) {
+        Object.assign(task, payload);
+        savedTask = normalizeTask(task);
+        const index = tasks.findIndex((x) => x.id === task.id);
+        if (index >= 0) tasks[index] = savedTask;
+      }
       showToast(t("taskUpdated"), "success");
-      clearTaskEdit();
     } else {
-      tasks.push({ id: uid(), text, priority, due, completed: false, createdAt: Date.now() });
+      savedTask = normalizeTask({ ...payload, id: uid(), completed: false, createdAt: Date.now() });
+      tasks.push(savedTask);
       showToast(t("taskAdded"), "success");
     }
+
+    if (savedTask) syncTaskReminders(savedTask, true);
     saveData();
-    e.target.reset();
+    resetTaskForm();
     renderAll();
   });
 
@@ -1533,8 +2276,7 @@ function setupForms() {
     document.getElementById("exam-form").reset();
   });
   document.getElementById("task-cancel-edit").addEventListener("click", () => {
-    clearTaskEdit();
-    document.getElementById("task-form").reset();
+    resetTaskForm();
   });
 }
 
@@ -1551,6 +2293,9 @@ function setupActions() {
       }
     } else if (action === "delete-exam") {
       exams = exams.filter((x) => x.id !== id);
+      tasks.forEach((task) => {
+        if (task.examId === id) task.examId = "";
+      });
       if (editingExamId === id) clearExamEdit();
     } else if (action === "edit-exam") {
       startExamEdit(id);
@@ -1569,12 +2314,18 @@ function setupActions() {
       if (task) {
         task.completed = !task.completed;
         task.completedAt = task.completed ? Date.now() : null;
+        if (task.completed) cancelTaskReminders(task.id);
+        else syncTaskReminders(task, false);
       }
     } else if (action === "delete-task") {
+      cancelTaskReminders(id);
       tasks = tasks.filter((x) => x.id !== id);
-      if (editingTaskId === id) clearTaskEdit();
+      if (editingTaskId === id) resetTaskForm();
     } else if (action === "edit-task") {
-      startTaskEdit(id);
+      startTaskEdit(id, false);
+      return;
+    } else if (action === "edit-breaks") {
+      startTaskEdit(id, true);
       return;
     }
     saveData();
@@ -1588,7 +2339,9 @@ function setupActions() {
       return;
     }
     if (!confirm(t("confirmClear", { n: count }))) return;
+    tasks.filter((task) => task.completed).forEach((task) => cancelTaskReminders(task.id));
     tasks = tasks.filter((task) => !task.completed);
+    if (editingTaskId) resetTaskForm();
     saveData();
     renderAll();
     showToast(t("completedCleared"), "success");
@@ -1826,8 +2579,8 @@ function completeSession(log) {
   renderTimer();
 }
 
-function playChime() {
-  if (!pomodoro.settings.sound) return;
+function playChime(force) {
+  if (!force && !pomodoro.settings.sound) return;
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
@@ -1993,12 +2746,26 @@ function resumeAppTimer() {
 
 window.ExamBuddyOnResume = resumeAppTimer;
 
+function resumeReminders() {
+  syncAllTaskReminders();
+  checkTaskReminders();
+}
+
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) resumeAppTimer();
+  if (!document.hidden) {
+    resumeAppTimer();
+    resumeReminders();
+  }
 });
-window.addEventListener("pageshow", () => resumeAppTimer());
+window.addEventListener("pageshow", () => {
+  resumeAppTimer();
+  resumeReminders();
+});
 window.addEventListener("focus", () => {
-  if (document.visibilityState !== "hidden") resumeAppTimer();
+  if (document.visibilityState !== "hidden") {
+    resumeAppTimer();
+    resumeReminders();
+  }
 });
 
 function setupBackToTop() {
@@ -2026,7 +2793,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 1.6</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 1.7</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -2276,6 +3043,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTheme();
   setupTabs();
   setupForms();
+  setupTaskPlanner();
   setupActions();
   setupFilters();
   setupQuickActions();
@@ -2292,7 +3060,10 @@ document.addEventListener("DOMContentLoaded", () => {
   restoreTimer();
   renderAll();
   persistSnapshot();
+  syncAllTaskReminders();
+  startReminderLoop();
   updateCountdown();
   setInterval(updateCountdown, 1000);
+  checkTaskReminders();
   setText("footer-year", "© " + new Date().getFullYear());
 });

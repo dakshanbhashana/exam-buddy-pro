@@ -2442,3 +2442,180 @@ input:focus, select:focus {
   .rq-social { font-size: 0.82rem; padding: 0.55rem 0.5rem; }
   .about-rq-tools { gap: 0.5rem; }
 }
+
+/* ---------- Exam limit and task planner ---------- */
+
+input[type="time"] {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--input);
+  min-width: 0;
+  font-family: inherit;
+}
+
+.exam-limit-hint {
+  margin: 0.75rem 0 0;
+}
+
+.exam-limit-hint.limit-reached {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.task-form-card .full-btn {
+  margin-top: 0.9rem;
+}
+
+.technique-hint {
+  margin: 0.1rem 0 0.75rem;
+  min-height: 1.1rem;
+}
+
+.reminder-toggles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.reminder-toggles .switch-row {
+  border-bottom: 1px solid var(--border);
+}
+
+.break-editor {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: var(--card-2);
+  margin-bottom: 0.9rem;
+}
+
+.break-title-row {
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.break-title-row h4 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 1rem;
+}
+
+.break-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.break-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.break-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.break-row .break-label {
+  flex: 1 1 150px;
+  min-width: 0;
+}
+
+.break-row .break-start,
+.break-row .break-end {
+  flex: 0 1 112px;
+  width: 112px;
+}
+
+.break-dash {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.break-row .break-remove {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.schedule-preview {
+  margin-bottom: 0.5rem;
+}
+
+.schedule-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.schedule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+}
+
+.schedule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+
+.schedule-chip strong { font-weight: 800; }
+.schedule-chip.focus { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+.schedule-chip.break { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+
+.task-schedule-line,
+.task-exam-line,
+.task-reminder-line {
+  margin-top: 0.35rem;
+}
+
+.task-schedule-line strong { color: var(--text); }
+
+.badge.technique { background: var(--primary-soft); color: var(--primary); }
+.badge.method { background: var(--accent); color: var(--primary); border: 1px solid var(--accent-border); }
+.badge.exam { background: var(--success-soft); color: var(--success); }
+.badge.reminder { background: var(--warning-soft); color: var(--warning); }
+
+.plan-dot.schedule { background: var(--warning); }
+
+@media (max-width: 600px) {
+  .reminder-toggles { grid-template-columns: 1fr; }
+  .break-row .break-start,
+  .break-row .break-end {
+    flex: 1 1 120px;
+    width: auto;
+  }
+  .break-row .break-label { flex: 1 1 100%; }
+  .break-row .break-remove { margin-left: auto; }
+}

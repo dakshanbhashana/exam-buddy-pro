@@ -10,7 +10,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -36,7 +39,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import android.app.DownloadManager;
+import android.database.Cursor;
 
 public class MainActivity extends Activity {
     private static final String HOST = "exam-buddy.local";
@@ -46,21 +55,27 @@ public class MainActivity extends Activity {
     private static final int REQUEST_EXACT_ALARM = 52;
     private static final int REQUEST_BACKGROUND_PERMISSIONS = 53;
     private static final int REQUEST_NOTIFICATIONS = 54;
+    private static final int REQUEST_INSTALL = 55;
 
     private static final String DATA_PREFS = "exam_buddy_data";
     private static final String SETTINGS_PREFS = "exam_buddy_settings";
     private static final String KEY_SNAPSHOT = "snapshot_json";
     private static final String KEY_SAVED_AT = "saved_at";
     private static final String KEY_LANGUAGE = "language";
-    private static final String KEY_PERMISSIONS_REQUESTED = "permissions_requested";
     private static final String DATA_FILE = "exam-buddy-data.json";
+    private static final String UPDATE_HOST = "github.com";
+    private static final long UPDATE_POLL_MS = 650;
 
     private WebView webView;
     private ActivityResultLauncher exactAlarmLauncher;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private boolean permissionsFlowStarted = false;
     private boolean backPromptShown = false;
     private static volatile boolean appVisible = false;
+
+    private long downloadId = -1;
+    private boolean updateDownloading = false;
+    private String pendingUpdateUrl = null;
+    private String pendingUpdateVersion = null;
 
     public static boolean isAppVisible() {
         return appVisible;
@@ -71,19 +86,34 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.parseColor("#f4f7fb"));
+        webView.setBackgroundColor(Color.parseColor("#fff1f2")); // Light rose background
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setGeolocationEnabled(false);
+        settings.setMediaPlaybackRequiresUserGesture(true);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        settings.setSaveFormData(false);
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setSafeBrowsingEnabled(true);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(false);
+        }
 
         webView.addJavascriptInterface(new DataBridge(), "ExamBuddyFileBridge");
         webView.addJavascriptInterface(new TimerBridge(), "ExamBuddyNative");
         webView.addJavascriptInterface(new ReminderBridge(), "ExamBuddyReminders");
+        webView.addJavascriptInterface(new PermissionBridge(), "ExamBuddyPermissions");
+        webView.addJavascriptInterface(new UpdateBridge(), "ExamBuddyUpdate");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -113,15 +143,12 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (!permissionsFlowStarted) {
-                    permissionsFlowStarted = true;
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            requestFirstOpenPermissions();
-                        }
-                    }, 1700);
-                }
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pushPermissionStatus();
+                    }
+                }, 700);
             }
         });
 
@@ -141,14 +168,32 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void pushPermissionStatus() {
+        if (webView == null) return;
+        webView.evaluateJavascript(
+                "if(window.ExamBuddyPermissionsChanged) window.ExamBuddyPermissionsChanged();",
+                null);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         appVisible = true;
         if (webView != null) {
             webView.evaluateJavascript(
-                    "(function(){try{if(window.ExamBuddyOnResume)window.ExamBuddyOnResume();}catch(e){}})();",
+                    "(function(){try{if(window.ExamBuddyOnResume)window.ExamBuddyOnResume();if(window.ExamBuddyPermissionsChanged)window.ExamBuddyPermissionsChanged();}catch(e){}})();",
                     null);
+        }
+        if (pendingUpdateUrl != null) {
+            String url = pendingUpdateUrl;
+            String version = pendingUpdateVersion;
+            pendingUpdateUrl = null;
+            pendingUpdateVersion = null;
+            if (hasInstallPermission()) {
+                startUpdateDownload(url, version);
+            } else {
+                updateStatus("permission", 0);
+            }
         }
     }
 
@@ -240,43 +285,6 @@ public class MainActivity extends Activity {
         moveTaskToBack(true);
     }
 
-    private void requestFirstOpenPermissions() {
-        SharedPreferences prefs = settingsPrefs();
-        if (prefs.getBoolean(KEY_PERMISSIONS_REQUESTED, false)) {
-            requestExactAlarmIfNeeded();
-            return;
-        }
-        ArrayList<String> missing = new ArrayList<String>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                missing.add(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                missing.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                missing.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                missing.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-        }
-        if (!missing.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(missing.toArray(new String[0]), REQUEST_PERMISSIONS);
-            } else {
-                prefs.edit().putBoolean(KEY_PERMISSIONS_REQUESTED, true).apply();
-                requestExactAlarmIfNeeded();
-            }
-            return;
-        }
-        prefs.edit().putBoolean(KEY_PERMISSIONS_REQUESTED, true).apply();
-        requestExactAlarmIfNeeded();
-    }
-
     private void requestExactAlarmIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return;
@@ -295,14 +303,10 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSIONS) {
-            settingsPrefs().edit().putBoolean(KEY_PERMISSIONS_REQUESTED, true).apply();
-            requestExactAlarmIfNeeded();
-        } else if (requestCode == REQUEST_BACKGROUND_PERMISSIONS) {
+        if (requestCode == REQUEST_BACKGROUND_PERMISSIONS) {
             proceedWithBatteryRequest();
-        } else if (requestCode == REQUEST_NOTIFICATIONS) {
-            requestExactAlarmIfNeeded();
         }
+        pushPermissionStatus();
     }
 
     @Override
@@ -311,6 +315,7 @@ public class MainActivity extends Activity {
         if (requestCode == REQUEST_EXACT_ALARM && exactAlarmLauncher != null) {
             exactAlarmLauncher.dispatch(resultCode);
         }
+        pushPermissionStatus();
     }
 
     private boolean handleExternalUri(Uri uri) {
@@ -321,8 +326,7 @@ public class MainActivity extends Activity {
             return false;
         }
         if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)
-                || "mailto".equalsIgnoreCase(scheme) || "tel".equalsIgnoreCase(scheme)
-                || "intent".equalsIgnoreCase(scheme)) {
+                || "mailto".equalsIgnoreCase(scheme) || "tel".equalsIgnoreCase(scheme)) {
             try {
                 Intent intent;
                 if ("mailto".equalsIgnoreCase(scheme)) {
@@ -452,6 +456,9 @@ public class MainActivity extends Activity {
             int read;
             while ((read = in.read(chunk)) != -1) {
                 buffer.write(chunk, 0, read);
+                if (buffer.size() > 4000000) {
+                    return null;
+                }
             }
             return new String(buffer.toByteArray(), "UTF-8");
         } catch (Exception ignored) {
@@ -606,6 +613,381 @@ public class MainActivity extends Activity {
         }
     }
 
+    private class PermissionBridge {
+        @JavascriptInterface
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public String getStatus() {
+            try {
+                JSONObject status = new JSONObject();
+                status.put("notifications", hasNotificationPermission());
+
+                boolean alarm = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    alarm = manager != null && manager.canScheduleExactAlarms();
+                }
+                status.put("alarm", alarm);
+                status.put("battery", isIgnoringBatteryOptimizations());
+
+                boolean storage = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    storage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                    storage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+                }
+                status.put("files", storage);
+
+                boolean install = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    install = getPackageManager().canRequestPackageInstalls();
+                }
+                status.put("install", install);
+
+                return status.toString();
+            } catch (Exception e) {
+                return "{}";
+            }
+        }
+
+        @JavascriptInterface
+        public void requestNotifications() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATIONS);
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void requestExactAlarm() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    requestExactAlarmIfNeeded();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void requestBattery() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    proceedWithBatteryRequest();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void requestFiles() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        ArrayList<String> missing = new ArrayList<>();
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                            missing.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                            missing.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                            missing.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                        }
+                        if (!missing.isEmpty()) {
+                            requestPermissions(missing.toArray(new String[0]), REQUEST_PERMISSIONS);
+                        }
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void requestInstall() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (!getPackageManager().canRequestPackageInstalls()) {
+                            startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName())));
+                        }
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void openSettings() {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
+    }
+
+    private boolean hasInstallPermission() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+                || getPackageManager().canRequestPackageInstalls();
+    }
+
+    private boolean isTrustedUpdateUrl(String raw) {
+        try {
+            Uri uri = Uri.parse(raw == null ? "" : raw);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) return false;
+            String host = uri.getHost();
+            if (host == null) return false;
+            host = host.toLowerCase();
+            return UPDATE_HOST.equals(host)
+                    || "raw.githubusercontent.com".equals(host)
+                    || host.endsWith(".githubusercontent.com");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void requestInstallPermission(String url, String version) {
+        pendingUpdateUrl = url;
+        pendingUpdateVersion = version;
+        updateStatus("permission", 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + getPackageName())));
+            } catch (Exception e) {
+                try {
+                    startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES));
+                } catch (Exception ignored) {
+                }
+            }
+        } else {
+            startUpdateDownload(url, version);
+        }
+    }
+
+    private void startUpdateDownload(final String url, final String version) {
+        updateDownloading = false;
+        downloadId = -1;
+        if (!isTrustedUpdateUrl(url)) {
+            updateStatus("error", 0);
+            return;
+        }
+        if (!hasInstallPermission()) {
+            requestInstallPermission(url, version);
+            return;
+        }
+        try {
+            File dir = getExternalFilesDir(null);
+            if (dir == null) throw new IOException("Storage unavailable");
+            File target = new File(dir, UpdateFileProvider.FILE_NAME);
+            if (target.exists() && !target.delete()) throw new IOException("Cannot replace old update");
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+            request.setTitle("Exam Buddy update");
+            request.setDescription(version == null || version.isEmpty()
+                    ? "Downloading update..." : "Downloading " + version);
+            request.setMimeType("application/vnd.android.package-archive");
+            request.setAllowedOverMetered(true);
+            request.setAllowedOverRoaming(false);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalFilesDir(MainActivity.this, null, UpdateFileProvider.FILE_NAME);
+            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            if (manager == null) throw new IOException("Download manager unavailable");
+            downloadId = manager.enqueue(request);
+            if (downloadId < 0) throw new IOException("Download did not start");
+            updateDownloading = true;
+            updateStatus("downloading", 0);
+            handler.postDelayed(updatePoll, UPDATE_POLL_MS);
+        } catch (Exception e) {
+            finishUpdateWithError();
+        }
+    }
+
+    private final Runnable updatePoll = new Runnable() {
+        @Override
+        public void run() {
+            if (!updateDownloading) return;
+            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            if (manager == null || downloadId < 0) {
+                finishUpdateWithError();
+                return;
+            }
+            Cursor cursor = null;
+            try {
+                DownloadManager.Query query = new DownloadManager.Query().setFilterById(downloadId);
+                cursor = manager.query(query);
+                if (cursor == null || !cursor.moveToFirst()) {
+                    scheduleUpdatePoll();
+                    return;
+                }
+                int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                long done = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                long total = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    updateDownloading = false;
+                    downloadId = -1;
+                    File dir = getExternalFilesDir(null);
+                    File file = dir == null ? null : new File(dir, UpdateFileProvider.FILE_NAME);
+                    if (!verifyApkSignature(file)) {
+                        if (file != null && file.exists()) file.delete();
+                        updateStatus("error", 0);
+                        showToast("Update failed security verification", true);
+                        return;
+                    }
+                    updateStatus("installing", 100);
+                    installUpdateApk(file);
+                    return;
+                }
+                if (status == DownloadManager.STATUS_FAILED) {
+                    finishUpdateWithError();
+                    return;
+                }
+                int progress = total > 0
+                        ? (int) Math.max(0, Math.min(100, (done * 100) / total)) : 0;
+                updateStatus("downloading", progress);
+                scheduleUpdatePoll();
+            } catch (Exception e) {
+                finishUpdateWithError();
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+        }
+    };
+
+    private void scheduleUpdatePoll() {
+        if (updateDownloading) handler.postDelayed(updatePoll, UPDATE_POLL_MS);
+    }
+
+    private void finishUpdateWithError() {
+        updateDownloading = false;
+        downloadId = -1;
+        updateStatus("error", 0);
+    }
+
+    private void updateStatus(String state, int progress) {
+        if (webView == null) return;
+        try {
+            JSONObject status = new JSONObject();
+            status.put("state", state);
+            status.put("progress", progress);
+            final String js = "if(window.ExamBuddyUpdateStatus)window.ExamBuddyUpdateStatus("
+                    + JSONObject.quote(status.toString()) + ");";
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (webView != null) webView.evaluateJavascript(js, null);
+                }
+            });
+        } catch (Exception ignored) {
+        }
+    }
+
+    private Set<String> signatureDigests(Signature[] signatures) {
+        Set<String> digests = new HashSet<String>();
+        if (signatures == null) return digests;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            for (Signature signature : signatures) {
+                if (signature == null) continue;
+                digest.reset();
+                byte[] hash = digest.digest(signature.toByteArray());
+                StringBuilder hex = new StringBuilder(hash.length * 2);
+                for (byte value : hash) {
+                    hex.append(String.format("%02x", value & 0xff));
+                }
+                digests.add(hex.toString());
+            }
+        } catch (Exception ignored) {
+        }
+        return digests;
+    }
+
+    private boolean verifyApkSignature(File file) {
+        if (file == null || !file.isFile() || file.length() <= 0) return false;
+        try {
+            PackageManager manager = getPackageManager();
+            int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? PackageManager.GET_SIGNING_CERTIFICATES
+                    : PackageManager.GET_SIGNATURES;
+            PackageInfo archive = manager.getPackageArchiveInfo(file.getAbsolutePath(), flags);
+            if (archive == null || !getPackageName().equals(archive.packageName)) return false;
+            PackageInfo installed = manager.getPackageInfo(getPackageName(), flags);
+            if (archive.versionCode <= installed.versionCode) return false;
+            Signature[] archiveSignatures;
+            Signature[] installedSignatures;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                SigningInfo archiveInfo = archive.signingInfo;
+                SigningInfo installedInfo = installed.signingInfo;
+                if (archiveInfo == null || installedInfo == null) return false;
+                archiveSignatures = archiveInfo.hasMultipleSigners()
+                        ? archiveInfo.getApkContentsSigners()
+                        : archiveInfo.getSigningCertificateHistory();
+                installedSignatures = installedInfo.hasMultipleSigners()
+                        ? installedInfo.getApkContentsSigners()
+                        : installedInfo.getSigningCertificateHistory();
+            } else {
+                archiveSignatures = archive.signatures;
+                installedSignatures = installed.signatures;
+            }
+            Set<String> archiveDigests = signatureDigests(archiveSignatures);
+            Set<String> installedDigests = signatureDigests(installedSignatures);
+            return !archiveDigests.isEmpty() && archiveDigests.equals(installedDigests);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void installUpdateApk(File file) {
+        if (file == null || !file.isFile()) {
+            updateStatus("error", 0);
+            return;
+        }
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(UpdateFileProvider.uri(), "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            updateStatus("error", 0);
+        }
+    }
+
+    private class UpdateBridge {
+        @JavascriptInterface
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public void downloadAndInstall(final String url, final String version) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    startUpdateDownload(url, version);
+                }
+            });
+        }
+    }
+
+    private void showToast(final String message, final boolean isError) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                android.widget.Toast.makeText(MainActivity.this, message, android.widget.Toast.LENGTH_SHORT).show();
+                if (webView != null) {
+                    try {
+                        String js = "if(window.showToast)window.showToast("
+                                + JSONObject.quote(message == null ? "" : message)
+                                + ",'" + (isError ? "error" : "info") + "');";
+                        webView.evaluateJavascript(js, null);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        });
+    }
+
     private class ReminderBridge {
         @JavascriptInterface
         public boolean isAvailable() {
@@ -739,11 +1121,14 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public boolean saveJson(String json) {
-            if (json == null) {
+            if (json == null || json.length() > 2000000) {
                 return false;
             }
             try {
-                new JSONObject(json);
+                JSONObject parsed = new JSONObject(json);
+                if (!parsed.has("exams") || !parsed.has("tasks")) {
+                    return false;
+                }
                 writeQuietly(privateDataFile(), json);
                 writeQuietly(externalDataFile(), json);
                 dataPrefs().edit()

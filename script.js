@@ -39,14 +39,24 @@ const STUDY_METHODS = ["none", "activeRecall", "spaced", "feynman", "interleavin
 const REMINDER_KINDS = ["start", "end"];
 const REMINDER_BREAK_LIMIT = 20;
 
-const APP_VERSION_NAME = "1.7";
-const APP_VERSION_CODE = 8;
+const APP_VERSION_NAME = "1.9.0";
+const APP_VERSION_CODE = 10;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   checkIntervalMs: 6 * 60 * 60 * 1000,
-  lastCheckKey: "examBuddy_lastUpdateCheck"
+  lastCheckKey: "examBuddy_lastUpdateCheck",
+  allowedHosts: [
+    "github.com",
+    "raw.githubusercontent.com",
+    "objects.githubusercontent.com",
+    "github-releases.githubusercontent.com"
+  ]
 };
+
+const PERMISSION_KEYS = ["notifications", "alarm", "battery", "files", "install"];
+const PERMISSION_SNOOZE_KEY = "examBuddy_permissionsSnooze";
+const BACKUP_MAX_BYTES = 2 * 1024 * 1024;
 
 const I18N = {
   en: {
@@ -59,6 +69,8 @@ const I18N = {
     switchLanguage: "Switch language",
     lang: { english: "English", sinhala: "Sinhala" },
     languageChanged: "Language switched to {lang}",
+    "lang.english": "English",
+    "lang.sinhala": "Sinhala",
     languageCardTitle: "Language",
     languageCardDesc: "Choose your preferred language. Changes apply instantly.",
     mainSections: "Main sections",
@@ -350,7 +362,7 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
-    version: "Version 1.7",
+    version: "Version 1.9.0",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -381,6 +393,82 @@ const I18N = {
     focusDone: "Focus session complete — take a break!",
     breakDone: "Break over — ready to focus?",
     settingsSaved: "Timer settings saved",
+    "permissions.eyebrow": "Quick setup",
+    "permissions.title": "Let's set up Exam Buddy",
+    "permissions.subtitle": "Allow these to keep reminders, the focus timer and updates working while you study.",
+    "permissions.note": "You can change any of these later in Android Settings.",
+    "permissions.continue": "Continue",
+    "permissions.allowAll": "Allow recommended",
+    "permissions.allow": "Allow",
+    "permissions.allowed": "Allowed",
+    "permissions.denied": "Not allowed",
+    "permissions.openSettings": "Settings",
+    "permissions.manage": "Notifications, alarms & app access",
+    "permissions.banner": "Some access is missing — tap to finish setup.",
+    "permissions.saved": "Setup updated",
+    "permissions.notSupported": "This access is only available in the Android app.",
+    "permissions.notifications.title": "Notifications",
+    "permissions.notifications.desc": "Task reminders and focus timer alerts.",
+    "permissions.alarm.title": "Exact alarms",
+    "permissions.alarm.desc": "Start and finish study sessions on time.",
+    "permissions.battery.title": "Battery access",
+    "permissions.battery.desc": "Keep the focus timer alive when the screen is off.",
+    "permissions.files.title": "File access",
+    "permissions.files.desc": "Save your study data and future backups on this device.",
+    "permissions.install.title": "App updates",
+    "permissions.install.desc": "Download and install new versions without leaving the app.",
+    "permissions.installHint": "Android will ask you to allow installs from Exam Buddy.",
+    "permissions.recommended": "Recommended",
+    "permissions.optional": "Optional",
+    "permissions.notNow": "Not now",
+    "permissions.granted": "All permissions are ready.",
+    "permissions.needed": "Grant the missing access to keep everything reliable.",
+    "detail.subtitle": "{n} item(s)",
+    "detail.empty": "Nothing here yet.",
+    "detail.openTasks": "Open Tasks",
+    "detail.openExams": "Open Exams",
+    "detail.edit": "Edit",
+    "detail.editBreaks": "Edit breaks",
+    "detail.done": "Mark done",
+    "detail.undo": "Mark not done",
+    "detail.delete": "Delete",
+    "detail.close": "Close",
+    "detail.nextExam": "Next exam",
+    "detail.pending": "Pending tasks",
+    "detail.upcoming": "Upcoming exams",
+    "detail.completedExams": "Completed exams",
+    "detail.doneTasks": "Completed tasks",
+    "detail.daysNext": "Days to next exam",
+    "detail.focusToday": "Focus today",
+    "detail.streak": "Study streak",
+    "detail.bestStreak": "Best streak",
+    "detail.taskTitle": "Task details",
+    "detail.examTitle": "Exam details",
+    "detail.noExam": "No exam linked",
+    "detail.schedule": "Schedule",
+    "detail.noSchedule": "No schedule set",
+    "detail.breaks": "Breaks",
+    "detail.reminders": "Reminders",
+    "detail.on": "On",
+    "detail.off": "Off",
+    "smart.quickAdd": "Quick add",
+    "smart.tea": "Tea 10 min",
+    "smart.food": "Food 30 min",
+    "smart.rest": "Rest 15 min",
+    "smart.breakAdded": "{label} break added at {time}",
+    "smart.autoTechnique": "Auto-selected {technique} to fit your break plan.",
+    "smart.autoApplied": "Study technique auto-adjusted to {technique}.",
+    "smart.noGap": "No free space for that break. Adjust your study window.",
+    "smart.needWindow": "Add a start and finish time first.",
+    "update.downloading": "Downloading update…",
+    "update.downloadProgress": "Downloading {p}%",
+    "update.installing": "Opening the installer…",
+    "update.permission": "Allow installs from Exam Buddy, then return to the app.",
+    "update.playProtect": "If Play Protect asks, choose “Install anyway”. The update is signed with the same key as your current app.",
+    "update.downloadOnly": "Download only",
+    "update.failedInstall": "Update download failed. Try again.",
+    "update.badUrl": "This update link is not trusted.",
+    "update.ready": "Update downloaded. Finish installing in the Android installer.",
     monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     monthsLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     weekdaysLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -396,6 +484,8 @@ const I18N = {
     switchLanguage: "භාෂාව මාරු කරන්න",
     lang: { english: "English", sinhala: "සිංහල" },
     languageChanged: "භාෂාව {lang} බවට මාරු විය",
+    "lang.english": "English",
+    "lang.sinhala": "සිංහල",
     languageCardTitle: "භාෂාව",
     languageCardDesc: "ඔබ කැමති භාෂාව තෝරන්න. වෙනස්කම් වහාම ක්‍රියාත්මක වේ.",
     mainSections: "ප්‍රධාන අංශ",
@@ -687,7 +777,7 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
-    version: "Version 1.7",
+    version: "Version 1.9.0",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -718,6 +808,82 @@ const I18N = {
     focusDone: "අවධාන සැසිය සම්පූර්ණයි — විවේකයක් ගන්න!",
     breakDone: "විවේකය අවසන් — නැවත අවධානය යොමු කරන්නද?",
     settingsSaved: "කාලමාන සැකසුම් සුරකිනු ලැබීය",
+    "permissions.eyebrow": "ඉක්මන් සැකසුම",
+    "permissions.title": "Exam Buddy සකසමු",
+    "permissions.subtitle": "මතක් කිරීම්, අවධාන කාලමානය සහ යාවත්කාලීන නිවැරදිව ක්‍රියා කරවීමට මේවාට අවසර දෙන්න.",
+    "permissions.note": "පසුව Android සැකසුම්වලින් ඕනෑම එකක් වෙනස් කළ හැක.",
+    "permissions.continue": "ඉදිරියට",
+    "permissions.allowAll": "නිර්දේශිත ඒවාට අවසර දෙන්න",
+    "permissions.allow": "අවසර දෙන්න",
+    "permissions.allowed": "අවසර දී ඇත",
+    "permissions.denied": "අවසර නැත",
+    "permissions.openSettings": "සැකසුම්",
+    "permissions.manage": "දැනුම්දීම්, ඇලාම් සහ යෙදුම් අවසර",
+    "permissions.banner": "සමහර අවසර අඩුයි — සැකසුම සම්පූර්ණ කිරීමට තට්ටු කරන්න.",
+    "permissions.saved": "සැකසුම යාවත්කාලීන විය",
+    "permissions.notSupported": "මෙම අවසරය Android යෙදුමේ පමණක් ලබා ගත හැක.",
+    "permissions.notifications.title": "දැනුම්දීම්",
+    "permissions.notifications.desc": "කාර්ය මතක් කිරීම් සහ කාලමාන ඇඟවීම්.",
+    "permissions.alarm.title": "නිශ්චිත ඇලාම්",
+    "permissions.alarm.desc": "අධ්‍යයන සැසි නියමිත වේලාවට ආරම්භ කර අවසන් කරන්න.",
+    "permissions.battery.title": "බැටරි අවසර",
+    "permissions.battery.desc": "තිරය නිවී ඇති විටත් කාලමානය දිගටම ධාවනය වේ.",
+    "permissions.files.title": "ගොනු ප්‍රවේශය",
+    "permissions.files.desc": "ඔබේ අධ්‍යයන දත්ත සහ අනාගත උපස්ථ මෙම උපාංගයේ සුරකින්න.",
+    "permissions.install.title": "යෙදුම් යාවත්කාලීන",
+    "permissions.install.desc": "යෙදුමෙන් පිටතට නොයා නව සංස්කරණ බාගෙන ස්ථාපනය කරන්න.",
+    "permissions.installHint": "Exam Buddy වෙතින් ස්ථාපනයට අවසර දෙන ලෙස Android ඔබෙන් අසයි.",
+    "permissions.recommended": "නිර්දේශිත",
+    "permissions.optional": "අමතර",
+    "permissions.notNow": "දැන් නොවේ",
+    "permissions.granted": "සියලු අවසර සූදානම්.",
+    "permissions.needed": "සියල්ල නිවැරදිව ක්‍රියා කරවීමට අඩු අවසර ලබා දෙන්න.",
+    "detail.subtitle": "අයිතම {n}",
+    "detail.empty": "තවම කිසිවක් නැත.",
+    "detail.openTasks": "කාර්යයන් විවෘත කරන්න",
+    "detail.openExams": "විභාග විවෘත කරන්න",
+    "detail.edit": "සංස්කරණය",
+    "detail.editBreaks": "විරාම සංස්කරණය",
+    "detail.done": "සම්පූර්ණ කරන්න",
+    "detail.undo": "නැවත විවෘත කරන්න",
+    "detail.delete": "මකන්න",
+    "detail.close": "වසන්න",
+    "detail.nextExam": "ඊළඟ විභාගය",
+    "detail.pending": "විවෘත කාර්යයන්",
+    "detail.upcoming": "ඉදිරි විභාග",
+    "detail.completedExams": "සම්පූර්ණ කළ විභාග",
+    "detail.doneTasks": "සම්පූර්ණ කළ කාර්යයන්",
+    "detail.daysNext": "ඊළඟ විභාගයට දින",
+    "detail.focusToday": "අද අවධානය",
+    "detail.streak": "අධ්‍යයන අඛණ්ඩතාව",
+    "detail.bestStreak": "හොඳම අඛණ්ඩතාව",
+    "detail.taskTitle": "කාර්ය විස්තර",
+    "detail.examTitle": "විභාග විස්තර",
+    "detail.noExam": "විභාගයක් සම්බන්ධ නැත",
+    "detail.schedule": "කාලසටහන",
+    "detail.noSchedule": "කාලසටහනක් නැත",
+    "detail.breaks": "විරාම",
+    "detail.reminders": "මතක් කිරීම්",
+    "detail.on": "ක්‍රියාත්මකයි",
+    "detail.off": "නිවා ඇත",
+    "smart.quickAdd": "ඉක්මන් එකතු කිරීම",
+    "smart.tea": "තේ මිනිත්තු 10",
+    "smart.food": "කෑම මිනිත්තු 30",
+    "smart.rest": "විවේක මිනිත්තු 15",
+    "smart.breakAdded": "{label} විරාමය {time} ට එක් විය",
+    "smart.autoTechnique": "ඔබේ විරාම සැලැස්මට ගැලපෙන {technique} තෝරා ගන්නා ලදී.",
+    "smart.autoApplied": "අධ්‍යයන ක්‍රමය {technique} ලෙස ස්වයංක්‍රීයව සකස් විය.",
+    "smart.noGap": "එම විරාමයට නිදහස් කාලයක් නැත. අධ්‍යයන කාලය සකසන්න.",
+    "smart.needWindow": "පළමුව ආරම්භක සහ අවසන් වේලාව ඇතුළත් කරන්න.",
+    "update.downloading": "යාවත්කාලීනය බාගනිමින්…",
+    "update.downloadProgress": "බාගනිමින් {p}%",
+    "update.installing": "ස්ථාපකය විවෘත කරමින්…",
+    "update.permission": "Exam Buddy වෙතින් ස්ථාපනයට අවසර දී නැවත යෙදුමට එන්න.",
+    "update.playProtect": "Play Protect අසන්නේ නම් “Install anyway” තෝරන්න. යාවත්කාලීනය ඔබේ යෙදුමේම යතුරෙන් අත්සන් කර ඇත.",
+    "update.downloadOnly": "බාගන්න පමණයි",
+    "update.failedInstall": "යාවත්කාලීනය බාගැනීම අසාර්ථකයි. නැවත උත්සාහ කරන්න.",
+    "update.badUrl": "මෙම යාවත්කාලීන සබැඳිය විශ්වාසදායක නොවේ.",
+    "update.ready": "යාවත්කාලීනය බාගත විය. Android ස්ථාපකයේ ස්ථාපනය සම්පූර්ණ කරන්න.",
     monthsShort: ["ජන", "පෙබ", "මාර්", "අප්‍රි", "මැයි", "ජූනි", "ජූලි", "අගෝ", "සැප්", "ඔක්", "නොවැ", "දෙසැ"],
     monthsLong: ["ජනවාරි", "පෙබරවාරි", "මාර්තු", "අප්‍රේල්", "මැයි", "ජූනි", "ජූලි", "අගෝස්තු", "සැප්තැම්බර්", "ඔක්තෝබර්", "නොවැම්බර්", "දෙසැම්බර්"],
     weekdaysLong: ["ඉරිදා", "සඳුදා", "අඟහරුවාදා", "බදාදා", "බ්‍රහස්පතින්දා", "සිකුරාදා", "සෙනසුරාදා"],
@@ -898,6 +1064,274 @@ function nativeTimer() {
   return null;
 }
 
+function nativePermissions() {
+  try {
+    const bridge = window.ExamBuddyPermissions;
+    if (bridge && typeof bridge.isAvailable === "function" && bridge.isAvailable()) return bridge;
+  } catch {
+  }
+  return null;
+}
+
+function nativeUpdate() {
+  try {
+    const bridge = window.ExamBuddyUpdate;
+    if (bridge && typeof bridge.isAvailable === "function" && bridge.isAvailable()) return bridge;
+  } catch {
+  }
+  return null;
+}
+
+function readPermissionStatus() {
+  const bridge = nativePermissions();
+  const fallback = {
+    notifications: typeof Notification === "undefined" || Notification.permission === "granted",
+    alarm: false,
+    battery: false,
+    files: true,
+    install: false
+  };
+  if (!bridge) return { ...fallback, native: false };
+  try {
+    const raw = bridge.getStatus();
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      notifications: Boolean(parsed.notifications),
+      alarm: Boolean(parsed.alarm),
+      battery: Boolean(parsed.battery),
+      files: Boolean(parsed.files),
+      install: Boolean(parsed.install),
+      native: true
+    };
+  } catch {
+    return { ...fallback, native: true };
+  }
+}
+
+function permissionReady(status) {
+  return PERMISSION_KEYS.every((key) => status[key]);
+}
+
+function requestNativePermission(key) {
+  const bridge = nativePermissions();
+  if (!bridge) {
+    showToast(t("permissions.notSupported"));
+    return false;
+  }
+  const method = {
+    notifications: "requestNotifications",
+    alarm: "requestExactAlarm",
+    battery: "requestBattery",
+    files: "requestFiles",
+    install: "requestInstall"
+  }[key];
+  if (!method || typeof bridge[method] !== "function") return false;
+  try {
+    bridge[method]();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function openAppPermissions() {
+  const bridge = nativePermissions();
+  if (bridge && typeof bridge.openSettings === "function") {
+    try { bridge.openSettings(); return; } catch {}
+  }
+  showToast(t("permissions.notSupported"));
+}
+
+function permissionRows(status) {
+  const icon = {
+    notifications: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>',
+    alarm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M5 3 2 6M19 3l3 3"></path></svg>',
+    battery: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="18" height="10" rx="2"></rect><path d="M22 11v2M6 10v4M10 10v4"></path></svg>',
+    files: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>',
+    install: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>'
+  };
+  const recommended = { notifications: true, alarm: true, battery: true, files: false, install: true };
+  return PERMISSION_KEYS.map((key) => {
+    const granted = Boolean(status[key]);
+    const badge = !status.native
+      ? t("permissions.optional")
+      : granted
+        ? t("permissions.allowed")
+        : recommended[key] ? t("permissions.recommended") : t("permissions.optional");
+    const action = !status.native
+      ? `<span class="permission-state muted">${escapeHtml(t("permissions.notSupported"))}</span>`
+      : granted
+        ? `<span class="permission-state granted">${escapeHtml(t("permissions.allowed"))}</span>`
+        : `<button type="button" class="permission-state action" data-permission-request="${key}">${escapeHtml(t("permissions.allow"))}</button>`;
+    return `
+      <div class="permission-row ${granted ? "granted" : ""}" data-permission-row="${key}">
+        <span class="permission-icon" aria-hidden="true">${icon[key]}</span>
+        <div class="permission-copy">
+          <strong>${escapeHtml(t("permissions." + key + ".title"))}</strong>
+          <p>${escapeHtml(t("permissions." + key + ".desc"))}</p>
+          <span class="permission-badge">${escapeHtml(badge)}</span>
+        </div>
+        ${action}
+      </div>`;
+  }).join("");
+}
+
+function renderPermissionOverlay() {
+  const list = document.getElementById("permission-list");
+  if (!list) return;
+  const status = readPermissionStatus();
+  list.innerHTML = permissionRows(status);
+  const subtitle = document.getElementById("permission-subtitle");
+  if (subtitle) {
+    subtitle.textContent = permissionReady(status) ? t("permissions.granted") : t("permissions.subtitle");
+  }
+}
+
+function refreshPermissionUi() {
+  const status = readPermissionStatus();
+  const banner = document.getElementById("permission-banner");
+  if (banner) banner.classList.toggle("hidden", permissionReady(status));
+  const overlay = document.getElementById("permission-overlay");
+  if (overlay && !overlay.classList.contains("hidden")) renderPermissionOverlay();
+}
+
+function openPermissionOverlay() {
+  const overlay = document.getElementById("permission-overlay");
+  if (!overlay) return;
+  renderPermissionOverlay();
+  overlay.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+
+function closePermissionOverlay(snooze) {
+  stopPermissionQueue();
+  const overlay = document.getElementById("permission-overlay");
+  if (overlay) overlay.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  if (snooze) {
+    try { localStorage.setItem(PERMISSION_SNOOZE_KEY, String(Date.now())); } catch {}
+  }
+}
+
+function maybeShowPermissionOnboarding() {
+  if (!nativePermissions()) return;
+  const status = readPermissionStatus();
+  if (permissionReady(status)) return;
+  let snoozedAt = 0;
+  try { snoozedAt = Number(localStorage.getItem(PERMISSION_SNOOZE_KEY) || 0) || 0; } catch {}
+  if (snoozedAt && Date.now() - snoozedAt < 7 * 24 * 60 * 60 * 1000) return;
+  openPermissionOverlay();
+}
+
+const PERMISSION_ORDER = ["notifications", "alarm", "battery", "install", "files"];
+let permissionQueue = [];
+let permissionQueueBusy = false;
+let permissionQueueTimer = null;
+
+function clearPermissionQueueTimer() {
+  if (permissionQueueTimer) {
+    clearTimeout(permissionQueueTimer);
+    permissionQueueTimer = null;
+  }
+}
+
+function stopPermissionQueue() {
+  clearPermissionQueueTimer();
+  permissionQueue = [];
+  permissionQueueBusy = false;
+}
+
+function runPermissionQueue() {
+  clearPermissionQueueTimer();
+  if (!permissionQueue.length) {
+    permissionQueueBusy = false;
+    refreshPermissionUi();
+    return;
+  }
+  if (!nativePermissions()) {
+    stopPermissionQueue();
+    return;
+  }
+  const key = permissionQueue[0];
+  const status = readPermissionStatus();
+  if (status[key]) {
+    permissionQueue.shift();
+    runPermissionQueue();
+    return;
+  }
+  permissionQueueBusy = true;
+  if (!requestNativePermission(key)) {
+    permissionQueue.shift();
+    permissionQueueBusy = false;
+    runPermissionQueue();
+    return;
+  }
+  permissionQueueTimer = setTimeout(() => {
+    permissionQueueTimer = null;
+    permissionQueue.shift();
+    permissionQueueBusy = false;
+    refreshPermissionUi();
+    runPermissionQueue();
+  }, 12000);
+}
+
+function advancePermissionQueue() {
+  if (!permissionQueueBusy) return;
+  clearPermissionQueueTimer();
+  permissionQueueBusy = false;
+  if (permissionQueue.length) permissionQueue.shift();
+  setTimeout(runPermissionQueue, 500);
+}
+
+function requestPermissionKey(key) {
+  stopPermissionQueue();
+  if (!requestNativePermission(key)) return;
+  showToast(t("permissions." + key + ".desc"), "info");
+  setTimeout(refreshPermissionUi, 700);
+  setTimeout(refreshPermissionUi, 1800);
+}
+
+function requestAllPermissions() {
+  if (!nativePermissions()) {
+    showToast(t("permissions.notSupported"));
+    return;
+  }
+  const status = readPermissionStatus();
+  permissionQueue = PERMISSION_ORDER.filter((key) => PERMISSION_KEYS.includes(key) && !status[key]);
+  if (!permissionQueue.length) {
+    refreshPermissionUi();
+    showToast(t("permissions.granted"), "success");
+    return;
+  }
+  permissionQueueBusy = false;
+  runPermissionQueue();
+}
+
+function setupPermissions() {
+  const continueButton = document.getElementById("permission-continue");
+  if (continueButton) continueButton.addEventListener("click", () => closePermissionOverlay(true));
+  const allowAll = document.getElementById("permission-allow-all");
+  if (allowAll) allowAll.addEventListener("click", requestAllPermissions);
+  const list = document.getElementById("permission-list");
+  if (list) {
+    list.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-permission-request]");
+      if (!button) return;
+      requestPermissionKey(button.getAttribute("data-permission-request"));
+    });
+  }
+  const banner = document.getElementById("permission-banner");
+  if (banner) banner.addEventListener("click", openPermissionOverlay);
+  const settingsButton = document.getElementById("permissions-btn");
+  if (settingsButton) settingsButton.addEventListener("click", openPermissionOverlay);
+  refreshPermissionUi();
+}
+
+window.ExamBuddyPermissionsChanged = function () {
+  refreshPermissionUi();
+  advancePermissionQueue();
+};
+
 function startNativeTimer() {
   const bridge = nativeTimer();
   if (!bridge || !timer.running || !timer.endsAt) return;
@@ -1047,6 +1481,7 @@ let editingExamId = null;
 let editingTaskId = null;
 let pendingUpdate = null;
 let breakDraft = [];
+let autoTechnique = true;
 let firedReminders = new Set();
 let reminderInterval = null;
 
@@ -1339,6 +1774,85 @@ function addBreakDraft() {
   }
 }
 
+function focusGaps(startTime, endTime, breaks) {
+  return buildScheduleSegments({ startTime, endTime, breaks })
+    .filter((segment) => segment.type === "focus" && segment.end > segment.start);
+}
+
+function suggestedTechniqueKey(startMin, endMin, breaks, methodKey) {
+  if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) return null;
+  const gaps = focusGaps(minutesToClock(startMin), minutesToClock(endMin), breaks);
+  const longest = gaps.reduce((max, segment) => Math.max(max, segment.end - segment.start), 0);
+  const total = gaps.reduce((sum, segment) => sum + (segment.end - segment.start), 0);
+  if (!longest || total < 15) return "timeblock";
+  const method = STUDY_METHODS.includes(methodKey) ? methodKey : "none";
+  if (method === "feynman" || method === "activeRecall") {
+    return longest >= 45 ? "deep50" : "pomodoro";
+  }
+  if (method === "sq3r") {
+    return longest >= 40 ? "deep50" : "pomodoro";
+  }
+  if (method === "spaced" || method === "interleaving") {
+    return longest >= 50 ? "fiftyTwo" : "pomodoro";
+  }
+  if (longest >= 80) return "ultradian";
+  if (longest >= 45) return "deep50";
+  if (longest >= 20) return "pomodoro";
+  return "timeblock";
+}
+
+function applySuggestedTechnique(startMin, endMin, notify) {
+  if (!autoTechnique) return;
+  const methodSelect = document.getElementById("task-method");
+  const key = suggestedTechniqueKey(startMin, endMin, breakDraft, methodSelect ? methodSelect.value : "none");
+  if (!key) return;
+  const select = document.getElementById("task-technique");
+  const note = document.getElementById("auto-technique-note");
+  if (!select || select.value === key) {
+    if (note) note.classList.add("hidden");
+    return;
+  }
+  select.value = key;
+  if (note) {
+    note.textContent = t("smart.autoApplied", { technique: techniqueLabel(key) });
+    note.classList.remove("hidden");
+  }
+  if (notify) showToast(t("smart.autoApplied", { technique: techniqueLabel(key) }), "success");
+}
+
+function addQuickBreak(kind) {
+  syncBreakDraftFromDom();
+  const durations = { tea: 10, food: 30, rest: 15 };
+  const labels = { tea: t("breakDefaultTea"), food: t("breakDefaultFood"), rest: t("breakDefaultRest") };
+  const duration = durations[kind] || 10;
+  const startTime = document.getElementById("task-start-time").value;
+  const endTime = document.getElementById("task-end-time").value;
+  const startMin = parseTimeToMinutes(startTime);
+  const endMin = parseTimeToMinutes(endTime);
+  if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) {
+    showToast(t("smart.needWindow"), "error");
+    return;
+  }
+  const gaps = focusGaps(startTime, endTime, breakDraft)
+    .filter((segment) => segment.end - segment.start >= duration + 10);
+  if (!gaps.length) {
+    showToast(t("smart.noGap"), "error");
+    return;
+  }
+  const gap = gaps.sort((a, b) => (b.end - b.start) - (a.end - a.start))[0];
+  const breakStart = Math.round(gap.start + Math.max(0, (gap.end - gap.start - duration) / 2));
+  const breakEnd = breakStart + duration;
+  breakDraft.push(makeBreakDraft(labels[kind] || t("breakDefaultRest"), minutesToClock(breakStart), minutesToClock(breakEnd)));
+  autoTechnique = true;
+  renderBreakList();
+  updateSchedulePreview();
+  applySuggestedTechnique(startMin, endMin, false);
+  showToast(t("smart.breakAdded", {
+    label: labels[kind] || t("breakDefaultRest"),
+    time: minutesToClock(breakStart)
+  }), "success");
+}
+
 function autoPlanBreaks() {
   syncBreakDraftFromDom();
   const startTime = document.getElementById("task-start-time").value;
@@ -1355,24 +1869,29 @@ function autoPlanBreaks() {
     showToast(t("noAutoBreaks"), "error");
     return;
   }
+  const manual = sortBreaks(breakDraft).map((item) => makeBreakDraft(item.label, item.start, item.end));
+  const gaps = focusGaps(startTime, endTime, breakDraft);
   const generated = [];
-  let cursor = startMin;
-  let round = 0;
-  while (cursor + profile.focus < endMin) {
-    cursor += profile.focus;
-    const isLong = profile.cycle > 0 && (round + 1) % profile.cycle === 0;
-    const duration = isLong ? profile.long : profile.short;
-    if (!duration || cursor + duration > endMin) break;
-    const label = duration >= 20 ? t("breakDefaultFood") : t("breakDefaultTea");
-    generated.push(makeBreakDraft(label, minutesToClock(cursor), minutesToClock(cursor + duration)));
-    cursor += duration;
-    round += 1;
-  }
+  gaps.forEach((gap) => {
+    let cursor = gap.start;
+    let round = 0;
+    while (cursor + profile.focus < gap.end) {
+      cursor += profile.focus;
+      const isLong = profile.cycle > 0 && (round + 1) % profile.cycle === 0;
+      const duration = isLong ? profile.long : profile.short;
+      if (!duration || cursor + duration > gap.end) break;
+      const label = duration >= 20 ? t("breakDefaultFood") : t("breakDefaultTea");
+      generated.push(makeBreakDraft(label, minutesToClock(cursor), minutesToClock(cursor + duration)));
+      cursor += duration;
+      round += 1;
+    }
+  });
   if (!generated.length) {
     showToast(t("noAutoBreaks"), "error");
     return;
   }
-  breakDraft = generated;
+  breakDraft = manual.concat(generated);
+  autoTechnique = false;
   renderBreakList();
   updateSchedulePreview();
   showToast(t("breaksPlanned", { n: generated.length }), "success");
@@ -1397,6 +1916,10 @@ function updateSchedulePreview() {
   const container = document.getElementById("task-schedule-preview");
   const hint = document.getElementById("technique-hint");
   if (!container) return;
+  syncBreakDraftFromDom();
+  const startMin = parseTimeToMinutes(document.getElementById("task-start-time").value);
+  const endMin = parseTimeToMinutes(document.getElementById("task-end-time").value);
+  applySuggestedTechnique(startMin, endMin, false);
   const techniqueKey = document.getElementById("task-technique").value;
   const methodKey = document.getElementById("task-method").value;
   if (hint) {
@@ -1404,7 +1927,6 @@ function updateSchedulePreview() {
     if (methodKey && methodKey !== "none") parts.push(t("method.hint." + methodKey));
     hint.textContent = parts.filter(Boolean).join(" ");
   }
-  syncBreakDraftFromDom();
   const segments = buildScheduleSegments({
     startTime: document.getElementById("task-start-time").value,
     endTime: document.getElementById("task-end-time").value,
@@ -1518,6 +2040,7 @@ function syncAllTaskReminders() {
 }
 
 function checkTaskReminders() {
+  if (document.hidden) return;
   const now = Date.now();
   tasks.forEach((task) => {
     if (task.completed || !task.alarm && !task.notify) return;
@@ -1541,7 +2064,7 @@ function checkTaskReminders() {
 
 function startReminderLoop() {
   if (reminderInterval) clearInterval(reminderInterval);
-  reminderInterval = setInterval(checkTaskReminders, 20000);
+  reminderInterval = setInterval(checkTaskReminders, 60000);
 }
 
 function normalizePomodoro(raw) {
@@ -1587,8 +2110,23 @@ function durationFor(mode) {
   return Math.max(1, Number.isFinite(minutes) ? minutes : DEFAULT_SETTINGS[mode]) * 60;
 }
 
+function timerSavedDefaults() {
+  return {
+    focus: durationFor("focus"),
+    short: durationFor("short"),
+    long: durationFor("long")
+  };
+}
+
 function normalizeTimer(raw) {
-  const base = { mode: "focus", remaining: durationFor("focus"), running: false, endsAt: null };
+  const savedDefaults = timerSavedDefaults();
+  const base = {
+    mode: "focus",
+    remaining: savedDefaults.focus,
+    running: false,
+    endsAt: null,
+    saved: { ...savedDefaults }
+  };
   if (!raw || Array.isArray(raw) || typeof raw !== "object") return base;
 
   const mode = MODES[raw.mode] ? raw.mode : "focus";
@@ -1597,12 +2135,24 @@ function normalizeTimer(raw) {
   const remaining = Number.isFinite(rawRemaining)
     ? Math.max(0, Math.min(rawRemaining, durationFor(mode)))
     : durationFor(mode);
+  const saved = { ...savedDefaults };
+  if (raw.saved && typeof raw.saved === "object") {
+    Object.keys(saved).forEach((key) => {
+      const value = Number(raw.saved[key]);
+      if (Number.isFinite(value) && value >= 0) {
+        saved[key] = Math.max(0, Math.min(value, durationFor(key)));
+      }
+    });
+  }
+  const liveRemaining = running ? Math.max(0, Math.ceil((raw.endsAt - Date.now()) / 1000)) : remaining;
+  saved[mode] = liveRemaining;
 
   return {
     mode,
-    remaining: running ? Math.max(0, Math.ceil((raw.endsAt - Date.now()) / 1000)) : remaining,
+    remaining: liveRemaining,
     running,
-    endsAt: running ? raw.endsAt : null
+    endsAt: running ? raw.endsAt : null,
+    saved
   };
 }
 
@@ -1774,7 +2324,7 @@ function renderTodayPlan() {
   const container = document.getElementById("today-plan");
   const examsHtml = upcomingExams()
     .slice(0, 3)
-    .map((e) => `<div class="plan-row"><span class="plan-dot"></span><span>${escapeHtml(e.subject)}</span><span>${daysUntil(e.date) === 0 ? t("today") : daysUntil(e.date) + t("dayShort")}</span></div>`)
+    .map((e) => `<div class="plan-row" data-detail="exam" data-detail-id="${e.id}" role="button" tabindex="0"><span class="plan-dot"></span><span>${escapeHtml(e.subject)}</span><span>${daysUntil(e.date) === 0 ? t("today") : daysUntil(e.date) + t("dayShort")}</span></div>`)
     .join("") || `<p class="item-meta">${t("noUpcomingShort")}</p>`;
 
   const scheduledToday = tasks
@@ -1785,7 +2335,7 @@ function renderTodayPlan() {
     .map((task) => {
       const exam = taskExam(task);
       const label = exam ? escapeHtml(task.text) + " · " + escapeHtml(exam.subject) : escapeHtml(task.text);
-      return `<div class="plan-row"><span class="plan-dot schedule"></span><span>${label}</span><span>${escapeHtml(task.startTime)}–${escapeHtml(task.endTime)}</span></div>`;
+      return `<div class="plan-row" data-detail="task" data-detail-id="${task.id}" role="button" tabindex="0"><span class="plan-dot schedule"></span><span>${label}</span><span>${escapeHtml(task.startTime)}–${escapeHtml(task.endTime)}</span></div>`;
     })
     .join("") || `<p class="item-meta">${t("noSchedule")}</p>`;
 
@@ -1794,7 +2344,7 @@ function renderTodayPlan() {
     .sort((a, b) => (a.due || "9999-99-99").localeCompare(b.due || "9999-99-99") || b.createdAt - a.createdAt)
     .slice(0, 3);
   const tasksHtml = pending
-    .map((task) => `<div class="plan-row"><span class="plan-dot"></span><span>${escapeHtml(task.text)}</span><span>${task.due ? formatDate(task.due) : t("anytime")}</span></div>`)
+    .map((task) => `<div class="plan-row" data-detail="task" data-detail-id="${task.id}" role="button" tabindex="0"><span class="plan-dot"></span><span>${escapeHtml(task.text)}</span><span>${task.due ? formatDate(task.due) : t("anytime")}</span></div>`)
     .join("") || `<p class="item-meta">${t("noPendingTasks")}</p>`;
 
   container.innerHTML =
@@ -2034,6 +2584,257 @@ function renderInsights() {
   setText("insight-tip", tip);
 }
 
+let detailState = { kind: "", id: "" };
+
+function bestStreak() {
+  const keys = Array.from(activityDays()).sort();
+  let best = 0;
+  let run = 0;
+  let previous = null;
+  keys.forEach((key) => {
+    const current = new Date(key + "T00:00:00").getTime();
+    run = previous !== null && Math.round((current - previous) / DAY_MS) === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+    previous = current;
+  });
+  return best;
+}
+
+function detailTaskRow(task) {
+  const exam = taskExam(task);
+  const meta = [];
+  if (task.startDate) {
+    meta.push(formatDate(task.startDate) + (task.startTime ? " · " + task.startTime + "–" + (task.endTime || "") : ""));
+  }
+  if (exam) meta.push(exam.subject);
+  return `<div class="detail-item ${task.completed ? "completed" : ""}">
+    <div class="detail-item-main">
+      <strong>${escapeHtml(task.text)}</strong>
+      <p>${escapeHtml(meta.join(" · ") || t("detail.noSchedule"))}</p>
+      <span class="detail-chip">${escapeHtml(techniqueLabel(task.technique))}</span>
+    </div>
+    <div class="detail-item-actions">
+      <button type="button" class="ghost-btn" data-detail-action="toggle-task" data-id="${task.id}">${escapeHtml(t(task.completed ? "detail.undo" : "detail.done"))}</button>
+      <button type="button" class="ghost-btn" data-detail-action="edit-task" data-id="${task.id}">${escapeHtml(t("detail.edit"))}</button>
+      <button type="button" class="danger-btn" data-detail-action="delete-task" data-id="${task.id}">${escapeHtml(t("detail.delete"))}</button>
+    </div>
+  </div>`;
+}
+
+function detailExamRow(exam) {
+  return `<div class="detail-item ${exam.completed ? "completed" : ""}">
+    <div class="detail-item-main">
+      <strong>${escapeHtml(exam.subject)}</strong>
+      <p>${formatDate(exam.date)} · ${escapeHtml(categoryLabel(exam.category))}</p>
+      ${exam.notes ? `<p>${escapeHtml(exam.notes)}</p>` : ""}
+    </div>
+    <div class="detail-item-actions">
+      <button type="button" class="ghost-btn" data-detail-action="toggle-exam" data-id="${exam.id}">${escapeHtml(t(exam.completed ? "detail.undo" : "detail.done"))}</button>
+      <button type="button" class="ghost-btn" data-detail-action="edit-exam" data-id="${exam.id}">${escapeHtml(t("detail.edit"))}</button>
+      <button type="button" class="danger-btn" data-detail-action="delete-exam" data-id="${exam.id}">${escapeHtml(t("detail.delete"))}</button>
+    </div>
+  </div>`;
+}
+
+function renderDetailModal() {
+  const title = document.getElementById("detail-modal-title");
+  const subtitle = document.getElementById("detail-modal-subtitle");
+  const body = document.getElementById("detail-modal-body");
+  const actions = document.getElementById("detail-modal-actions");
+  if (!title || !subtitle || !body || !actions) return;
+  const kind = detailState.kind;
+  let items = [];
+  let content = "";
+  let footer = "";
+
+  if (kind === "task" || kind === "todayTask") {
+    const task = tasks.find((item) => item.id === detailState.id);
+    if (!task) {
+      detailState = { kind: "", id: "" };
+      closeDetailModal();
+      return;
+    }
+    title.textContent = t("detail.taskTitle");
+    subtitle.textContent = task.due ? formatDate(task.due) : "";
+    content = detailTaskRow(task) +
+      `<div class="detail-note">${escapeHtml(t("detail.schedule"))}: ${escapeHtml(task.startTime ? task.startTime + "–" + task.endTime : t("detail.noSchedule"))}</div>` +
+      `<div class="detail-note">${escapeHtml(t("detail.reminders"))}: ${escapeHtml(task.alarm || task.notify ? t("detail.on") : t("detail.off"))}</div>` +
+      taskScheduleChips(task, 12);
+    footer = `<button type="button" class="secondary-btn" data-detail-action="edit-breaks" data-id="${task.id}">${escapeHtml(t("detail.editBreaks"))}</button>`;
+  } else if (kind === "exam") {
+    const exam = exams.find((item) => item.id === detailState.id);
+    if (!exam) {
+      detailState = { kind: "", id: "" };
+      closeDetailModal();
+      return;
+    }
+    title.textContent = t("detail.examTitle");
+    subtitle.textContent = formatDate(exam.date);
+    const linked = tasks.filter((task) => task.examId === exam.id);
+    content = detailExamRow(exam) + (linked.length
+      ? `<h4 class="detail-heading">${escapeHtml(t("detail.pending"))}</h4>` + linked.map(detailTaskRow).join("")
+      : `<p class="detail-empty">${escapeHtml(t("detail.empty"))}</p>`);
+  } else if (kind === "pending" || kind === "doneTasks") {
+    items = kind === "pending" ? tasks.filter((task) => !task.completed) : tasks.filter((task) => task.completed);
+    title.textContent = t("detail." + kind);
+    subtitle.textContent = t("detail.subtitle", { n: items.length });
+    content = items.length ? items.map(detailTaskRow).join("") : `<p class="detail-empty">${escapeHtml(t("detail.empty"))}</p>`;
+    footer = `<button type="button" class="secondary-btn" data-detail-action="open-tab" data-tab="tasks">${escapeHtml(t("detail.openTasks"))}</button>`;
+  } else if (kind === "upcoming" || kind === "completedExams") {
+    items = kind === "upcoming"
+      ? upcomingExams()
+      : exams.filter((exam) => exam.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+    title.textContent = t("detail." + kind);
+    subtitle.textContent = t("detail.subtitle", { n: items.length });
+    content = items.length ? items.map(detailExamRow).join("") : `<p class="detail-empty">${escapeHtml(t("detail.empty"))}</p>`;
+    footer = `<button type="button" class="secondary-btn" data-detail-action="open-tab" data-tab="exams">${escapeHtml(t("detail.openExams"))}</button>`;
+  } else if (kind === "daysNext" || kind === "nextExam") {
+    const next = upcomingExams()[0];
+    title.textContent = t(kind === "daysNext" ? "detail.daysNext" : "detail.nextExam");
+    if (!next) {
+      subtitle.textContent = "";
+      content = `<p class="detail-empty">${escapeHtml(t("noUpcoming"))}</p>`;
+    } else {
+      const days = Math.max(0, daysUntil(next.date));
+      subtitle.textContent = formatDate(next.date);
+      content = `<div class="detail-hero"><strong>${escapeHtml(next.subject)}</strong><span>${escapeHtml(days + " " + t(days === 1 ? "day" : "days"))}</span></div>` +
+        detailExamRow(next);
+      footer = `<button type="button" class="secondary-btn" data-detail-action="open-tab" data-tab="exams">${escapeHtml(t("detail.openExams"))}</button>`;
+    }
+  } else if (kind === "focusToday") {
+    const sessions = pomodoro.sessions.filter((session) => session.date === todayKey() && session.mode === "focus");
+    title.textContent = t("detail.focusToday");
+    subtitle.textContent = minutesLabel(focusMinutesForDay(todayKey()));
+    content = sessions.length
+      ? sessions.map((session) => `<div class="detail-item"><div class="detail-item-main"><strong>${escapeHtml(t("tab.focus"))}</strong><p>${minutesLabel(session.minutes)} · ${escapeHtml(new Date(session.at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}</p></div></div>`).join("")
+      : `<p class="detail-empty">${escapeHtml(t("detail.empty"))}</p>`;
+    footer = `<button type="button" class="secondary-btn" data-detail-action="open-tab" data-tab="focus">${escapeHtml(t("tab.focus"))}</button>`;
+  } else if (kind === "streak") {
+    const current = calcStreak();
+    const best = bestStreak();
+    const days = [];
+    for (let i = 6; i >= 0; i -= 1) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const key = dateKey(date);
+      days.push({ key, label: weekdayShort(date), minutes: focusMinutesForDay(key), active: activityDays().has(key) });
+    }
+    title.textContent = t("detail.streak");
+    subtitle.textContent = current + " " + t(current === 1 ? "day" : "days");
+    content = `<div class="detail-hero"><strong>${current} ${escapeHtml(t(current === 1 ? "day" : "days"))}</strong><span>${escapeHtml(t("detail.streak"))}</span></div>` +
+      `<p class="detail-note">${escapeHtml(t("detail.bestStreak"))}: ${escapeHtml(String(best))} ${escapeHtml(t("days"))}</p>` +
+      `<div class="detail-days">${days.map((day) => `<div class="detail-day ${day.active ? "active" : ""}"><span>${escapeHtml(day.label)}</span><strong>${day.minutes ? escapeHtml(minutesLabel(day.minutes)) : "—"}</strong></div>`).join("")}</div>`;
+  } else {
+    closeDetailModal();
+    return;
+  }
+
+  body.innerHTML = content;
+  actions.innerHTML = footer;
+}
+
+function openDetail(kind, id) {
+  detailState = { kind, id: id || "" };
+  renderDetailModal();
+  const modal = document.getElementById("detail-modal");
+  if (modal) modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+
+function closeDetailModal() {
+  const modal = document.getElementById("detail-modal");
+  if (modal) modal.classList.add("hidden");
+  detailState = { kind: "", id: "" };
+  document.body.classList.remove("modal-open");
+}
+
+function setupDetailModal() {
+  document.addEventListener("click", (event) => {
+    const element = event.target.closest("[data-detail]");
+    if (!element) return;
+    event.preventDefault();
+    openDetail(element.getAttribute("data-detail"), element.getAttribute("data-detail-id") || "");
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const element = event.target.closest("[data-detail][role='button']");
+    if (!element) return;
+    event.preventDefault();
+    openDetail(element.getAttribute("data-detail"), element.getAttribute("data-detail-id") || "");
+  });
+  const modal = document.getElementById("detail-modal");
+  if (!modal) return;
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-detail]")) {
+      closeDetailModal();
+      return;
+    }
+    const action = event.target.closest("[data-detail-action]");
+    if (!action) return;
+    const id = action.getAttribute("data-id");
+    const kindAction = action.getAttribute("data-detail-action");
+    if (kindAction === "open-tab") {
+      closeDetailModal();
+      switchTab(action.getAttribute("data-tab"));
+      return;
+    }
+    if (kindAction === "edit-task") {
+      closeDetailModal();
+      switchTab("tasks");
+      startTaskEdit(id, false);
+      return;
+    }
+    if (kindAction === "edit-breaks") {
+      closeDetailModal();
+      switchTab("tasks");
+      startTaskEdit(id, true);
+      return;
+    }
+    if (kindAction === "edit-exam") {
+      closeDetailModal();
+      switchTab("exams");
+      startExamEdit(id);
+      return;
+    }
+    if (kindAction === "toggle-task") {
+      const task = tasks.find((item) => item.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        task.completedAt = task.completed ? Date.now() : null;
+        if (task.completed) cancelTaskReminders(task.id);
+        else syncTaskReminders(task, false);
+      }
+    } else if (kindAction === "delete-task") {
+      if (!confirm(t("delete") + "?")) return;
+      cancelTaskReminders(id);
+      tasks = tasks.filter((item) => item.id !== id);
+      if (editingTaskId === id) resetTaskForm();
+    } else if (kindAction === "toggle-exam") {
+      const exam = exams.find((item) => item.id === id);
+      if (exam) {
+        exam.completed = !exam.completed;
+        exam.completedAt = exam.completed ? Date.now() : null;
+      }
+    } else if (kindAction === "delete-exam") {
+      if (!confirm(t("delete") + "?")) return;
+      exams = exams.filter((item) => item.id !== id);
+      tasks.forEach((task) => { if (task.examId === id) task.examId = ""; });
+      if (editingExamId === id) clearExamEdit();
+    }
+    saveData();
+    renderAll();
+    if (detailState.kind === "task" || detailState.kind === "todayTask" || detailState.kind === "exam") {
+      renderDetailModal();
+    } else {
+      renderDetailModal();
+    }
+  });
+  document.getElementById("detail-modal-close").addEventListener("click", closeDetailModal);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeDetailModal();
+  });
+}
+
 function renderAll() {
   renderDashboard();
   renderExams();
@@ -2066,6 +2867,9 @@ function resetTaskForm() {
   if (method) method.value = "none";
   populateTaskExamSelect("");
   breakDraft = [];
+  autoTechnique = true;
+  const note = document.getElementById("auto-technique-note");
+  if (note) note.classList.add("hidden");
   renderBreakList();
   updateSchedulePreview();
 }
@@ -2100,6 +2904,7 @@ function startTaskEdit(id, focusBreaks) {
   document.getElementById("task-alarm").checked = Boolean(task.alarm);
   document.getElementById("task-notify").checked = Boolean(task.notify);
   breakDraft = (task.breaks || []).map((item) => makeBreakDraft(item.label, item.start, item.end));
+  autoTechnique = false;
   renderBreakList();
   updateSchedulePreview();
   setText("task-form-title", t("editTask"));
@@ -2131,9 +2936,16 @@ function setupTaskPlanner() {
     });
     breakList.addEventListener("input", () => updateSchedulePreview());
   }
+  document.querySelectorAll("[data-quick-break]").forEach((button) => {
+    button.addEventListener("click", () => addQuickBreak(button.getAttribute("data-quick-break")));
+  });
   ["task-start-time", "task-end-time", "task-technique", "task-method"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("change", updateSchedulePreview);
+    if (!el) return;
+    el.addEventListener("change", () => {
+      if (id === "task-technique") autoTechnique = false;
+      updateSchedulePreview();
+    });
   });
   const alarm = document.getElementById("task-alarm");
   if (alarm) {
@@ -2469,10 +3281,20 @@ function setupTheme() {
   }
 }
 
+function rememberTimerRemaining() {
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  const left = timer.running && timer.endsAt
+    ? Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000))
+    : Math.max(0, timer.remaining);
+  timer.remaining = left;
+  timer.saved[timer.mode] = left;
+  return left;
+}
+
 function startTicking() {
   stopTicking();
   if (!timer.running) return;
-  timerInterval = setInterval(tick, 250);
+  timerInterval = setInterval(tick, 1000);
   tick();
 }
 
@@ -2488,6 +3310,8 @@ function tick() {
   const left = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
   if (left !== timer.remaining) {
     timer.remaining = left;
+    if (!timer.saved) timer.saved = timerSavedDefaults();
+    timer.saved[timer.mode] = left;
     renderTimer();
   }
   if (left <= 0) completeSession(true);
@@ -2506,7 +3330,7 @@ function startTimer() {
 
 function pauseTimer() {
   if (!timer.running) return;
-  timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+  rememberTimerRemaining();
   timer.running = false;
   timer.endsAt = null;
   stopNativeTimer();
@@ -2519,6 +3343,8 @@ function resetTimer() {
   timer.running = false;
   timer.endsAt = null;
   timer.remaining = durationFor(timer.mode);
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  timer.saved[timer.mode] = timer.remaining;
   stopNativeTimer();
   saveTimer();
   renderTimer();
@@ -2528,16 +3354,32 @@ function resetTimer() {
 
 function setMode(mode, keepRunning = false) {
   if (!MODES[mode]) return;
-  if (!keepRunning) {
+  if (mode === timer.mode) {
+    renderTimer();
+    return;
+  }
+
+  // Save current progress before switching
+  rememberTimerRemaining();
+
+  const wasRunning = timer.running;
+  if (wasRunning) {
     timer.running = false;
     timer.endsAt = null;
     stopTicking();
     stopNativeTimer();
   }
+
+  if (!timer.saved) timer.saved = timerSavedDefaults();
   timer.mode = mode;
-  timer.remaining = durationFor(mode);
+
+  const saved = Number(timer.saved[mode]);
+  timer.remaining = Number.isFinite(saved) && saved > 0 ? saved : durationFor(mode);
+  timer.endsAt = null;
+
   saveTimer();
   renderTimer();
+  if (wasRunning && keepRunning) startTimer();
 }
 
 function completeSession(log) {
@@ -2641,7 +3483,10 @@ function renderTimer() {
 
 function setupPomodoro() {
   document.querySelectorAll(".mode-btn").forEach((btn) => {
-    btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    btn.addEventListener("click", () => {
+      if (timer.running) rememberTimerRemaining();
+      setMode(btn.dataset.mode, false);
+    });
   });
   document.getElementById("start-pause").addEventListener("click", () => {
     if (timer.running) pauseTimer();
@@ -2670,6 +3515,8 @@ function setupPomodoro() {
     pomodoro.settings.sound = document.getElementById("sound-enabled").checked;
 
     if (!timer.running) timer.remaining = durationFor(timer.mode);
+    timer.saved = timerSavedDefaults();
+    timer.saved[timer.mode] = timer.remaining;
     document.getElementById("focus-duration").value = pomodoro.settings.focus;
     document.getElementById("short-duration").value = pomodoro.settings.short;
     document.getElementById("long-duration").value = pomodoro.settings.long;
@@ -2752,10 +3599,13 @@ function resumeReminders() {
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) {
-    resumeAppTimer();
-    resumeReminders();
+  if (document.hidden) {
+    stopTicking();
+    return;
   }
+  resumeAppTimer();
+  resumeReminders();
+  refreshPermissionUi();
 });
 window.addEventListener("pageshow", () => {
   resumeAppTimer();
@@ -2793,7 +3643,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 1.7</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 1.9.0</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -2820,7 +3670,7 @@ function setupExternalLinks() {
     const scheme = href.split(":")[0].toLowerCase();
     const external = link.getAttribute("data-external-link") === "true" ||
       scheme === "mailto" || scheme === "tel" ||
-      scheme === "http" || scheme === "https" || scheme === "intent";
+      scheme === "http" || scheme === "https";
     if (!external) return;
     try {
       const resolved = new URL(href, window.location.href);
@@ -2859,9 +3709,10 @@ function hideSplash() {
   if (!splash || splash.classList.contains("done")) return;
   splash.classList.add("done");
   setTimeout(() => { if (splash.parentNode) splash.remove(); }, 500);
+  setTimeout(maybeShowPermissionOnboarding, 600);
 }
 
-const SPLASH_DURATION_MS = 5000;
+const SPLASH_DURATION_MS = 2200;
 
 function setupSplash() {
   const navStart = window.performance && performance.timing && performance.timing.navigationStart;
@@ -2915,8 +3766,15 @@ function openUpdateModal(info) {
       list.appendChild(item);
     });
   }
-  const now = document.getElementById("update-now-link");
-  if (now) now.setAttribute("href", info.apkUrl || UPDATE_CONFIG.releaseNotesUrl);
+  const button = document.getElementById("update-now-btn");
+  if (button) {
+    button.disabled = false;
+    button.textContent = t("update.now");
+  }
+  const progress = document.getElementById("update-progress");
+  if (progress) progress.classList.add("hidden");
+  const hint = document.getElementById("update-install-hint");
+  if (hint) hint.classList.add("hidden");
   const notes = document.getElementById("update-notes-link");
   if (notes) {
     notes.setAttribute("href", info.releaseNotesUrl || UPDATE_CONFIG.releaseNotesUrl);
@@ -2931,6 +3789,106 @@ function closeUpdateModal() {
   const modal = document.getElementById("update-modal");
   if (modal) modal.classList.add("hidden");
 }
+
+function isTrustedUpdateUrl(raw) {
+  try {
+    const url = new URL(String(raw || ""));
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return host === "github.com" || host === "raw.githubusercontent.com" || host.endsWith(".githubusercontent.com");
+  } catch {
+    return false;
+  }
+}
+
+function setUpdateProgress(percent, text) {
+  const wrap = document.getElementById("update-progress");
+  const fill = document.getElementById("update-progress-fill");
+  const label = document.getElementById("update-progress-text");
+  if (wrap) wrap.classList.remove("hidden");
+  if (fill) fill.style.width = Math.max(0, Math.min(100, percent)) + "%";
+  if (label) label.textContent = text || "";
+}
+
+function updateInstallHint(show) {
+  const hint = document.getElementById("update-install-hint");
+  if (hint) hint.classList.toggle("hidden", !show);
+}
+
+function startAppUpdate() {
+  if (!pendingUpdate) return;
+  const url = pendingUpdate.apkUrl;
+  if (!isTrustedUpdateUrl(url)) {
+    showToast(t("update.badUrl"), "error");
+    return;
+  }
+  if (!/\.apk(\?|$)/i.test(String(url))) {
+    window.open(pendingUpdate.releaseNotesUrl || UPDATE_CONFIG.releaseNotesUrl, "_blank", "noopener");
+    return;
+  }
+  const bridge = nativeUpdate();
+  if (bridge && typeof bridge.downloadAndInstall === "function") {
+    const button = document.getElementById("update-now-btn");
+    if (button) {
+      button.disabled = true;
+      button.textContent = t("update.downloading");
+    }
+    setUpdateProgress(0, t("update.downloading"));
+    try {
+      bridge.downloadAndInstall(url, pendingUpdate.versionName || String(pendingUpdate.versionCode || ""));
+    } catch {
+      showToast(t("update.failedInstall"), "error");
+      if (button) {
+        button.disabled = false;
+        button.textContent = t("update.now");
+      }
+    }
+    return;
+  }
+  updateInstallHint(true);
+  setUpdateProgress(100, t("update.downloadOnly"));
+  window.open(url, "_blank", "noopener");
+}
+
+window.ExamBuddyUpdateStatus = function (raw) {
+  let info = {};
+  try { info = typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch { info = {}; }
+  const state = String(info.state || "");
+  const progress = Number(info.progress);
+  const button = document.getElementById("update-now-btn");
+  if (state === "downloading") {
+    setUpdateProgress(Number.isFinite(progress) ? progress : 0, t("update.downloadProgress", { p: Number.isFinite(progress) ? Math.round(progress) : 0 }));
+    updateInstallHint(false);
+    if (button) {
+      button.disabled = true;
+      button.textContent = t("update.downloading");
+    }
+  } else if (state === "permission") {
+    setUpdateProgress(0, t("update.permission"));
+    updateInstallHint(true);
+    if (button) {
+      button.disabled = false;
+      button.textContent = t("update.now");
+    }
+    showToast(t("update.permission"), "info");
+  } else if (state === "installing" || state === "ready") {
+    setUpdateProgress(100, t("update.installing"));
+    updateInstallHint(true);
+    if (button) {
+      button.disabled = false;
+      button.textContent = t("update.now");
+    }
+    showToast(t("update.ready"), "success");
+  } else if (state === "error") {
+    setUpdateProgress(0, t("update.failedInstall"));
+    updateInstallHint(false);
+    if (button) {
+      button.disabled = false;
+      button.textContent = t("update.now");
+    }
+    showToast(t("update.failedInstall"), "error");
+  }
+};
 
 function requestUpdateManifest() {
   return new Promise((resolve, reject) => {
@@ -3028,6 +3986,8 @@ function setupUpdates() {
       if (e.target && e.target.getAttribute("data-close-update") === "true") closeUpdateModal();
     });
   }
+  const now = document.getElementById("update-now-btn");
+  if (now) now.addEventListener("click", startAppUpdate);
   const checkButton = document.getElementById("about-update-btn");
   if (checkButton) checkButton.addEventListener("click", () => checkForUpdates(true));
   document.addEventListener("keydown", (e) => {
@@ -3050,6 +4010,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPomodoro();
   setupBackToTop();
   setupAbout();
+  setupPermissions();
+  setupDetailModal();
   setupUpdates();
   setupExternalLinks();
   setupAutoSave();

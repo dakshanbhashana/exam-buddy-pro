@@ -38,7 +38,7 @@ public class TimerService extends Service {
     private static final int NOTIF_ONGOING = 4101;
     private static final int NOTIF_DONE = 4102;
     private static final int ALARM_REQUEST = 4103;
-    private static final long ALARM_INTERVAL = 1000L;
+    private static final long ALARM_INTERVAL = 5000L;
 
     private static volatile boolean running = false;
 
@@ -210,7 +210,7 @@ public class TimerService extends Service {
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setColor(Color.parseColor("#4f46e5"));
+            builder.setColor(Color.parseColor("#e11d48"));
         }
 
         try {
@@ -310,7 +310,7 @@ public class TimerService extends Service {
                 .setCategory(Notification.CATEGORY_STOPWATCH)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setColor(Color.parseColor("#4f46e5"));
+            builder.setColor(Color.parseColor("#e11d48"));
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setSubText(isSinhala() ? "පසුබිමේ ධාවනය වේ" : "Running in background");

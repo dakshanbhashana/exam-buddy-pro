@@ -13,8 +13,8 @@ SIZES = {
 }
 SS = 3
 RADIUS = 0.22
-START = (30, 58, 138)
-END = (37, 99, 235)
+START = (127, 16, 52)
+END = (225, 29, 72)
 
 
 def lerp(a, b, t):

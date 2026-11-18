@@ -116,7 +116,7 @@ public class TaskReminderReceiver extends BroadcastReceiver {
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setColor(Color.parseColor("#4f46e5"));
+            builder.setColor(Color.parseColor("#e11d48"));
         }
         try {
             manager.notify(id, builder.build());

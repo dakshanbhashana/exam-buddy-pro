@@ -1,34 +1,32 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 8,
-  "versionName": "1.7",
+  "versionCode": 10,
+  "versionName": "1.9.0",
   "minSdk": 21,
   "publishedAt": "2026-11-18",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "Plan only your next 3 upcoming exams so the dashboard stays focused.",
-      "Create study tasks for an exam with a start date, start time and lesson finish time.",
-      "Add tea, food or rest breaks inside the study window and edit them anytime.",
-      "Auto-plan breaks using Pomodoro, deep work, ultradian, 52/17 or time-blocking rhythms.",
-      "Choose a study method such as active recall, spaced repetition, Feynman, interleaving or SQ3R.",
-      "Turn on alarms and notifications for task start, every break and lesson finish.",
-      "Android now delivers reminders in the background, even when the app is closed.",
-      "See today's study schedule on the dashboard.",
-      "Deleting, completing or rescheduling a task now cleans up its old reminders."
+      "New rose and red-rose visual redesign with polished light and dark themes.",
+      "Permission setup now appears after the loading screen with Allow / Deny controls for notifications, alarms, battery, files and updates.",
+      "Fixed the focus timer resetting when switching between focus and break modes.",
+      "Dashboard cards and today rows now open focused detail sheets for the exact task or exam you tap.",
+      "Added tea, food and rest quick breaks that automatically adapt the study technique and remain editable.",
+      "New in-app updater downloads the new APK and opens the installer without visiting GitHub.",
+      "The updater verifies the APK signature before installing, and the WebView and file provider are hardened.",
+      "Hardened configuration and battery-friendly background timer handling."
     ],
     "si": [
-      "ඉදිරි විභාග 3ක් පමණක් සැලසුම් කර අවධානය එක තැනක තබා ගන්න.",
-      "විභාගයකට සම්බන්ධ අධ්‍යයන පැවරුමක් සඳහා ආරම්භක දිනය, ආරම්භක වේලාව සහ පාඩම අවසන් වේලාව ඇතුළත් කරන්න.",
-      "අධ්‍යයන කාලය තුළ තේ, කෑම හෝ විවේක විරාම එක් කර පසුව ඒවා සංස්කරණය කරන්න.",
-      "Pomodoro, ගැඹුරු වැඩ, ultradian, 52/17 හෝ කාල කොටස් ක්‍රම භාවිතයෙන් විරාම ස්වයංක්‍රීයව සැලසුම් කරන්න.",
-      "සක්‍රීය සිහිපත් කිරීම, විරාම පුනරාවර්තනය, Feynman, interleaving හෝ SQ3R වැනි අධ්‍යයන ක්‍රමයක් තෝරන්න.",
-      "පැවරුම ආරම්භය, සෑම විරාමයක් සහ පාඩම අවසානය සඳහා ඇලාම් සහ දැනුම්දීම් සක්‍රීය කරන්න.",
-      "යෙදුම වසා ඇති විටදී පවා Android පසුබිම් මතක් කිරීම් ලබා දෙයි.",
-      "අද දිනයේ අධ්‍යයන කාලසටහන පාලක පුවරුවේ පෙන්වයි.",
-      "පැවරුමක් මැකීම, සම්පූර්ණ කිරීම හෝ නැවත සැලසුම් කිරීමේදී පැරණි මතක් කිරීම් ඉවත් කරයි."
+      "ලස්සන රෝස් සහ රතු රෝස නිමාවක් සහිත නව අඳුරු/ආලෝක තේමා.",
+      "පැටවීමේ තිරයෙන් පසු දැනුම්දීම්, ඇලාම්, බැටරි, ගොනු සහ යාවත්කාලීන සඳහා අවසර දෙන්න/ප්‍රතික්ෂේප කරන්න පහසුකම.",
+      "focus සහ විවේක මාදිලි අතර මාරු වීමේදී කාලමානය reset වීමේ ගැටලුව විසඳා ඇත.",
+      "පාලක පුවරුවේ කාඩ්පත් සහ අද ලැයිස්තුවේ අයිතම තට්ටු කළ විට එම කාර්යය හෝ විභාගය පමණක් විස්තරව පෙන්වයි.",
+      "තේ, කෑම සහ විවේක ඉක්මන් විරාම එක් කිරීමෙන් අධ්‍යයන ක්‍රමය ස්වයංක්‍රීයව ගැළපෙන අතර පසුව සංස්කරණය කළ හැක.",
+      "GitHub වෙත නොයා යෙදුම තුළින්ම නව APK බාගෙන ස්ථාපකය විවෘත කරන නව යාවත්කාලීන ක්‍රමය.",
+      "ස්ථාපනයට පෙර APK අත්සන දෙවරක් පරීක්ෂා කරන අතර WebView සහ ගොනු සැපයුම්කරු ආරක්ෂිත කර ඇත.",
+      "Play Protect අනුකූල වීමට සහ බැටරි ඉතිරි කිරීමට වැඩිදියුණු කළ වින්‍යාසය."
     ]
   }
 }

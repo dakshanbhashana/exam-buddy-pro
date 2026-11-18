@@ -4,23 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Exam Buddy Pro — plan exams, run focus sessions, track tasks and study smarter.">
-  <meta name="theme-color" content="#1e3a8a">
+  <meta name="theme-color" content="#9f1239">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://raw.githubusercontent.com https://github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
   <title>Exam Buddy Pro</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <script>
-    (function () {
-      try {
-        var mode = localStorage.getItem("examBuddy_theme") || "auto";
-        var dark = mode === "dark" || (mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-        document.documentElement.dataset.theme = dark ? "dark" : "light";
-        var lang = localStorage.getItem("examBuddy_language") || "en";
-        document.documentElement.lang = lang;
-      } catch (e) {
-        document.documentElement.dataset.theme = "light";
-      }
-    })();
-  </script>
+  <script src="theme-init.js"></script>
 </head>
 <body>
   <div id="app-splash" class="app-splash" aria-label="Loading">
@@ -32,6 +22,24 @@
       <span class="splash-tag">Sinhala English study app</span>
       <div class="splash-progress" aria-hidden="true"><div class="splash-progress-fill"></div></div>
       <span class="splash-credit">Developed by Dakshan Bhashna</span>
+    </div>
+  </div>
+
+  <div id="permission-overlay" class="permission-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="permission-title">
+    <div class="permission-card">
+      <div class="permission-hero" aria-hidden="true">
+        <img src="logo.svg" alt="">
+        <span class="permission-spark"></span>
+      </div>
+      <p class="eyebrow" data-i18n="permissions.eyebrow">Quick setup</p>
+      <h2 id="permission-title" data-i18n="permissions.title">Let's set up Exam Buddy</h2>
+      <p id="permission-subtitle" class="permission-subtitle" data-i18n="permissions.subtitle">Allow these to keep reminders, the focus timer and updates working while you study.</p>
+      <div id="permission-list" class="permission-list"></div>
+      <div class="permission-actions">
+        <button type="button" id="permission-continue" class="secondary-btn" data-i18n="permissions.continue">Continue</button>
+        <button type="button" id="permission-allow-all" class="primary-btn" data-i18n="permissions.allowAll">Allow recommended</button>
+      </div>
+      <p class="permission-note" data-i18n="permissions.note">You can change any of these later in Android Settings.</p>
     </div>
   </div>
 
@@ -96,46 +104,52 @@
         <button id="quick-add-exam" type="button" class="quick-btn" data-i18n="newExam">+ New exam</button>
       </div>
 
+      <button id="permission-banner" type="button" class="permission-banner hidden">
+        <span class="permission-banner-dot" aria-hidden="true"></span>
+        <span data-i18n="permissions.banner">Some access is missing — tap to finish setup.</span>
+        <span aria-hidden="true">›</span>
+      </button>
+
       <div class="stats-grid">
-        <div class="stat-card">
+        <button type="button" class="stat-card" data-detail="upcoming">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg></span>
           <span class="stat-label" data-i18n="stat.upcoming">Upcoming Exams</span>
           <span id="stat-upcoming" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="pending">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"></path><path d="m3 6 1.5 1.5L7 5"></path></svg></span>
           <span class="stat-label" data-i18n="stat.pending">Pending Tasks</span>
           <span id="stat-pending" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="completedExams">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>
           <span class="stat-label" data-i18n="stat.completed">Completed Exams</span>
           <span id="stat-completed" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="doneTasks">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7"></path></svg></span>
           <span class="stat-label" data-i18n="stat.doneTasks">Tasks Done</span>
           <span id="stat-done-tasks" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="daysNext">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"></path><path d="M12 7v5l3.5 2M21 3v6h-6"></path></svg></span>
           <span class="stat-label" data-i18n="stat.daysNext">Days to Next</span>
           <span id="stat-days-left" class="stat-value">—</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="focusToday">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
           <span class="stat-label" data-i18n="stat.focusToday">Focus Today</span>
           <span id="stat-focus-today" class="stat-value">0m</span>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-detail="streak">
           <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.6 7-6.5 0-3-1.8-5.2-4-7.5V3h-6v5c-2.2 2.3-4 4.5-4 7.5C5 19.4 8 22 12 22Z"></path><path d="M12 22a2.5 2.5 0 0 1-2.5-2.5c0-1.8 2.5-4 2.5-4s2.5 2.2 2.5 4A2.5 2.5 0 0 1 12 22Z"></path></svg></span>
           <span class="stat-label" data-i18n="stat.streak">Study Streak</span>
           <span id="stat-streak" class="stat-value">0 days</span>
-        </div>
+        </button>
       </div>
 
       <div class="dashboard-split">
-        <div class="card highlight-card next-card">
+        <div class="card highlight-card next-card" data-detail="nextExam" role="button" tabindex="0">
           <div class="card-title-row">
             <h3 data-i18n="nextExam">Next Exam</h3>
             <span class="pill" data-i18n="liveCountdown">Live countdown</span>
@@ -323,7 +337,14 @@
           </div>
           <div id="break-list" class="break-list"></div>
           <p id="break-empty" class="hint" data-i18n="breakEmpty">Add tea, food or rest breaks inside your study window.</p>
+          <div class="break-quick-row">
+            <span class="break-quick-label" data-i18n="smart.quickAdd">Quick add</span>
+            <button type="button" class="chip-btn" data-quick-break="tea" data-i18n="smart.tea">Tea 10 min</button>
+            <button type="button" class="chip-btn" data-quick-break="food" data-i18n="smart.food">Food 30 min</button>
+            <button type="button" class="chip-btn" data-quick-break="rest" data-i18n="smart.rest">Rest 15 min</button>
+          </div>
         </div>
+        <p id="auto-technique-note" class="auto-technique-note hidden"></p>
         <div id="task-schedule-preview" class="schedule-preview"></div>
         <button type="submit" id="task-submit" class="primary-btn full-btn" data-i18n="addTask">Add Task</button>
       </form>
@@ -415,6 +436,7 @@
             </label>
             <button type="button" id="background-access-btn" class="secondary-btn full-btn" data-i18n="backgroundAccess">Background running access</button>
             <p id="background-status" class="hint background-status"></p>
+            <button type="button" id="permissions-btn" class="secondary-btn full-btn" data-i18n="permissions.manage">Notifications, alarms &amp; app access</button>
             <button type="submit" class="primary-btn full-btn" data-i18n="saveSettings">Save settings</button>
           </form>
 
@@ -486,7 +508,7 @@
           <span class="rq-app-logo"><img src="logo.svg" alt=""></span>
           <h2 class="rq-app-name">Exam Buddy Pro</h2>
           <p class="rq-app-sub" data-i18n="about.subtitle">Sinhala English study app</p>
-          <span class="rq-version" data-i18n="version">Version 1.7</span>
+          <span class="rq-version" data-i18n="version">Version 1.9.0</span>
         </div>
         <div class="rq-mini-actions">
           <button type="button" id="about-privacy-btn" class="rq-mini-btn" data-i18n="about.privacy">Privacy policy</button>
@@ -528,7 +550,7 @@
 
       <div class="about-foot">
         <span data-i18n="developedBy">Developed by Dakshan Bhashna</span>
-        <span data-i18n="version">Version 1.7</span>
+        <span data-i18n="version">Version 1.9.0</span>
       </div>
     </section>
   </main>
@@ -538,7 +560,7 @@
   </button>
 
   <footer class="app-footer">
-    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.7</span></p>
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.9.0</span></p>
   </footer>
 
   <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
@@ -567,11 +589,31 @@
       <p id="update-modal-current" class="update-current"></p>
       <h4 id="update-modal-changelog-title" class="update-changelog-title">What's new</h4>
       <ul id="update-modal-changelog" class="update-changelog"></ul>
+      <div id="update-progress" class="update-progress hidden" aria-live="polite">
+        <div class="update-progress-track"><span id="update-progress-fill"></span></div>
+        <p id="update-progress-text" class="update-progress-text"></p>
+      </div>
+      <p id="update-install-hint" class="update-install-hint hidden" data-i18n="update.playProtect">If Play Protect asks, choose “Install anyway”. The update is signed with the same key as your current app.</p>
       <div class="update-actions">
         <a id="update-notes-link" class="update-btn update-btn-ghost" href="#" data-external-link="true" data-i18n="update.releasePage">View release notes</a>
         <button type="button" id="update-later-btn" class="update-btn update-btn-ghost" data-i18n="update.later">Later</button>
-        <a id="update-now-link" class="update-btn update-btn-primary" href="#" data-external-link="true" data-i18n="update.now">Update now</a>
+        <button type="button" id="update-now-btn" class="update-btn update-btn-primary" data-i18n="update.now">Update now</button>
       </div>
+    </div>
+  </div>
+
+  <div id="detail-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+    <div class="about-modal-backdrop" data-close-detail="true"></div>
+    <div class="about-modal-card detail-modal-card">
+      <div class="about-modal-head">
+        <div>
+          <h3 id="detail-modal-title"></h3>
+          <p id="detail-modal-subtitle" class="detail-modal-subtitle"></p>
+        </div>
+        <button type="button" id="detail-modal-close" class="about-modal-close" aria-label="Close">×</button>
+      </div>
+      <div id="detail-modal-body" class="detail-modal-body"></div>
+      <div id="detail-modal-actions" class="detail-modal-actions"></div>
     </div>
   </div>
 

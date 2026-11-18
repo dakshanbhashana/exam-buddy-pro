@@ -14,12 +14,15 @@ Built with HTML, CSS and JavaScript, packaged as an Android WebView app.
 
 - **Live exam countdown** with preparation progress
 - **Exams and tasks** with categories, priorities, search and filters
+- **Focused detail sheets** when you tap a task, exam, or dashboard stat
 - **Pomodoro focus timer** with configurable focus/break lengths and auto-start
+- **Smart study plans** with tea, food and rest breaks plus automatic techniques
 - **Insights** including a 7-day focus chart, task balance and study streak
 - **Sinhala and English** interface with instant switching
-- **Light, dark and automatic** themes
+- **Rose light and dark themes** with an automatic mode
+- **Guided permissions** for notifications, alarms, battery, files and updates
 - **Private by design** — data stays on your device, no account and no tracking
-- **In-app update checker** with a bilingual changelog (see below)
+- **In-app updates** that verify the APK signature and open the installer
 
 ## How updates work
 
@@ -31,7 +34,7 @@ The app reads a small manifest at the root of this repository:
 https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json
 ```
 
-`version.json` contains the latest `versionCode`, `versionName`, the APK download URL and the changelog in English and Sinhala. When the installed app starts (at most once every 6 hours), it fetches this file and compares the remote `versionCode` with its own. If the remote version is newer, an update dialog appears showing exactly what changed and a one-tap **Update now** button that downloads the newest APK.
+`version.json` contains the latest `versionCode`, `versionName`, the APK download URL and the changelog in English and Sinhala. When the installed app starts (at most once every 6 hours), it fetches this file and compares the remote `versionCode` with its own. If the remote version is newer, an update dialog appears showing exactly what changed and a one-tap **Update now** button. The app downloads the APK, verifies its package name, signing certificate and version, then opens the Android installer.
 
 Users can also check manually from **About → Check for updates**.
 
@@ -72,14 +75,23 @@ bash android/build.sh
 
 Output: `exam-buddy-lite.apk` in the project root.
 
-The build script creates a signing keystore at `android/build/exam-buddy.jks` if one does not exist. **Back this file up and keep it safe.** Android only installs updates signed with the same key, so losing it means future updates cannot be installed over existing installs. The keystore and build folder are intentionally git-ignored.
+The build script creates a signing keystore at `android/build/exam-buddy.jks` if one does not exist. **Back this file up and keep it safe.** Android only installs updates signed with the same key, so losing it means future updates cannot be installed over existing installs.
+
+The signing password is read from the git-ignored `android/build/signing.env` file:
+
+```bash
+export EXAM_BUDDY_STORE_PASS="your-keystore-password"
+```
+
+Alternatively, export `EXAM_BUDDY_STORE_PASS` before running the build. The keystore, signing settings and build folder are intentionally git-ignored.
 
 ## Project structure
 
 ```
 index.html            App UI and update dialog markup
-style.css             App styles, including update dialog
+style.css             App styles, including detail and update dialogs
 script.js             App logic, i18n and update checker
+theme-init.js         Early light/dark theme bootstrap
 logo.svg              App icon source
 version.json          Update manifest read by installed apps
 release-notes/        One JSON file per release

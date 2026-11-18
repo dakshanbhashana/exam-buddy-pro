@@ -1,0 +1,27 @@
+{
+  "versionCode": 10,
+  "versionName": "1.9.0",
+  "changelog": {
+    "en": [
+      "New rose and red-rose visual redesign with polished light and dark themes.",
+      "Permission setup now appears after the loading screen with Allow / Deny controls for notifications, alarms, battery, files and updates.",
+      "Fixed the focus timer resetting when switching between focus and break modes.",
+      "Dashboard cards and today rows now open focused detail sheets for the exact task or exam you tap.",
+      "Added tea, food and rest quick breaks that automatically adapt the study technique and remain editable.",
+      "New in-app updater downloads the new APK and opens the installer without visiting GitHub.",
+      "The updater verifies the APK signature before installing, and the WebView and file provider are hardened.",
+      "Hardened configuration and battery-friendly background timer handling."
+    ],
+    "si": [
+      "ලස්සන රෝස් සහ රතු රෝස නිමාවක් සහිත නව අඳුරු/ආලෝක තේමා.",
+      "පැටවීමේ තිරයෙන් පසු දැනුම්දීම්, ඇලාම්, බැටරි, ගොනු සහ යාවත්කාලීන සඳහා අවසර දෙන්න/ප්‍රතික්ෂේප කරන්න පහසුකම.",
+      "focus සහ විවේක මාදිලි අතර මාරු වීමේදී කාලමානය reset වීමේ ගැටලුව විසඳා ඇත.",
+      "පාලක පුවරුවේ කාඩ්පත් සහ අද ලැයිස්තුවේ අයිතම තට්ටු කළ විට එම කාර්යය හෝ විභාගය පමණක් විස්තරව පෙන්වයි.",
+      "තේ, කෑම සහ විවේක ඉක්මන් විරාම එක් කිරීමෙන් අධ්‍යයන ක්‍රමය ස්වයංක්‍රීයව ගැළපෙන අතර පසුව සංස්කරණය කළ හැක.",
+      "GitHub වෙත නොයා යෙදුම තුළින්ම නව APK බාගෙන ස්ථාපකය විවෘත කරන නව යාවත්කාලීන ක්‍රමය.",
+      "ස්ථාපනයට පෙර APK අත්සන දෙවරක් පරීක්ෂා කරන අතර WebView සහ ගොනු සැපයුම්කරු ආරක්ෂිත කර ඇත.",
+      "Play Protect අනුකූල වීමට සහ බැටරි ඉතිරි කිරීමට වැඩිදියුණු කළ වින්‍යාසය."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v1.9.0\n\n### What's new\n- New rose / red-rose redesign for light and dark themes.\n- Permission setup after the loading screen (notifications, alarms, battery, files, updates).\n- Focus timer no longer resets when switching focus and break modes.\n- Tap any dashboard task, exam or stat to open a focused detail sheet.\n- Smart tea, food and rest breaks with automatic, editable study techniques.\n- One-tap in-app update: download and install from inside the app.\n- APK signature verification and hardened WebView / file access.\n\n### අලුතෙන් එන දේ\n- ආලෝක සහ අඳුරු තේමා සඳහා නව රෝස නිමාව.\n- පැටවීමේ තිරයෙන් පසු අවසර සැකසුම.\n- focus/විවේක මාදිලි මාරු කිරීමේදී කාලමාන reset නොවේ.\n- පාලක පුවරුවේ අයිතම තට්ටු කළ විට අදාළ විස්තර පමණක් පෙන්වයි.\n- තේ, කෑම සහ විවේක විරාම සඳහා ස්වයංක්‍රීය අධ්‍යයන ක්‍රම.\n- යෙදුම තුළින්ම එක් තට්ටුවකින් යාවත්කාලීනය බාගෙන ස්ථාපනය කරන්න.\n- APK අත්සන සත්‍යාපනය සහ ආරක්ෂිත WebView / ගොනු ප්‍රවේශය.\n"
+}

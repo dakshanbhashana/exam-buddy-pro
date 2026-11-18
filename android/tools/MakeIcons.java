@@ -19,9 +19,9 @@ import javax.imageio.ImageIO;
 
 public final class MakeIcons {
     private static final int SS = 4;
-    private static final Color SKY = Color.decode("#38bdf8");
-    private static final Color INDIGO = Color.decode("#4f46e5");
-    private static final Color PURPLE = Color.decode("#7c3aed");
+    private static final Color ROSE_LIGHT = Color.decode("#fb7185");
+    private static final Color ROSE = Color.decode("#be123c");
+    private static final Color ROSE_DARK = Color.decode("#7f1034");
     private static final Color GREEN = Color.decode("#22c55e");
     private static final String[] DENSITIES = {"mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"};
     private static final int[] LEGACY_SIZES = {48, 72, 96, 144, 192};
@@ -63,7 +63,7 @@ public final class MakeIcons {
             Paint gradient = new LinearGradientPaint(
                     0f, 0f, big, big,
                     new float[] {0f, 0.55f, 1f},
-                    new Color[] {SKY, INDIGO, PURPLE});
+                    new Color[] {ROSE_LIGHT, ROSE, ROSE_DARK});
             g.setPaint(gradient);
             g.fill(tile);
             if (!"background".equals(kind)) {

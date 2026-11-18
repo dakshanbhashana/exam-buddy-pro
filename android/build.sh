@@ -7,7 +7,16 @@ BUILD="$ROOT/build"
 PLATFORM_ZIP="${ANDROID_PLATFORM_ZIP:-/data/data/com.termux/files/usr/tmp/opencode/sdk/platform-35.zip}"
 ANDROID_JAR="$BUILD/android.jar"
 KEYSTORE="$BUILD/exam-buddy.jks"
-STORE_PASS="examBuddy2026"
+if [ -f "$BUILD/signing.env" ]; then
+  # Local, git-ignored signing settings.
+  # shellcheck disable=SC1090
+  . "$BUILD/signing.env"
+fi
+STORE_PASS="${EXAM_BUDDY_STORE_PASS:-}"
+if [ -z "$STORE_PASS" ]; then
+  echo "Missing signing password. Create android/build/signing.env with EXAM_BUDDY_STORE_PASS." >&2
+  exit 1
+fi
 OUT="$WEB/exam-buddy-lite.apk"
 
 mkdir -p "$BUILD/gen" "$BUILD/classes" "$BUILD/dex" "$BUILD/tools-classes" "$ROOT/assets/www"
@@ -21,7 +30,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 PY
 fi
 
-cp "$WEB/index.html" "$WEB/style.css" "$WEB/script.js" "$WEB/logo.svg" "$ROOT/assets/www/"
+cp "$WEB/index.html" "$WEB/style.css" "$WEB/script.js" "$WEB/theme-init.js" "$WEB/logo.svg" "$ROOT/assets/www/"
 
 javac -encoding UTF-8 -d "$BUILD/tools-classes" "$ROOT/tools/MakeIcons.java"
 java -cp "$BUILD/tools-classes" MakeIcons "$ROOT/res" >/dev/null

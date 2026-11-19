@@ -18,6 +18,8 @@ public class TaskReminderReceiver extends BroadcastReceiver {
     public static final String EXTRA_BODY = "body";
     public static final String EXTRA_SOUND = "sound";
     public static final String EXTRA_LANGUAGE = "language";
+    public static final String EXTRA_TRIGGER_AT = "trigger_at";
+    public static final String EXTRA_ALARM_ID = "alarm_id";
 
     private static final String CHANNEL_ALERT = "exam_buddy_task_alerts";
     private static final String CHANNEL_SILENT = "exam_buddy_task_silent";
@@ -28,10 +30,8 @@ public class TaskReminderReceiver extends BroadcastReceiver {
         if (intent == null || !ACTION_TASK_REMINDER.equals(intent.getAction())) {
             return;
         }
-        if (MainActivity.isAppVisible()) {
-            return;
-        }
         String language = intent.getStringExtra(EXTRA_LANGUAGE);
+        if (language == null) language = "en";
         String title = intent.getStringExtra(EXTRA_TITLE);
         String body = intent.getStringExtra(EXTRA_BODY);
         boolean sound = intent.getBooleanExtra(EXTRA_SOUND, true);
@@ -43,7 +43,24 @@ public class TaskReminderReceiver extends BroadcastReceiver {
         if (body == null) {
             body = "";
         }
-        postNotification(context, notificationId(taskId, kind), title, body, sound);
+
+        if (sound) {
+            String alarmId = intent.getStringExtra(EXTRA_ALARM_ID);
+            if (alarmId == null || alarmId.isEmpty()) {
+                long triggerAt = intent.getLongExtra(EXTRA_TRIGGER_AT, 0L);
+                alarmId = (taskId == null ? "" : taskId) + ":" +
+                        (kind == null ? "" : kind) + ":" + triggerAt;
+            }
+            AlarmService.startAlarm(context, title, body, language,
+                    taskId, kind, alarmId, MainActivity.isAppVisible());
+            return;
+        }
+
+        if (MainActivity.isAppVisible()) {
+            MainActivity.showInAppReminder(title, body);
+            return;
+        }
+        postNotification(context, notificationId(taskId, kind), title, body, false);
     }
 
     static int notificationId(String taskId, String kind) {

@@ -4,6 +4,8 @@ A lightweight Sinhala/English study companion for Android. Plan exams, track rev
 
 Built with HTML, CSS and JavaScript, packaged as an Android WebView app.
 
+Alarm ringtones are CC0 public-domain sounds sourced from Wikimedia Commons: “Alarm Clock” and “Mechanical Clock Ring” by Yoo-toob-FX / Directory.Audio, and “Alarm Alert sound in United States 2025” by Ranch9613.
+
 ## Download
 
 **[Download the latest APK](https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk)**
@@ -20,9 +22,18 @@ Built with HTML, CSS and JavaScript, packaged as an Android WebView app.
 - **Insights** including a 7-day focus chart, task balance and study streak
 - **Sinhala and English** interface with instant switching
 - **Rose light and dark themes** with an automatic mode
+- **Reliable task alarms** that ring even when the app is closed, with exact alarm-clock scheduling
+- **Full-screen lock-screen alarm** with turn off and snooze, plus an in-app alarm popup
+- **Bluetooth-aware audio** that plays through a connected headset or speaker, otherwise the phone speaker
+- **Three bundled alarm ringtones** (CC0), vibration, volume ramp-up and a test-alarm button
+- **Auto-stop protection** so an unattended alarm stops after one minute
 - **Guided permissions** for notifications, alarms, battery, files and updates
 - **Private by design** — data stays on your device, no account and no tracking
 - **In-app updates** that verify the APK signature and open the installer
+
+## Alarms
+
+Task alarms are scheduled as exact alarm-clock events so they wake the device even in Doze. When an alarm fires, a foreground service starts within the broadcast, plays the selected ringtone on the alarm stream, and raises the alarm volume temporarily. If a Bluetooth A2DP/BLE audio device is connected, playback is routed to that device instead. The service posts a high-priority alarm notification with **Turn off** and **Snooze** actions and, when the app is not visible, a full-screen alarm activity over the lock screen. Alarms stop automatically after 60 seconds. Pending alarms are stored natively and rescheduled after a reboot or an app update.
 
 ## How updates work
 

@@ -8,4 +8,13 @@
         <item name="android:windowLightNavigationBar">false</item>
     </style>
     <style name="AppTheme" parent="BaseAppTheme" />
+    <style name="AlarmTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#4c0519</item>
+        <item name="android:statusBarColor">#4c0519</item>
+        <item name="android:navigationBarColor">#1c0811</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
 </resources>

@@ -13,8 +13,16 @@ const DEFAULT_SETTINGS = {
   long: 15,
   autoBreaks: false,
   autoFocus: false,
-  sound: true
+  sound: true,
+  alarmTone: 0,
+  alarmVibrate: true,
+  alarmBluetooth: true,
+  alarmSnooze: 5
 };
+
+const ALARM_TONE_NAMES = ["classic", "mechanical", "beep"];
+const ALARM_TONE_LABELS = ["alarmToneClassic", "alarmToneMechanical", "alarmToneBeep"];
+const ALARM_LOCAL_STORAGE_KEY = "examBuddy_alarmOverlay";
 
 const MODES = {
   focus: { label: "mode.focus", status: "timerReady" },
@@ -39,8 +47,8 @@ const STUDY_METHODS = ["none", "activeRecall", "spaced", "feynman", "interleavin
 const REMINDER_KINDS = ["start", "end"];
 const REMINDER_BREAK_LIMIT = 20;
 
-const APP_VERSION_NAME = "1.9";
-const APP_VERSION_CODE = 11;
+const APP_VERSION_NAME = "2.0";
+const APP_VERSION_CODE = 12;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -286,6 +294,28 @@ const I18N = {
     autoBreaks: "Auto-start breaks",
     autoFocus: "Auto-start focus",
     sound: "Completion chime",
+    alarmSettings: "Task alarm",
+    alarmTone: "Alarm ringtone",
+    alarmToneClassic: "Classic bell",
+    alarmToneMechanical: "Mechanical clock",
+    alarmToneBeep: "Alert beep",
+    alarmVibrate: "Vibrate with alarm",
+    alarmBluetooth: "Bluetooth only when connected",
+    alarmSnooze: "Snooze (minutes)",
+    alarmTest: "Test alarm",
+    alarmHint: "Alarms ring loudly even when the app is closed, and play through Bluetooth when a device is connected. They stop automatically after one minute.",
+    alarmTestTitle: "Alarm test",
+    alarmTestBody: "This is how your study alarm will sound.",
+    alarmOverlayEyebrow: "Exam Buddy alarm",
+    alarmTurnOff: "Turn off alarm",
+    alarmSnoozeAction: "Snooze",
+    alarmOverlayNote: "The alarm stops automatically after one minute.",
+    alarmAutoStop: "Stops automatically in {n}s",
+    alarmStopped: "Alarm turned off",
+    alarmSnoozed: "Snoozed for {n} min",
+    alarmReminderTitle: "Study reminder",
+    alarmFullScreenHint: "Turn off the alarm from the notification if the full-screen alert does not appear.",
+    alarmFullScreenAccess: "Allow full-screen alarms",
     backgroundAccess: "Background running access",
     backgroundAllowed: "Background timer is allowed.",
     backgroundBlocked: "Allow background activity and battery access so the timer keeps running.",
@@ -362,7 +392,7 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
-    version: "Version 1.9",
+    version: "Version 2.0",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -701,6 +731,28 @@ const I18N = {
     autoBreaks: "විවේක ස්වයංක්‍රීයව ආරම්භ කරන්න",
     autoFocus: "අවධානය ස්වයංක්‍රීයව ආරම්භ කරන්න",
     sound: "සම්පූර්ණ වීමේ ශබ්දය",
+    alarmSettings: "කාර්ය ඇලාම්",
+    alarmTone: "ඇලාම් සංගීතය",
+    alarmToneClassic: "සාම්ප්‍රදායික සීනුව",
+    alarmToneMechanical: "යාන්ත්‍රික ඔරලෝසුව",
+    alarmToneBeep: "අනතුරු ඇඟවීමේ බීප්",
+    alarmVibrate: "ඇලාම් සමඟ කම්පනය",
+    alarmBluetooth: "සම්බන්ධ නම් Bluetooth හරහා පමණි",
+    alarmSnooze: "Snooze (විනාඩි)",
+    alarmTest: "ඇලාම් පරීක්ෂා කරන්න",
+    alarmHint: "යෙදුම වසා තිබුණත් ඇලාම් හයියෙන් නාද වේ. Bluetooth උපාංගයක් සම්බන්ධ නම් එය හරහා නාද වේ. විනාඩියකින් ස්වයංක්‍රීයව නවතී.",
+    alarmTestTitle: "ඇලාම් පරීක්ෂණය",
+    alarmTestBody: "ඔබේ අධ්‍යයන ඇලාම් නාද වන්නේ මෙසේයි.",
+    alarmOverlayEyebrow: "Exam Buddy ඇලාම්",
+    alarmTurnOff: "ඇලාම් නවත්වන්න",
+    alarmSnoozeAction: "Snooze",
+    alarmOverlayNote: "ඇලාම් විනාඩියකින් ස්වයංක්‍රීයව නවතී.",
+    alarmAutoStop: "තත්පර {n}කින් ස්වයංක්‍රීයව නවතී",
+    alarmStopped: "ඇලාම් නවත්වා ඇත",
+    alarmSnoozed: "විනාඩි {n}ක් සඳහා Snooze කර ඇත",
+    alarmReminderTitle: "අධ්‍යයන මතක් කිරීම",
+    alarmFullScreenHint: "සම්පූර්ණ තිර ඇඟවීම නොපෙනේ නම් දැනුම්දීමෙන් ඇලාම් නවත්වන්න.",
+    alarmFullScreenAccess: "සම්පූර්ණ තිර ඇලාම්වලට අවසර දෙන්න",
     backgroundAccess: "පසුබිම් ක්‍රියාකාරීත්ව අවසරය",
     backgroundAllowed: "පසුබිම් කාලමානයට අවසර ඇත.",
     backgroundBlocked: "යෙදුමෙන් පිටව ගියත් කාලමානය දිගටම ධාවනය වීමට පසුබිම් සහ බැටරි අවසර දෙන්න.",
@@ -777,7 +829,7 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
-    version: "Version 1.9",
+    version: "Version 2.0",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -1063,6 +1115,36 @@ function nativeTimer() {
   } catch {
   }
   return null;
+}
+
+function nativeAlarm() {
+  try {
+    const bridge = window.ExamBuddyAlarm;
+    if (bridge && typeof bridge.isAvailable === "function" && bridge.isAvailable()) return bridge;
+  } catch {
+  }
+  return null;
+}
+
+function alarmToneValue() {
+  const tone = Number(pomodoro.settings.alarmTone);
+  return Number.isFinite(tone) && tone >= 0 && tone < ALARM_TONE_NAMES.length
+    ? Math.round(tone) : 0;
+}
+
+function syncAlarmSettingsToNative() {
+  const bridge = nativeAlarm();
+  if (!bridge) return;
+  try {
+    bridge.configure(JSON.stringify({
+      tone: alarmToneValue(),
+      vibrate: Boolean(pomodoro.settings.alarmVibrate),
+      bluetooth: Boolean(pomodoro.settings.alarmBluetooth),
+      snooze: Number(pomodoro.settings.alarmSnooze) || 5,
+      volumeRamp: true
+    }));
+  } catch {
+  }
 }
 
 function nativePermissions() {
@@ -2054,9 +2136,11 @@ function syncAllTaskReminders() {
 function checkTaskReminders() {
   if (document.hidden) return;
   const now = Date.now();
+  const native = nativeReminder();
   tasks.forEach((task) => {
     if (task.completed || !task.alarm && !task.notify) return;
     if (!task.startDate || task.startDate !== todayKey()) return;
+    if (native) return;
     reminderEvents(task).forEach((event) => {
       if (now < event.at || now - event.at > 60000) return;
       const key = task.id + ":" + event.kind + ":" + event.at;
@@ -2064,7 +2148,7 @@ function checkTaskReminders() {
       firedReminders.add(key);
       showToast(event.title, "success");
       if (task.alarm) playChime(true);
-      if (task.notify && !nativeReminder() && typeof Notification !== "undefined") {
+      if (task.notify && typeof Notification !== "undefined") {
         try {
           new Notification(event.title, { body: event.body });
         } catch (e) {
@@ -2096,9 +2180,15 @@ function normalizePomodoro(raw) {
       ? Math.min(Math.round(value), key === "focus" ? 180 : 90)
       : DEFAULT_SETTINGS[key];
   });
-  ["autoBreaks", "autoFocus", "sound"].forEach((key) => {
+  ["autoBreaks", "autoFocus", "sound", "alarmVibrate", "alarmBluetooth"].forEach((key) => {
     base.settings[key] = Boolean(base.settings[key]);
   });
+  const alarmTone = Number(base.settings.alarmTone);
+  base.settings.alarmTone = Number.isFinite(alarmTone) && alarmTone >= 0 && alarmTone < ALARM_TONE_NAMES.length
+    ? Math.round(alarmTone) : DEFAULT_SETTINGS.alarmTone;
+  const alarmSnooze = Number(base.settings.alarmSnooze);
+  base.settings.alarmSnooze = Number.isFinite(alarmSnooze) && alarmSnooze > 0
+    ? Math.min(30, Math.round(alarmSnooze)) : DEFAULT_SETTINGS.alarmSnooze;
 
   base.sessions = Array.isArray(raw.sessions)
     ? raw.sessions
@@ -3751,6 +3841,173 @@ function playChime(force) {
   }
 }
 
+let alarmOverlayInterval = null;
+let alarmOverlayState = null;
+
+function parseAlarmState(raw) {
+  if (!raw) return null;
+  try {
+    return typeof raw === "string" ? JSON.parse(raw) : raw;
+  } catch {
+    return null;
+  }
+}
+
+function updateAlarmOverlayClock() {
+  const time = document.getElementById("alarm-overlay-time");
+  if (time) {
+    const now = new Date();
+    time.textContent = pad(now.getHours()) + ":" + pad(now.getMinutes());
+  }
+}
+
+function updateAlarmOverlayCountdown() {
+  const countdown = document.getElementById("alarm-overlay-countdown");
+  if (!countdown || !alarmOverlayState) return;
+  const stopAt = Number(alarmOverlayState.autoStopAt) || (Date.now() + 60000);
+  const seconds = Math.max(0, Math.ceil((stopAt - Date.now()) / 1000));
+  countdown.textContent = t("alarmAutoStop", { n: seconds });
+  if (seconds <= 0) hideAlarmOverlay();
+}
+
+function showAlarmOverlay(raw) {
+  const state = parseAlarmState(raw);
+  if (!state || !state.ringing) {
+    hideAlarmOverlay();
+    return;
+  }
+  alarmOverlayState = state;
+  const overlay = document.getElementById("alarm-overlay");
+  if (!overlay) return;
+  setText("alarm-overlay-title", state.title || t("alarmTestTitle"));
+  setText("alarm-overlay-body", state.body || "");
+  const time = document.getElementById("alarm-overlay-time");
+  if (time) time.textContent = state.time || (pad(new Date().getHours()) + ":" + pad(new Date().getMinutes()));
+  const snooze = document.getElementById("alarm-overlay-snooze");
+  if (snooze) {
+    const minutes = Number(state.snoozeMinutes) || Number(pomodoro.settings.alarmSnooze) || 5;
+    snooze.textContent = t("alarmSnoozeAction") + " · " + minutes + " " + t("minuteShort");
+  }
+  overlay.classList.remove("hidden");
+  document.body.classList.add("alarm-open");
+  updateAlarmOverlayCountdown();
+  if (alarmOverlayInterval) clearInterval(alarmOverlayInterval);
+  alarmOverlayInterval = setInterval(() => {
+    updateAlarmOverlayClock();
+    updateAlarmOverlayCountdown();
+  }, 500);
+}
+
+function hideAlarmOverlay() {
+  alarmOverlayState = null;
+  if (alarmOverlayInterval) {
+    clearInterval(alarmOverlayInterval);
+    alarmOverlayInterval = null;
+  }
+  const overlay = document.getElementById("alarm-overlay");
+  if (overlay) overlay.classList.add("hidden");
+  document.body.classList.remove("alarm-open");
+}
+
+function stopAlarmFromOverlay() {
+  const bridge = nativeAlarm();
+  if (bridge) {
+    try {
+      bridge.stop();
+    } catch {
+    }
+  }
+  hideAlarmOverlay();
+  showToast(t("alarmStopped"), "success");
+}
+
+function snoozeAlarmFromOverlay() {
+  const bridge = nativeAlarm();
+  if (bridge) {
+    try {
+      bridge.snooze();
+    } catch {
+    }
+  }
+  hideAlarmOverlay();
+  showToast(t("alarmSnoozed", { n: Number(pomodoro.settings.alarmSnooze) || 5 }), "success");
+}
+
+function testAlarm() {
+  const bridge = nativeAlarm();
+  syncAlarmSettingsToNative();
+  if (bridge) {
+    try {
+      bridge.test(t("alarmTestTitle"), t("alarmTestBody"), getLanguage());
+      return;
+    } catch {
+    }
+  }
+  playChime(true);
+  showAlarmOverlay({
+    ringing: true,
+    title: t("alarmTestTitle"),
+    body: t("alarmTestBody"),
+    autoStopAt: Date.now() + 60000,
+    snoozeMinutes: Number(pomodoro.settings.alarmSnooze) || 5
+  });
+}
+
+function refreshFullScreenAlarmAccess() {
+  const button = document.getElementById("alarm-fullscreen-btn");
+  if (!button) return;
+  const bridge = nativeAlarm();
+  let allowed = true;
+  if (bridge && typeof bridge.canUseFullScreen === "function") {
+    try {
+      allowed = !!bridge.canUseFullScreen();
+    } catch {
+      allowed = true;
+    }
+  }
+  button.classList.toggle("hidden", allowed);
+}
+
+function setupAlarmOverlay() {
+  const stop = document.getElementById("alarm-overlay-stop");
+  if (stop) stop.addEventListener("click", stopAlarmFromOverlay);
+  const fullScreen = document.getElementById("alarm-fullscreen-btn");
+  if (fullScreen) {
+    fullScreen.addEventListener("click", () => {
+      const bridge = nativeAlarm();
+      if (bridge && typeof bridge.requestFullScreen === "function") {
+        try {
+          bridge.requestFullScreen();
+        } catch {
+        }
+      }
+    });
+  }
+  const snooze = document.getElementById("alarm-overlay-snooze");
+  if (snooze) snooze.addEventListener("click", snoozeAlarmFromOverlay);
+  const test = document.getElementById("alarm-test-btn");
+  if (test) test.addEventListener("click", testAlarm);
+
+  window.ExamBuddyAlarmFired = (state) => showAlarmOverlay(state);
+  window.ExamBuddyAlarmState = (state) => showAlarmOverlay(state);
+  window.ExamBuddyAlarmStopped = () => hideAlarmOverlay();
+  window.ExamBuddyInAppReminder = (title, body) => {
+    if (title) showToast(title, "success");
+    else if (body) showToast(body, "info");
+  };
+
+  const bridge = nativeAlarm();
+  if (bridge) {
+    try {
+      const state = parseAlarmState(bridge.getState());
+      if (state && state.ringing) showAlarmOverlay(state);
+    } catch {
+    }
+  }
+  syncAlarmSettingsToNative();
+  refreshFullScreenAlarmAccess();
+}
+
 function renderSessionDots() {
   const filled = timer.mode === "long" ? 4 : pomodoro.focusCount % 4;
   document.getElementById("session-dots").innerHTML = Array.from({ length: 4 }, (_, i) =>
@@ -3826,6 +4083,22 @@ function setupPomodoro() {
     pomodoro.settings.autoBreaks = document.getElementById("auto-start-breaks").checked;
     pomodoro.settings.autoFocus = document.getElementById("auto-start-focus").checked;
     pomodoro.settings.sound = document.getElementById("sound-enabled").checked;
+    const alarmToneInput = document.getElementById("alarm-tone");
+    if (alarmToneInput) {
+      const tone = Number(alarmToneInput.value);
+      pomodoro.settings.alarmTone = Number.isFinite(tone) && tone >= 0 && tone < ALARM_TONE_NAMES.length
+        ? Math.round(tone) : 0;
+    }
+    const alarmVibrateInput = document.getElementById("alarm-vibrate");
+    if (alarmVibrateInput) pomodoro.settings.alarmVibrate = alarmVibrateInput.checked;
+    const alarmBluetoothInput = document.getElementById("alarm-bluetooth");
+    if (alarmBluetoothInput) pomodoro.settings.alarmBluetooth = alarmBluetoothInput.checked;
+    const alarmSnoozeInput = document.getElementById("alarm-snooze");
+    if (alarmSnoozeInput) {
+      const snooze = Number(alarmSnoozeInput.value);
+      pomodoro.settings.alarmSnooze = Number.isFinite(snooze) && snooze > 0
+        ? Math.min(30, Math.round(snooze)) : 5;
+    }
 
     timer.saved = timerSavedDefaults();
     if (timer.running) {
@@ -3845,6 +4118,8 @@ function setupPomodoro() {
     document.getElementById("auto-start-breaks").checked = pomodoro.settings.autoBreaks;
     document.getElementById("auto-start-focus").checked = pomodoro.settings.autoFocus;
     document.getElementById("sound-enabled").checked = pomodoro.settings.sound;
+    applyAlarmSettingsToForm();
+    syncAlarmSettingsToNative();
 
     saveData();
     renderTimer();
@@ -3863,6 +4138,18 @@ function setupPomodoro() {
   });
 }
 
+function applyAlarmSettingsToForm() {
+  const tone = document.getElementById("alarm-tone");
+  if (tone) tone.value = String(alarmToneValue());
+  const vibrate = document.getElementById("alarm-vibrate");
+  if (vibrate) vibrate.checked = Boolean(pomodoro.settings.alarmVibrate);
+  const bluetooth = document.getElementById("alarm-bluetooth");
+  if (bluetooth) bluetooth.checked = pomodoro.settings.alarmBluetooth !== false;
+  const snooze = document.getElementById("alarm-snooze");
+  if (snooze) snooze.value = String(Number(pomodoro.settings.alarmSnooze) || 5);
+  syncPrettySelects();
+}
+
 function applySettingsToForm() {
   document.getElementById("focus-duration").value = pomodoro.settings.focus;
   document.getElementById("short-duration").value = pomodoro.settings.short;
@@ -3870,6 +4157,7 @@ function applySettingsToForm() {
   document.getElementById("auto-start-breaks").checked = pomodoro.settings.autoBreaks;
   document.getElementById("auto-start-focus").checked = pomodoro.settings.autoFocus;
   document.getElementById("sound-enabled").checked = pomodoro.settings.sound;
+  applyAlarmSettingsToForm();
 }
 
 function syncActiveTimerFromClock() {
@@ -3918,6 +4206,8 @@ function resumeAppTimer() {
 window.ExamBuddyOnResume = resumeAppTimer;
 
 function resumeReminders() {
+  syncAlarmSettingsToNative();
+  refreshFullScreenAlarmAccess();
   syncAllTaskReminders();
   checkTaskReminders();
 }
@@ -3967,12 +4257,13 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 1.9</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 2.0</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
         <li>Packaged as an Android app with a native WebView shell.</li>
         <li>Uses system fonts and inline SVG icons created for this project.</li>
+        <li>Alarm ringtones are CC0 public-domain sounds from Wikimedia Commons: “Alarm Clock” and “Mechanical Clock Ring” by Yoo-toob-FX / Directory.Audio, and “Alarm Alert sound in United States 2025” by Ranch9613.</li>
       </ul>
       <p>Thank you for using Exam Buddy Pro.</p>
     `;
@@ -4343,6 +4634,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPrettySelects();
   setupQuickActions();
   setupPomodoro();
+  setupAlarmOverlay();
   setupBackToTop();
   setupAbout();
   setupPermissions();

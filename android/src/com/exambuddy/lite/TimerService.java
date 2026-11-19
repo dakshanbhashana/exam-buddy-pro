@@ -357,12 +357,17 @@ public class TimerService extends Service {
         }
         PendingIntent pending = PendingIntent.getBroadcast(this, ALARM_REQUEST, intent, flags);
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (manager.canScheduleExactAlarms()) {
-                    manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endsAt, pending);
-                } else {
-                    manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endsAt, pending);
-                }
+            boolean exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                    || manager.canScheduleExactAlarms();
+            if (sound && exact) {
+                Intent showIntent = new Intent(this, MainActivity.class);
+                showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                PendingIntent show = PendingIntent.getActivity(this, ALARM_REQUEST + 1,
+                        showIntent, flags);
+                manager.setAlarmClock(
+                        new AlarmManager.AlarmClockInfo(endsAt, show), pending);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !exact) {
+                manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endsAt, pending);
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endsAt, pending);
             } else {
@@ -379,7 +384,12 @@ public class TimerService extends Service {
         handler.removeCallbacks(ticker);
         cancelAlarm(this);
         if (!MainActivity.isAppVisible() && claimNotification(this, endsAt)) {
-            postDoneNotification(this, endsAt, completeTitle, completeBody, language, sound);
+            if (sound) {
+                AlarmService.startAlarm(this, completeTitle, completeBody, language,
+                        "timer", "timer", "timer:" + endsAt, false);
+            } else {
+                postDoneNotification(this, endsAt, completeTitle, completeBody, language, false);
+            }
         }
         NotificationManager manager = notificationManager();
         if (manager != null) {

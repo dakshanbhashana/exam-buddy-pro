@@ -12,7 +12,7 @@ public class TimerAlarmReceiver extends BroadcastReceiver {
             return;
         }
         long endsAt = intent.getLongExtra(TimerService.EXTRA_ENDS_AT, 0L);
-        if (endsAt <= 0L || TimerService.isRunning()) {
+        if (endsAt <= 0L) {
             return;
         }
         if (MainActivity.isAppVisible()) {
@@ -34,7 +34,12 @@ public class TimerAlarmReceiver extends BroadcastReceiver {
         if (language == null) {
             language = "en";
         }
-        TimerService.postDoneNotification(context, endsAt, title, body, language, sound);
+        if (sound) {
+            AlarmService.startAlarm(context, title, body, language,
+                    "timer", "timer", "timer:" + endsAt, false);
+        } else {
+            TimerService.postDoneNotification(context, endsAt, title, body, language, false);
+        }
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {

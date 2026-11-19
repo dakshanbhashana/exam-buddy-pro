@@ -434,6 +434,29 @@
               <input type="checkbox" id="sound-enabled" class="switch-input" checked>
               <span class="switch" aria-hidden="true"></span>
             </label>
+            <div class="setting-divider"></div>
+            <h4 class="setting-subtitle" data-i18n="alarmSettings">Task alarm</h4>
+            <label>
+              <span data-i18n="alarmTone">Alarm ringtone</span>
+              <select id="alarm-tone">
+                <option value="0" data-i18n="alarmToneClassic">Classic bell</option>
+                <option value="1" data-i18n="alarmToneMechanical">Mechanical clock</option>
+                <option value="2" data-i18n="alarmToneBeep">Alert beep</option>
+              </select>
+            </label>
+            <label class="switch-row"><span data-i18n="alarmVibrate">Vibrate with alarm</span>
+              <input type="checkbox" id="alarm-vibrate" class="switch-input" checked>
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row"><span data-i18n="alarmBluetooth">Bluetooth only when connected</span>
+              <input type="checkbox" id="alarm-bluetooth" class="switch-input" checked>
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+            <label><span data-i18n="alarmSnooze">Snooze (minutes)</span><input type="number" id="alarm-snooze" min="1" max="30" value="5"></label>
+            <button type="button" id="alarm-test-btn" class="secondary-btn full-btn" data-i18n="alarmTest">Test alarm</button>
+            <button type="button" id="alarm-fullscreen-btn" class="secondary-btn full-btn hidden" data-i18n="alarmFullScreenAccess">Allow full-screen alarms</button>
+            <p class="hint" data-i18n="alarmHint">Alarms ring loudly even when the app is closed, and play through Bluetooth when a device is connected. They stop automatically after one minute.</p>
+            <div class="setting-divider"></div>
             <button type="button" id="background-access-btn" class="secondary-btn full-btn" data-i18n="backgroundAccess">Background running access</button>
             <p id="background-status" class="hint background-status"></p>
             <button type="button" id="permissions-btn" class="secondary-btn full-btn" data-i18n="permissions.manage">Notifications, alarms &amp; app access</button>
@@ -508,7 +531,7 @@
           <span class="rq-app-logo"><img src="logo.svg" alt=""></span>
           <h2 class="rq-app-name">Exam Buddy Pro</h2>
           <p class="rq-app-sub" data-i18n="about.subtitle">Sinhala English study app</p>
-          <span class="rq-version" data-i18n="version">Version 1.9</span>
+          <span class="rq-version" data-i18n="version">Version 2.0</span>
         </div>
         <div class="rq-mini-actions">
           <button type="button" id="about-privacy-btn" class="rq-mini-btn" data-i18n="about.privacy">Privacy policy</button>
@@ -550,7 +573,7 @@
 
       <div class="about-foot">
         <span data-i18n="developedBy">Developed by Dakshan Bhashna</span>
-        <span data-i18n="version">Version 1.9</span>
+        <span data-i18n="version">Version 2.0</span>
       </div>
     </section>
   </main>
@@ -560,7 +583,7 @@
   </button>
 
   <footer class="app-footer">
-    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 1.9</span></p>
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 2.0</span></p>
   </footer>
 
   <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
@@ -614,6 +637,23 @@
       </div>
       <div id="detail-modal-body" class="detail-modal-body"></div>
       <div id="detail-modal-actions" class="detail-modal-actions"></div>
+    </div>
+  </div>
+
+  <div id="alarm-overlay" class="alarm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="alarm-overlay-title">
+    <div class="alarm-overlay-backdrop"></div>
+    <div class="alarm-overlay-card">
+      <div class="alarm-pulse" aria-hidden="true"></div>
+      <p class="alarm-eyebrow" data-i18n="alarmOverlayEyebrow">Exam Buddy alarm</p>
+      <span id="alarm-overlay-time" class="alarm-overlay-time">08:00</span>
+      <h2 id="alarm-overlay-title">Time to study</h2>
+      <p id="alarm-overlay-body"></p>
+      <p id="alarm-overlay-countdown" class="alarm-overlay-countdown"></p>
+      <div class="alarm-overlay-actions">
+        <button type="button" id="alarm-overlay-stop" class="primary-btn full-btn" data-i18n="alarmTurnOff">Turn off alarm</button>
+        <button type="button" id="alarm-overlay-snooze" class="secondary-btn full-btn" data-i18n="alarmSnoozeAction">Snooze</button>
+      </div>
+      <p class="alarm-overlay-note" data-i18n="alarmOverlayNote">The alarm stops automatically after one minute.</p>
     </div>
   </div>
 

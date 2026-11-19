@@ -12,3 +12,6 @@ android/assets/www/
 .DS_Store
 Thumbs.db
 *.log
+
+# Local security audit output (not published)
+Security-Audit-Report/

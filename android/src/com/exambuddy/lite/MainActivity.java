@@ -71,6 +71,7 @@ public class MainActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean backPromptShown = false;
     private static volatile boolean appVisible = false;
+    private static volatile MainActivity instance = null;
 
     private long downloadId = -1;
     private boolean updateDownloading = false;
@@ -81,9 +82,59 @@ public class MainActivity extends Activity {
         return appVisible;
     }
 
+    public static void notifyAlarmTriggered(String stateJson) {
+        MainActivity activity = instance;
+        if (activity == null) return;
+        activity.evaluateAlarmScript(
+                "if(window.ExamBuddyAlarmFired)window.ExamBuddyAlarmFired("
+                        + JSONObject.quote(stateJson == null ? "{}" : stateJson) + ");");
+    }
+
+    public static void notifyAlarmStopped() {
+        MainActivity activity = instance;
+        if (activity == null) return;
+        activity.evaluateAlarmScript(
+                "if(window.ExamBuddyAlarmStopped)window.ExamBuddyAlarmStopped();");
+    }
+
+    public static void showInAppReminder(String title, String body) {
+        MainActivity activity = instance;
+        if (activity == null) return;
+        activity.evaluateAlarmScript(
+                "if(window.ExamBuddyInAppReminder)window.ExamBuddyInAppReminder("
+                        + JSONObject.quote(title == null ? "" : title) + ","
+                        + JSONObject.quote(body == null ? "" : body) + ");");
+    }
+
+    private void evaluateAlarmScript(final String js) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (webView == null) return;
+                try {
+                    webView.evaluateJavascript(js, null);
+                } catch (Exception ignored) {
+                }
+            }
+        });
+    }
+
+    private void pushAlarmState() {
+        if (webView == null) return;
+        try {
+            String state = AlarmService.getStateJson();
+            webView.evaluateJavascript(
+                    "if(window.ExamBuddyAlarmState)window.ExamBuddyAlarmState("
+                            + JSONObject.quote(state) + ");",
+                    null);
+        } catch (Exception ignored) {
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.parseColor("#fff1f2")); // Light rose background
@@ -112,6 +163,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new DataBridge(), "ExamBuddyFileBridge");
         webView.addJavascriptInterface(new TimerBridge(), "ExamBuddyNative");
         webView.addJavascriptInterface(new ReminderBridge(), "ExamBuddyReminders");
+        webView.addJavascriptInterface(new AlarmBridge(), "ExamBuddyAlarm");
         webView.addJavascriptInterface(new PermissionBridge(), "ExamBuddyPermissions");
         webView.addJavascriptInterface(new UpdateBridge(), "ExamBuddyUpdate");
 
@@ -147,6 +199,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         pushPermissionStatus();
+                        pushAlarmState();
                     }
                 }, 700);
             }
@@ -183,6 +236,12 @@ public class MainActivity extends Activity {
             webView.evaluateJavascript(
                     "(function(){try{if(window.ExamBuddyOnResume)window.ExamBuddyOnResume();if(window.ExamBuddyPermissionsChanged)window.ExamBuddyPermissionsChanged();}catch(e){}})();",
                     null);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    pushAlarmState();
+                }
+            }, 350);
         }
         if (pendingUpdateUrl != null) {
             String url = pendingUpdateUrl;
@@ -532,85 +591,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    private static int taskReminderRequestCode(String taskId, String kind) {
-        String key = (taskId == null ? "" : taskId) + ":" + (kind == null ? "" : kind);
-        return 52000 + ((key.hashCode() & 0x7FFFFFFF) % 100000);
-    }
-
-    private PendingIntent taskReminderPendingIntent(String taskId, String kind, String title,
-                                                    String body, boolean sound, String language) {
-        Intent intent = new Intent(this, TaskReminderReceiver.class);
-        intent.setAction(TaskReminderReceiver.ACTION_TASK_REMINDER);
-        intent.putExtra(TaskReminderReceiver.EXTRA_TASK_ID, taskId);
-        intent.putExtra(TaskReminderReceiver.EXTRA_KIND, kind);
-        intent.putExtra(TaskReminderReceiver.EXTRA_TITLE, title);
-        intent.putExtra(TaskReminderReceiver.EXTRA_BODY, body);
-        intent.putExtra(TaskReminderReceiver.EXTRA_SOUND, sound);
-        intent.putExtra(TaskReminderReceiver.EXTRA_LANGUAGE, language);
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            flags |= PendingIntent.FLAG_IMMUTABLE;
-        }
-        return PendingIntent.getBroadcast(
-                this,
-                taskReminderRequestCode(taskId, kind),
-                intent,
-                flags);
-    }
-
     private void scheduleTaskReminder(String taskId, String kind, long triggerAt, String title,
                                       String body, boolean sound, String language) {
-        if (triggerAt <= System.currentTimeMillis()) {
-            return;
-        }
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        if (manager == null) {
-            return;
-        }
-        PendingIntent pendingIntent =
-                taskReminderPendingIntent(taskId, kind, title, body, sound, language);
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !manager.canScheduleExactAlarms()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-                } else {
-                    manager.set(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-                }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-            } else {
-                manager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-            }
-        } catch (SecurityException securityError) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-                } else {
-                    manager.set(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent);
-                }
-            } catch (Exception ignored) {
-            }
-        } catch (Exception ignored) {
-        }
+        ReminderScheduler.schedule(this, taskId, kind, triggerAt, title, body, sound, language);
     }
 
     private void cancelTaskReminder(String taskId, String kind) {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        if (manager == null) {
-            return;
-        }
-        try {
-            manager.cancel(taskReminderPendingIntent(taskId, kind, null, null, true, "en"));
-        } catch (Exception ignored) {
-        }
-        try {
-            NotificationManager notifications =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notifications != null) {
-                notifications.cancel(TaskReminderReceiver.notificationId(taskId, kind));
-            }
-        } catch (Exception ignored) {
-        }
+        ReminderScheduler.cancel(this, taskId, kind);
     }
 
     private class PermissionBridge {
@@ -1041,11 +1028,91 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    cancelTaskReminder(taskId, "start");
-                    cancelTaskReminder(taskId, "end");
-                    for (int i = 0; i < 20; i += 1) {
-                        cancelTaskReminder(taskId, "break-" + i);
+                    ReminderScheduler.cancelAll(MainActivity.this, taskId);
+                }
+            });
+        }
+    }
+
+    private class AlarmBridge {
+        @JavascriptInterface
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public boolean isRinging() {
+            return AlarmService.isRinging();
+        }
+
+        @JavascriptInterface
+        public String getState() {
+            return AlarmService.getStateJson();
+        }
+
+        @JavascriptInterface
+        public void configure(String json) {
+            AlarmService.configure(MainActivity.this, json);
+        }
+
+        @JavascriptInterface
+        public boolean canUseFullScreen() {
+            if (Build.VERSION.SDK_INT >= 34) {
+                NotificationManager manager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                return manager == null || manager.canUseFullScreenIntent();
+            }
+            return true;
+        }
+
+        @JavascriptInterface
+        public void requestFullScreen() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT < 34) return;
+                    try {
+                        Intent intent = new Intent(
+                                Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                                Uri.parse("package:" + getPackageName()));
+                        startActivity(intent);
+                    } catch (Exception ignored) {
                     }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stop() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlarmService.stop(MainActivity.this);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void snooze() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlarmService.snooze(MainActivity.this);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void test(final String title, final String body, final String language) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlarmService.startAlarm(MainActivity.this,
+                            title == null || title.trim().isEmpty() ? "Alarm test" : title,
+                            body == null || body.trim().isEmpty() ? "Exam Buddy Pro" : body,
+                            language == null ? "en" : language,
+                            "test", "test",
+                            "test:" + System.currentTimeMillis(), true);
                 }
             });
         }
@@ -1171,5 +1238,11 @@ public class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (instance == this) instance = null;
+        super.onDestroy();
     }
 }

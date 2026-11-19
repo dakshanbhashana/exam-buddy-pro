@@ -1,0 +1,27 @@
+{
+  "versionCode": 12,
+  "versionName": "2.0",
+  "changelog": {
+    "en": [
+      "Task alarms now ring loudly even when the app is fully closed, using exact alarm-clock scheduling that survives Doze and reboot.",
+      "Added three CC0 alarm ringtones with a sound picker, a test-alarm button and full alarm settings.",
+      "Alarms play through your connected Bluetooth speaker or headphones and switch to the phone speaker when no Bluetooth device is connected.",
+      "A full-screen alarm popup appears over the lock screen with one-tap turn off and snooze. When the app is open, the same alarm appears as a polished in-app popup.",
+      "If you do not turn the alarm off, it stops automatically after one minute.",
+      "Added snooze, vibration patterns, volume ramp-up, and automatic rescheduling after reboot or an app update.",
+      "Focus and break timers now use the same background alarm engine, so sessions never end silently.",
+      "New alarm settings panel with a shortcut to allow full-screen alarms on Android 14 and newer."
+    ],
+    "si": [
+      "යෙදුම සම්පූර්ණයෙන්ම වසා තිබුණත් කාර්ය ඇලාම් දැන් හයියෙන් නාද වේ. Doze සහ නැවත ඇරඹීමෙන් පසුවත් ක්‍රියා කරන නිශ්චිත ඇලාම් ඔරලෝසු කාලසටහන් භාවිතා වේ.",
+      "CC0 බලපත්‍රයේ ඇලාම් සංගීත තුනක්, ශබ්ද තේරීමක්, ඇලාම් පරීක්ෂණ බොත්තමක් සහ සම්පූර්ණ ඇලාම් සැකසුම් එක් කර ඇත.",
+      "Bluetooth ස්පීකරයක් හෝ හෙඩ්ෆෝනයක් සම්බන්ධ නම් ඇලාම් එය හරහා නාද වේ. Bluetooth උපාංගයක් නැත්නම් දුරකථන ස්පීකරයෙන් නාද වේ.",
+      "තිර අගුළු දමා තිබුණත් සම්පූර්ණ තිර ඇලාම් පොප් අප් එකක් පෙන්වයි. එක් ස්පර්ශයකින් නවත්වන්න හෝ snooze කරන්න පුළුවන්. යෙදුම විවෘතව තිබේ නම් එම ඇලාම් යෙදුම තුළ ලස්සන පොප් අප් එකක් ලෙසම පෙන්වයි.",
+      "ඔබ ඇලාම් නවත්වා නොගත්තොත් විනාඩියකින් ස්වයංක්‍රීයව නවතී.",
+      "Snooze, කම්පන රටා, ශබ්දය සෙමින් වැඩි කිරීම, සහ නැවත ඇරඹීමකින් හෝ යෙදුම යාවත්කාලීන වීමකින් පසු ඇලාම් නැවත සැකසීම එක් කර ඇත.",
+      "focus සහ විවේක කාලමාන දැන් එම පසුබිම් ඇලාම් එන්ජිමම භාවිතා කරයි. එබැවින් සැසි නිශ්ශබ්දව අවසන් නොවේ.",
+      "Android 14 සහ ඊට අලුත් ඒවායේ සම්පූර්ණ තිර ඇලාම්වලට අවසර දීමට කෙටි මාර්ගයක් සහිත නව ඇලාම් සැකසුම් පුවරුවක්."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v2.0\n\nThis release rebuilds alarms from the ground up so study reminders actually ring when you need them.\n\n### Alarms that keep working\n- Exact alarm-clock scheduling, including after reboot and app updates\n- Loud native playback even when the app is fully closed\n- Bluetooth routing when a headset or speaker is connected, speaker otherwise\n- Auto-stop after one minute if the alarm is not dismissed\n\n### Alarm experience\n- Full-screen lock-screen alarm with turn off and snooze\n- In-app alarm popup while the app is open\n- Three bundled CC0 alarm ringtones and a test button\n- Vibration, volume ramp-up and snooze settings\n- Focus and break timers use the same reliable background alarm\n"
+}

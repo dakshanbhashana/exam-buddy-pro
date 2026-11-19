@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Exam Buddy Pro — plan exams, run focus sessions, track tasks and study smarter.">
-  <meta name="theme-color" content="#9f1239">
+  <meta name="theme-color" content="#1e1b4b">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://raw.githubusercontent.com https://github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
   <title>Exam Buddy Pro</title>
@@ -14,14 +14,18 @@
 </head>
 <body>
   <div id="app-splash" class="app-splash" aria-label="Loading">
+    <div class="splash-aurora" aria-hidden="true"></div>
     <div class="splash-inner">
       <div class="splash-logo-wrap">
+        <span class="splash-orbit splash-orbit-a" aria-hidden="true"></span>
+        <span class="splash-orbit splash-orbit-b" aria-hidden="true"></span>
         <img src="logo.svg" alt="" class="splash-logo">
       </div>
       <strong class="splash-name">Exam Buddy <span>Pro</span></strong>
-      <span class="splash-tag">Sinhala English study app</span>
+      <span class="splash-tag" data-i18n="brandSubtitle">Plan smarter. Focus deeper. Ace every exam.</span>
       <div class="splash-progress" aria-hidden="true"><div class="splash-progress-fill"></div></div>
-      <span class="splash-credit">Developed by Dakshan Bhashna</span>
+      <span class="splash-status">Preparing your study space</span>
+      <span class="splash-credit" data-i18n="developedBy">Developed by Dakshan Bhashna</span>
     </div>
   </div>
 
@@ -79,6 +83,10 @@
     <button class="tab-btn" data-tab="tasks">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"></path><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"></path></svg>
       <span data-i18n="tab.tasks">Tasks</span>
+    </button>
+    <button class="tab-btn" data-tab="cards">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="13" height="16" rx="2"></rect><path d="M8 3h11a2 2 0 0 1 2 2v14"></path></svg>
+      <span data-i18n="tab.cards">Cards</span>
     </button>
     <button class="tab-btn" data-tab="focus">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
@@ -146,6 +154,11 @@
           <span class="stat-label" data-i18n="stat.streak">Study Streak</span>
           <span id="stat-streak" class="stat-value">0 days</span>
         </button>
+        <button type="button" class="stat-card" data-detail="cardsDue">
+          <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="16" rx="2"></rect><path d="M8 3h11a2 2 0 0 1 2 2v14"></path></svg></span>
+          <span class="stat-label" data-i18n="stat.cardsDue">Cards Due</span>
+          <span id="stat-cards-due" class="stat-value">0</span>
+        </button>
       </div>
 
       <div class="dashboard-split">
@@ -173,6 +186,9 @@
             </button>
             <button type="button" class="quick-action" data-quick="tasks">
               <span class="qa-icon">✓</span><span><strong data-i18n="quick.addTask">Add task</strong><small data-i18n="quick.addTaskHint">Plan your revision</small></span>
+            </button>
+            <button type="button" class="quick-action" data-quick="cards">
+              <span class="qa-icon">▤</span><span><strong data-i18n="quick.reviewCards">Review cards</strong><small data-i18n="quick.reviewCardsHint">Practice active recall</small></span>
             </button>
             <button type="button" class="quick-action" data-quick="focus">
               <span class="qa-icon">▷</span><span><strong data-i18n="quick.startFocus">Start focus</strong><small data-i18n="quick.startFocusHint">Begin a Pomodoro</small></span>
@@ -368,6 +384,78 @@
       </div>
     </section>
 
+    <section id="cards" class="tab-panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="cards.eyebrow">Active recall</p>
+          <h2 data-i18n="cards.title">Flashcards</h2>
+        </div>
+        <button type="button" id="cards-review-due" class="quick-btn" data-i18n="cards.reviewDue">Review due</button>
+      </div>
+
+      <div class="stats-grid card-stats">
+        <div class="stat-card">
+          <span class="stat-label" data-i18n="cards.total">Total cards</span>
+          <span id="card-stat-total" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label" data-i18n="cards.due">Due now</span>
+          <span id="card-stat-due" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label" data-i18n="cards.mastered">Mastered</span>
+          <span id="card-stat-mastered" class="stat-value">0</span>
+        </div>
+      </div>
+
+      <form id="card-form" class="card form-card">
+        <div class="card-title-row">
+          <h3 id="card-form-title" data-i18n="cards.addCard">Add card</h3>
+          <button type="button" id="card-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+        </div>
+        <div class="form-grid">
+          <label class="full-width">
+            <span data-i18n="cards.front">Question</span>
+            <textarea id="card-front" rows="2" maxlength="500" required data-i18n-placeholder="cards.frontPlaceholder" placeholder="e.g. What is the powerhouse of the cell?"></textarea>
+          </label>
+          <label class="full-width">
+            <span data-i18n="cards.back">Answer</span>
+            <textarea id="card-back" rows="3" maxlength="1000" required data-i18n-placeholder="cards.backPlaceholder" placeholder="e.g. The mitochondria"></textarea>
+          </label>
+          <label>
+            <span data-i18n="cards.deck">Deck</span>
+            <input type="text" id="card-deck" maxlength="40" list="card-deck-options" data-i18n-placeholder="cards.deckPlaceholder" placeholder="e.g. Biology">
+            <datalist id="card-deck-options"></datalist>
+          </label>
+          <label>
+            <span data-i18n="cards.linkedExam">Exam (optional)</span>
+            <select id="card-exam">
+              <option value="" data-i18n="noExam">No exam</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" id="card-submit" class="primary-btn" data-i18n="cards.addCard">Add card</button>
+      </form>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 data-i18n="cards.yourCards">Your cards</h3>
+          <span id="card-count" class="pill">0</span>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="card-search" data-i18n-placeholder="cards.searchPlaceholder" data-i18n-aria="cards.searchLabel" placeholder="Search cards or decks..." aria-label="Search cards">
+          <select id="card-deck-filter" data-i18n-aria="cards.filterDeck" aria-label="Filter by deck"></select>
+          <select id="card-status-filter" data-i18n-aria="cards.filterStatus" aria-label="Filter by status">
+            <option value="all" data-i18n="cards.filterAll">All cards</option>
+            <option value="due" data-i18n="cards.filterDue">Due</option>
+            <option value="mastered" data-i18n="cards.filterMastered">Mastered</option>
+          </select>
+        </div>
+        <ul id="card-list" class="item-list"></ul>
+        <p id="card-empty" class="empty-state" data-i18n="cards.empty">No flashcards yet. Add your first card above.</p>
+      </div>
+    </section>
+
     <section id="focus" class="tab-panel">
       <div class="section-head">
         <div>
@@ -457,8 +545,6 @@
             <button type="button" id="alarm-fullscreen-btn" class="secondary-btn full-btn hidden" data-i18n="alarmFullScreenAccess">Allow full-screen alarms</button>
             <p class="hint" data-i18n="alarmHint">Alarms ring loudly even when the app is closed, and play through Bluetooth when a device is connected. They stop automatically after one minute.</p>
             <div class="setting-divider"></div>
-            <button type="button" id="background-access-btn" class="secondary-btn full-btn" data-i18n="backgroundAccess">Background running access</button>
-            <p id="background-status" class="hint background-status"></p>
             <button type="button" id="permissions-btn" class="secondary-btn full-btn" data-i18n="permissions.manage">Notifications, alarms &amp; app access</button>
             <button type="submit" class="primary-btn full-btn" data-i18n="saveSettings">Save settings</button>
           </form>
@@ -525,56 +611,119 @@
         </div>
       </div>
 
-      <article class="about-rq-card about-app-card">
-        <span class="rq-label" data-i18n="about.label">ABOUT</span>
-        <div class="rq-app-center">
-          <span class="rq-app-logo"><img src="logo.svg" alt=""></span>
-          <h2 class="rq-app-name">Exam Buddy Pro</h2>
-          <p class="rq-app-sub" data-i18n="about.subtitle">Sinhala English study app</p>
-          <span class="rq-version" data-i18n="version">Version 2.0</span>
-        </div>
-        <div class="rq-mini-actions">
-          <button type="button" id="about-privacy-btn" class="rq-mini-btn" data-i18n="about.privacy">Privacy policy</button>
-          <button type="button" id="about-licences-btn" class="rq-mini-btn" data-i18n="about.licences">Licences and credits</button>
-          <button type="button" id="about-update-btn" class="rq-mini-btn" data-i18n="about.checkUpdates">Check for updates</button>
-        </div>
-      </article>
-
-
-      <article class="about-rq-card about-dev-card">
-        <span class="rq-label" data-i18n="developer.label">DEVELOPER</span>
-        <div class="rq-dev-head">
-          <span class="rq-dev-logo" aria-hidden="true"><svg viewBox="0 0 64 64" role="presentation"><defs><linearGradient id="dbGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"></stop><stop offset="1" stop-color="#f0abfc"></stop></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#dbGrad)"></rect><text x="32" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="27" font-weight="800" fill="#2e1065">DB</text></svg></span>
-          <div class="rq-dev-copy">
-            <h3 class="rq-dev-name">Dakshan Bhashna</h3>
-            <p class="rq-dev-role" data-i18n="developer.role">Developer and owner</p>
+      <header class="abx-hero">
+        <div class="abx-hero-copy">
+          <span class="abx-kicker" data-i18n="about.label">ABOUT</span>
+          <h2 class="abx-title">Exam Buddy <span class="abx-title-accent">Pro</span></h2>
+          <p class="abx-lead" data-i18n="brandSubtitle">Plan smarter. Focus deeper. Ace every exam.</p>
+          <div class="abx-meta">
+            <span class="abx-chip"><span class="abx-chip-dot" aria-hidden="true"></span><span data-i18n="about.subtitle">Sinhala English study app</span></span>
+            <span class="abx-chip abx-chip-version" data-i18n="version">Version 2.0</span>
           </div>
         </div>
-        <p class="rq-dev-msg" data-i18n="developer.message">Questions ideas or a problem Message me</p>
-        <div class="rq-social-grid">
-          <a class="rq-social rq-whatsapp" href="https://wa.me/94743706283?text=Hello%20Dakshan" data-external-link="true">
-            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a9.9 9.9 0 0 0-8.5 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3.1.8.8-3-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.3-1.6-1.5-1.8-.2-.2 0-.3.1-.5l.4-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.4.2-1.5-.1-.2-.3-.3-.6-.4Z"></path></svg>
+        <div class="abx-hero-art" aria-hidden="true">
+          <span class="abx-ring abx-ring-a"></span>
+          <span class="abx-ring abx-ring-b"></span>
+          <span class="abx-spark abx-spark-a"></span>
+          <span class="abx-spark abx-spark-b"></span>
+          <span class="abx-logo"><img src="logo.svg" alt=""></span>
+        </div>
+      </header>
+
+      <div class="abx-actions">
+        <button type="button" id="about-privacy-btn" class="abx-action">
+          <span class="abx-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="3"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 15v2"></path></svg></span>
+          <span class="abx-action-copy"><strong data-i18n="about.privacy">Privacy policy</strong><small data-i18n="about.privacyHint">Your data never leaves this device</small></span>
+          <span class="abx-action-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" id="about-licences-btn" class="abx-action">
+          <span class="abx-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5V5.5Z"></path><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"></path><path d="M9 7h7M9 10h5"></path></svg></span>
+          <span class="abx-action-copy"><strong data-i18n="about.licences">Licences and credits</strong><small data-i18n="about.licencesHint">Sounds, fonts and libraries</small></span>
+          <span class="abx-action-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" id="about-update-btn" class="abx-action">
+          <span class="abx-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path><path d="m8.5 12 2.4 2.4L16 9.8"></path></svg></span>
+          <span class="abx-action-copy"><strong data-i18n="about.checkUpdates">Check for updates</strong><small data-i18n="about.updateHint">Always get the latest release</small></span>
+          <span class="abx-action-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+
+      <div class="abx-section-head">
+        <h3 data-i18n="whatYouGet">What you get</h3>
+        <span data-i18n="smallTools">Small tools, big momentum</span>
+      </div>
+
+      <div class="abx-features">
+        <article class="abx-feature">
+          <span class="abx-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M16 3v4M8 3v4M3 10h18"></path><path d="M12 14v4M10 16h4"></path></svg></span>
+          <h4 data-i18n="feature1Title">Live countdowns</h4>
+          <p data-i18n="feature1Text">Add an exam date once. A precise days-to-seconds timer and prep progress bar keep the deadline visible.</p>
+        </article>
+        <article class="abx-feature">
+          <span class="abx-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
+          <h4 data-i18n="feature2Title">Pomodoro focus</h4>
+          <p data-i18n="feature2Text">Work in focused sprints with configurable focus and break lengths, auto-start options and a completion chime.</p>
+        </article>
+        <article class="abx-feature">
+          <span class="abx-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"></path><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"></path></svg></span>
+          <h4 data-i18n="feature3Title">Task planning</h4>
+          <p data-i18n="feature3Text">Capture revision to-dos, set priorities and due dates, then filter and search to find exactly what matters now.</p>
+        </article>
+        <article class="abx-feature">
+          <span class="abx-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg></span>
+          <h4 data-i18n="feature4Title">Honest insights</h4>
+          <p data-i18n="feature4Text">A seven-day focus chart, task balance and a coach's note turn your activity into gentle, useful feedback.</p>
+        </article>
+      </div>
+
+      <div class="abx-notes">
+        <article class="abx-note abx-note-privacy">
+          <span class="abx-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.2 8.2 8 9 4.8-.8 8-4.5 8-9V6l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+          <div>
+            <h4 data-i18n="feature5Title">Private by design</h4>
+            <p data-i18n="feature5Text">Everything stays on your device. No account, no tracking, no server — you own your study data.</p>
+          </div>
+        </article>
+        <article class="abx-note abx-note-feel">
+          <span class="abx-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"></path><circle cx="12" cy="12" r="3.5"></circle></svg></span>
+          <div>
+            <h4 data-i18n="feature6Title">Made to feel right</h4>
+            <p data-i18n="feature6Text">Light and dark themes, smooth transitions and keyboard-friendly controls keep the workspace comfortable.</p>
+          </div>
+        </article>
+      </div>
+
+      <article class="abx-dev">
+        <div class="abx-dev-head">
+          <span class="abx-dev-avatar" aria-hidden="true"><svg viewBox="0 0 64 64" role="presentation"><defs><linearGradient id="dbGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7dff"></stop><stop offset="1" stop-color="#ffc857"></stop></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#dbGrad)"></rect><text x="32" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="27" font-weight="800" fill="#14112b">DB</text></svg></span>
+          <div class="abx-dev-copy">
+            <span class="abx-kicker" data-i18n="developer.label">DEVELOPER</span>
+            <h3>Dakshan Bhashna</h3>
+            <p data-i18n="developer.role">Developer and owner</p>
+          </div>
+        </div>
+        <p class="abx-dev-msg" data-i18n="developer.message">Questions ideas or a problem Message me</p>
+        <div class="abx-socials">
+          <a class="abx-social abx-whatsapp" href="https://wa.me/94743706283?text=Hello%20Dakshan" data-external-link="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a9.9 9.9 0 0 0-8.5 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3.1.8.8-3-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.3-1.6-1.5-1.8-.2-.2 0-.3.1-.5l.4-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.4.2-1.5-.1-.2-.3-.3-.6-.4Z"></path></svg>
             <span>WhatsApp</span>
           </a>
-          <a class="rq-social rq-email" href="mailto:dakshanbhashana01@gmail.com?subject=Hello%20Dakshan" data-external-link="true">
-            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+          <a class="abx-social abx-email" href="mailto:dakshanbhashana01@gmail.com?subject=Hello%20Dakshan" data-external-link="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m3 7 9 6 9-6"></path></svg>
             <span>Email</span>
           </a>
-          <a class="rq-social rq-website" href="https://www.google.com/search?q=Dakshan+Bhashna" data-external-link="true">
-            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
+          <a class="abx-social abx-website" href="https://www.google.com/search?q=Dakshan+Bhashna" data-external-link="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
             <span data-i18n="developer.website">Website</span>
           </a>
-          <a class="rq-social rq-youtube" href="https://www.youtube.com/results?search_query=Dakshan+Bhashna" data-external-link="true">
-            <svg class="rq-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2c-.2-1-1-1.8-2-2C17.9 4.8 12 4.8 12 4.8s-5.9 0-7.6.4c-1 .2-1.8 1-2 2C2 8.9 2 12 2 12s0 3.1.4 4.8c.2 1 1 1.8 2 2 1.7.4 7.6.4 7.6.4s5.9 0 7.6-.4c1-.2 1.8-1 2-2 .4-1.7.4-4.8.4-4.8s0-3.1-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"></path></svg>
+          <a class="abx-social abx-youtube" href="https://www.youtube.com/results?search_query=Dakshan+Bhashna" data-external-link="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2c-.2-1-1-1.8-2-2C17.9 4.8 12 4.8 12 4.8s-5.9 0-7.6.4c-1 .2-1.8 1-2 2C2 8.9 2 12 2 12s0 3.1.4 4.8c.2 1 1 1.8 2 2 1.7.4 7.6.4 7.6.4s5.9 0 7.6-.4c1-.2 1.8-1 2-2 .4-1.7.4-4.8.4-4.8s0-3.1-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"></path></svg>
             <span>YouTube</span>
           </a>
         </div>
       </article>
 
-      <div class="about-foot">
-        <span data-i18n="developedBy">Developed by Dakshan Bhashna</span>
-        <span data-i18n="version">Version 2.0</span>
-      </div>
+      <p class="abx-foot"><span data-i18n="developedBy">Developed by Dakshan Bhashna</span><span data-i18n="version">Version 2.0</span></p>
     </section>
   </main>
 
@@ -637,6 +786,58 @@
       </div>
       <div id="detail-modal-body" class="detail-modal-body"></div>
       <div id="detail-modal-actions" class="detail-modal-actions"></div>
+    </div>
+  </div>
+
+  <div id="study-modal" class="about-modal study-modal hidden" role="dialog" aria-modal="true" aria-labelledby="study-modal-title">
+    <div class="about-modal-backdrop" data-close-study="true"></div>
+    <div class="about-modal-card study-modal-card">
+      <div class="about-modal-head">
+        <div>
+          <h3 id="study-modal-title" data-i18n="cards.study.title">Study session</h3>
+          <p id="study-modal-subtitle" class="detail-modal-subtitle"></p>
+        </div>
+        <button type="button" id="study-modal-close" class="about-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="study-progress-row">
+        <span id="study-progress" class="study-progress"></span>
+        <span id="study-remaining" class="study-remaining"></span>
+      </div>
+      <div id="study-stage">
+        <button type="button" id="study-card" class="study-card" aria-label="Flashcard. Tap to reveal the answer.">
+          <span class="study-card-inner">
+            <span class="study-face study-front">
+              <span class="study-face-label" data-i18n="cards.study.question">Question</span>
+              <span id="study-front-text" class="study-text"></span>
+              <span class="study-reveal-hint" data-i18n="cards.study.tap">Tap to reveal the answer</span>
+            </span>
+            <span class="study-face study-back">
+              <span class="study-face-label" data-i18n="cards.study.answer">Answer</span>
+              <span id="study-back-text" class="study-text"></span>
+            </span>
+          </span>
+        </button>
+        <button type="button" id="study-reveal" class="primary-btn full-btn" data-i18n="cards.study.showAnswer">Show answer</button>
+        <div id="study-grade" class="study-grade hidden">
+          <button type="button" class="study-grade-btn again" data-grade="again" data-i18n="cards.study.again">Again</button>
+          <button type="button" class="study-grade-btn good" data-grade="good" data-i18n="cards.study.good">Good</button>
+          <button type="button" class="study-grade-btn easy" data-grade="easy" data-i18n="cards.study.easy">Easy</button>
+        </div>
+      </div>
+      <div id="study-empty" class="study-done hidden">
+        <div class="study-done-icon" aria-hidden="true">✓</div>
+        <h4 data-i18n="cards.study.caughtUpTitle">All caught up</h4>
+        <p data-i18n="cards.study.empty">No cards are due right now. Add new cards or come back later.</p>
+        <button type="button" id="study-empty-btn" class="primary-btn full-btn" data-i18n="cards.study.done">Done</button>
+      </div>
+      <div id="study-done" class="study-done hidden">
+        <div class="study-done-icon" aria-hidden="true">✓</div>
+        <h4 data-i18n="cards.study.doneTitle">Session complete</h4>
+        <p id="study-done-body"></p>
+        <div id="study-done-stats" class="study-done-stats"></div>
+        <button type="button" id="study-done-btn" class="primary-btn full-btn" data-i18n="cards.study.done">Done</button>
+      </div>
+      <p id="study-hint" class="hint study-hint" data-i18n="cards.study.startHint">Cards you find hard come back in the same session.</p>
     </div>
   </div>
 

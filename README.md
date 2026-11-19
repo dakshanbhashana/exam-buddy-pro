@@ -19,9 +19,10 @@ Alarm ringtones are CC0 public-domain sounds sourced from Wikimedia Commons: “
 - **Focused detail sheets** when you tap a task, exam, or dashboard stat
 - **Pomodoro focus timer** with configurable focus/break lengths and auto-start
 - **Smart study plans** with tea, food and rest breaks plus automatic techniques
+- **Flashcards** with decks, linked exams, search and a spaced-repetition study mode
 - **Insights** including a 7-day focus chart, task balance and study streak
 - **Sinhala and English** interface with instant switching
-- **Rose light and dark themes** with an automatic mode
+- **Indigo aurora light and dark themes** with an automatic mode
 - **Reliable task alarms** that ring even when the app is closed, with exact alarm-clock scheduling
 - **Full-screen lock-screen alarm** with turn off and snooze, plus an in-app alarm popup
 - **Bluetooth-aware audio** that plays through a connected headset or speaker, otherwise the phone speaker
@@ -34,6 +35,10 @@ Alarm ringtones are CC0 public-domain sounds sourced from Wikimedia Commons: “
 ## Alarms
 
 Task alarms are scheduled as exact alarm-clock events so they wake the device even in Doze. When an alarm fires, a foreground service starts within the broadcast, plays the selected ringtone on the alarm stream, and raises the alarm volume temporarily. If a Bluetooth A2DP/BLE audio device is connected, playback is routed to that device instead. The service posts a high-priority alarm notification with **Turn off** and **Snooze** actions and, when the app is not visible, a full-screen alarm activity over the lock screen. Alarms stop automatically after 60 seconds. Pending alarms are stored natively and rescheduled after a reboot or an app update.
+
+## Flashcards
+
+Create cards with a question and an answer, group them into decks, and optionally link a deck to an exam. Cards start due immediately. In study mode you reveal the answer, then grade yourself **Again**, **Good** or **Easy**. The app schedules the next review with a simple Leitner-style spaced-repetition system, keeps hard cards in the same session, and shows due and mastered counts on the dashboard. All cards are stored locally with the rest of your study data.
 
 ## How updates work
 
@@ -112,7 +117,7 @@ android/              Android WebView wrapper and build script
 
 ## Privacy
 
-Exam Buddy Pro does not create accounts, does not run its own backend for study data, and does not sell personal information. Exams, tasks, focus sessions and settings are stored locally on the device. The only network request the app makes is an HTTPS request to GitHub to check for updates.
+Exam Buddy Pro does not create accounts, does not run its own backend for study data, and does not sell personal information. Exams, tasks, flashcards, focus sessions and settings are stored locally on the device. The only network request the app makes is an HTTPS request to GitHub to check for updates.
 
 ## Developer
 

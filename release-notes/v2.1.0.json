@@ -1,0 +1,23 @@
+{
+  "versionCode": 13,
+  "versionName": "2.1.0",
+  "changelog": {
+    "en": [
+      "Added flashcards with question and answer cards grouped into decks.",
+      "Link a deck to an exam so revision stays focused on the right subject.",
+      "Study mode reveals the answer, then grades each card Again, Good or Easy.",
+      "A Leitner-style spaced-repetition schedule brings hard cards back in the same session and spaces out cards you know.",
+      "Search cards, filter by deck or status, and see due and mastered counts.",
+      "Flashcards now feed the dashboard card stat, your study streak and the local backup snapshot."
+    ],
+    "si": [
+      "ප්‍රශ්නය සහ පිළිතුර සහිත ෆ්ලෑෂ් කාඩ්පත්, තට්ටු වලට කාණ්ඩගත කර එක් කර ඇත.",
+      "නිවැරදි විෂයට අවධානය යොමු කර ගැනීමට තට්ටුවක් විභාගයකට සම්බන්ධ කළ හැක.",
+      "අධ්‍යයන ප්‍රකාරයේ පිළිතුර පෙන්වා, එක් එක් කාඩ්පත නැවත, හොඳයි හෝ පහසු ලෙස ශ්‍රේණිගත කරන්න.",
+      "Leitner ක්‍රමයේ ප්‍රතිපුනරුත්ථාපන කාලසටහනක් අපහසු කාඩ්පත් එම සැසියේම නැවත ගෙන එන අතර දන්නා කාඩ්පත් දිගු කාලයකට පසුව ගෙන එයි.",
+      "කාඩ්පත් සොයන්න, තට්ටුව හෝ තත්ත්වය අනුව පෙරන්න, සහ ඉගෙන ගත යුතු සහ හොඳින් දත් ගණන බලන්න.",
+      "ෆ්ලෑෂ් කාඩ්පත් දැන් උපකරණ පුවරුවේ කාඩ්පත් ගණන, අධ්‍යයන අඛණ්ඩතාව සහ දේශීය උපස්ථ දත්තවලට එක් වේ."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v2.1.0 — Part 1: Flashcards\n\nBuild active recall into your revision with a fast, offline flashcard system.\n\n### What's new\n- Question and answer cards grouped into decks\n- Optional exam links to keep each deck focused\n- A flip-card study mode with Again, Good and Easy grading\n- Leitner-style spaced repetition that requeues hard cards in the same session\n- Search, deck and status filters, plus due and mastered counts\n- Card reviews count toward your study streak and are saved in the local backup\n"
+}

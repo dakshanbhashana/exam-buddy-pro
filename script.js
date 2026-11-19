@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   exams: "examBuddy_exams",
   tasks: "examBuddy_tasks",
+  flashcards: "examBuddy_flashcards",
   theme: "examBuddy_theme",
   language: "examBuddy_language",
   pomodoro: "examBuddy_pomodoro",
@@ -32,8 +33,7 @@ const MODES = {
 
 const CIRCUMFERENCE = 2 * Math.PI * 104;
 const DAY_MS = 1000 * 60 * 60 * 24;
-const SNAPSHOT_VERSION = 4;
-
+const SNAPSHOT_VERSION = 5;
 const EXAM_LIMIT = 3;
 const TECHNIQUES = {
   pomodoro: { focus: 25, short: 5, long: 15, cycle: 4 },
@@ -46,6 +46,10 @@ const TECHNIQUES = {
 const STUDY_METHODS = ["none", "activeRecall", "spaced", "feynman", "interleaving", "sq3r"];
 const REMINDER_KINDS = ["start", "end"];
 const REMINDER_BREAK_LIMIT = 20;
+
+const CARD_MASTERED_BOX = 4;
+const CARD_MAX_BOX = 5;
+const CARD_INTERVALS = [10 * 60 * 1000, DAY_MS, 3 * DAY_MS, 7 * DAY_MS, 16 * DAY_MS, 35 * DAY_MS];
 
 const APP_VERSION_NAME = "2.0";
 const APP_VERSION_CODE = 12;
@@ -392,6 +396,9 @@ const I18N = {
     "developer.message": "Questions ideas or a problem Message me",
     "developer.website": "Website",
     "about.checkUpdates": "Check for updates",
+    "about.privacyHint": "Your data never leaves this device",
+    "about.licencesHint": "Sounds, fonts and libraries",
+    "about.updateHint": "Always get the latest release",
     version: "Version 2.0",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
@@ -499,6 +506,69 @@ const I18N = {
     "update.failedInstall": "Update download failed. Try again.",
     "update.badUrl": "This update link is not trusted.",
     "update.ready": "Update downloaded. Finish installing in the Android installer.",
+    "tab.cards": "Cards",
+    "stat.cardsDue": "Cards Due",
+    "quick.reviewCards": "Review cards",
+    "quick.reviewCardsHint": "Practice active recall",
+    "detail.cardsDue": "Cards due",
+    "detail.openCards": "Open Cards",
+    "cards.eyebrow": "Active recall",
+    "cards.title": "Flashcards",
+    "cards.reviewDue": "Review due",
+    "cards.total": "Total cards",
+    "cards.due": "Due now",
+    "cards.mastered": "Mastered",
+    "cards.addCard": "Add card",
+    "cards.editCard": "Edit card",
+    "cards.front": "Question",
+    "cards.frontPlaceholder": "e.g. What is the powerhouse of the cell?",
+    "cards.back": "Answer",
+    "cards.backPlaceholder": "e.g. The mitochondria",
+    "cards.deck": "Deck",
+    "cards.deckPlaceholder": "e.g. Biology",
+    "cards.linkedExam": "Exam (optional)",
+    "cards.yourCards": "Your cards",
+    "cards.defaultDeck": "General",
+    "cards.searchPlaceholder": "Search cards or decks...",
+    "cards.searchLabel": "Search cards",
+    "cards.filterDeck": "Filter by deck",
+    "cards.filterStatus": "Filter by status",
+    "cards.filterAll": "All cards",
+    "cards.filterDue": "Due",
+    "cards.filterMastered": "Mastered",
+    "cards.allDecks": "All decks",
+    "cards.empty": "No flashcards yet. Add your first card above.",
+    "cards.noMatch": "No cards match your filters.",
+    "cards.count": "{n} cards",
+    "cards.study": "Study",
+    "cards.dueNowLabel": "Due now",
+    "cards.dueIn": "In {n} day(s)",
+    "cards.dueInMinutes": "In {n} min",
+    "cards.added": "Flashcard added",
+    "cards.updated": "Flashcard updated",
+    "cards.deleted": "Flashcard deleted",
+    "cards.needBoth": "Add both a question and an answer.",
+    "cards.noDue": "Nothing is due right now. Add cards or review a single card from the list.",
+    "cards.deleteConfirm": "Delete this flashcard?",
+    "cards.masteredBadge": "Mastered",
+    "cards.dueBadge": "Due",
+    "cards.reviewed": "{n} reviews",
+    "cards.study.title": "Study session",
+    "cards.study.question": "Question",
+    "cards.study.answer": "Answer",
+    "cards.study.tap": "Tap to reveal the answer",
+    "cards.study.showAnswer": "Show answer",
+    "cards.study.again": "Again",
+    "cards.study.good": "Good",
+    "cards.study.easy": "Easy",
+    "cards.study.progress": "{current} / {total}",
+    "cards.study.remaining": "{n} left in this session",
+    "cards.study.doneTitle": "Session complete",
+    "cards.study.doneBody": "You reviewed {n} card(s).",
+    "cards.study.done": "Done",
+    "cards.study.caughtUpTitle": "All caught up",
+    "cards.study.empty": "No cards are due right now. Add new cards or come back later.",
+    "cards.study.startHint": "Cards you find hard come back in the same session.",
     monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     monthsLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     weekdaysLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -829,6 +899,9 @@ const I18N = {
     "developer.message": "ප්‍රශ්න අදහස් හෝ ගැටලුවක් ඇත්නම් මට පණිවිඩයක් එවන්න",
     "developer.website": "වෙබ් අඩවිය",
     "about.checkUpdates": "යාවත්කාලීන පරීක්ෂා කරන්න",
+    "about.privacyHint": "ඔබේ දත්ත කිසිදා මෙම උපාංගයෙන් පිට නොයයි",
+    "about.licencesHint": "ශබ්ද, අකුරු සහ පුස්තකාල",
+    "about.updateHint": "නවතම සංස්කරණය සැමවිටම ලබා ගන්න",
     version: "Version 2.0",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
@@ -936,6 +1009,69 @@ const I18N = {
     "update.failedInstall": "යාවත්කාලීනය බාගැනීම අසාර්ථකයි. නැවත උත්සාහ කරන්න.",
     "update.badUrl": "මෙම යාවත්කාලීන සබැඳිය විශ්වාසදායක නොවේ.",
     "update.ready": "යාවත්කාලීනය බාගත විය. Android ස්ථාපකයේ ස්ථාපනය සම්පූර්ණ කරන්න.",
+    "tab.cards": "කාඩ්පත්",
+    "stat.cardsDue": "ඉගෙන ගත යුතු කාඩ්පත්",
+    "quick.reviewCards": "කාඩ්පත් අධ්‍යයනය",
+    "quick.reviewCardsHint": "සක්‍රීය මතකය පුරුදු කරන්න",
+    "detail.cardsDue": "ඉගෙන ගත යුතු කාඩ්පත්",
+    "detail.openCards": "කාඩ්පත් විවෘත කරන්න",
+    "cards.eyebrow": "සක්‍රීය මතකය",
+    "cards.title": "ෆ්ලෑෂ් කාඩ්පත්",
+    "cards.reviewDue": "නියමිත ඒවා අධ්‍යයනය",
+    "cards.total": "මුළු කාඩ්පත්",
+    "cards.due": "දැන් ඉගෙන ගන්න",
+    "cards.mastered": "හොඳින් දත්",
+    "cards.addCard": "කාඩ්පතක් එක් කරන්න",
+    "cards.editCard": "කාඩ්පත සංස්කරණය",
+    "cards.front": "ප්‍රශ්නය",
+    "cards.frontPlaceholder": "උදා: සෛලයේ බලාගාරය කුමක්ද?",
+    "cards.back": "පිළිතුර",
+    "cards.backPlaceholder": "උදා: මයිටොකොන්ඩ්‍රියා",
+    "cards.deck": "තට්ටුව",
+    "cards.deckPlaceholder": "උදා: ජීව විද්‍යාව",
+    "cards.linkedExam": "විභාගය (අත්‍යවශ්‍ය නොවේ)",
+    "cards.yourCards": "ඔබේ කාඩ්පත්",
+    "cards.defaultDeck": "සාමාන්‍ය",
+    "cards.searchPlaceholder": "කාඩ්පත් හෝ තට්ටු සොයන්න...",
+    "cards.searchLabel": "කාඩ්පත් සොයන්න",
+    "cards.filterDeck": "තට්ටුව අනුව පෙරන්න",
+    "cards.filterStatus": "තත්ත්වය අනුව පෙරන්න",
+    "cards.filterAll": "සියලු කාඩ්පත්",
+    "cards.filterDue": "නියමිත",
+    "cards.filterMastered": "හොඳින් දත්",
+    "cards.allDecks": "සියලු තට්ටු",
+    "cards.empty": "තවම ෆ්ලෑෂ් කාඩ්පත් නැත. ඉහතින් ඔබේ පළමු කාඩ්පත එක් කරන්න.",
+    "cards.noMatch": "ඔබේ පෙරහන්වලට ගැලපෙන කාඩ්පත් නැත.",
+    "cards.count": "කාඩ්පත් {n}",
+    "cards.study": "අධ්‍යයනය",
+    "cards.dueNowLabel": "දැන් නියමිතයි",
+    "cards.dueIn": "දින {n} කින්",
+    "cards.dueInMinutes": "මිනිත්තු {n} කින්",
+    "cards.added": "ෆ්ලෑෂ් කාඩ්පත එක් විය",
+    "cards.updated": "ෆ්ලෑෂ් කාඩ්පත යාවත්කාලීන විය",
+    "cards.deleted": "ෆ්ලෑෂ් කාඩ්පත මකා දැමිණි",
+    "cards.needBoth": "ප්‍රශ්නය සහ පිළිතුර යන දෙකම එක් කරන්න.",
+    "cards.noDue": "දැන් නියමිත කාඩ්පත් නැත. නව කාඩ්පත් එක් කරන්න හෝ ලැයිස්තුවෙන් එක් කාඩ්පතක් අධ්‍යයනය කරන්න.",
+    "cards.deleteConfirm": "මෙම ෆ්ලෑෂ් කාඩ්පත මකා දමන්නද?",
+    "cards.masteredBadge": "හොඳින් දත්",
+    "cards.dueBadge": "නියමිත",
+    "cards.reviewed": "සමාලෝචන {n}",
+    "cards.study.title": "අධ්‍යයන සැසිය",
+    "cards.study.question": "ප්‍රශ්නය",
+    "cards.study.answer": "පිළිතුර",
+    "cards.study.tap": "පිළිතුර බැලීමට ස්පර්ශ කරන්න",
+    "cards.study.showAnswer": "පිළිතුර පෙන්වන්න",
+    "cards.study.again": "නැවත",
+    "cards.study.good": "හොඳයි",
+    "cards.study.easy": "පහසුයි",
+    "cards.study.progress": "{current} / {total}",
+    "cards.study.remaining": "මෙම සැසියේ {n} ක් ඉතිරියි",
+    "cards.study.doneTitle": "සැසිය සම්පූර්ණයි",
+    "cards.study.doneBody": "ඔබ කාඩ්පත් {n} ක් අධ්‍යයනය කළා.",
+    "cards.study.done": "අවසන්",
+    "cards.study.caughtUpTitle": "සියල්ල සම්පූර්ණයි",
+    "cards.study.empty": "දැන් නියමිත කාඩ්පත් නැත. නව කාඩ්පත් එක් කරන්න හෝ පසුව නැවත එන්න.",
+    "cards.study.startHint": "අපහසු යැයි සිතන කාඩ්පත් එම සැසිය තුළම නැවත පැමිණේ.",
     monthsShort: ["ජන", "පෙබ", "මාර්", "අප්‍රි", "මැයි", "ජූනි", "ජූලි", "අගෝ", "සැප්", "ඔක්", "නොවැ", "දෙසැ"],
     monthsLong: ["ජනවාරි", "පෙබරවාරි", "මාර්තු", "අප්‍රේල්", "මැයි", "ජූනි", "ජූලි", "අගෝස්තු", "සැප්තැම්බර්", "ඔක්තෝබර්", "නොවැම්බර්", "දෙසැම්බර්"],
     weekdaysLong: ["ඉරිදා", "සඳුදා", "අඟහරුවාදා", "බදාදා", "බ්‍රහස්පතින්දා", "සිකුරාදා", "සෙනසුරාදා"],
@@ -1062,6 +1198,7 @@ function applyLanguage() {
     renderBreakList();
     updateSchedulePreview();
   }
+  if (studyState && studyState.open) renderStudy();
 }
 
 function setLanguage(lang) {
@@ -1076,6 +1213,7 @@ function setLanguage(lang) {
   applyTheme(getThemeMode());
   renderAll();
   renderTimer();
+  if (studyState.open) renderStudy();
   persistSnapshot();
   syncAllTaskReminders();
   showToast(t("languageChanged", { lang: next === "si" ? t("lang.sinhala") : t("lang.english") }), "success");
@@ -1451,39 +1589,6 @@ function stopNativeTimer() {
   }
 }
 
-function requestBackgroundAccess() {
-  const bridge = nativeTimer();
-  if (!bridge) {
-    showToast(t("backgroundUnavailable"));
-    return;
-  }
-  try {
-    bridge.requestBackgroundAccess();
-  } catch {
-  }
-}
-
-function updateBackgroundStatus() {
-  const status = document.getElementById("background-status");
-  if (!status) return;
-  const bridge = nativeTimer();
-  if (!bridge) {
-    status.textContent = t("backgroundUnavailable");
-    status.classList.remove("ok");
-    return;
-  }
-  let battery = false;
-  let notifications = true;
-  try {
-    battery = !!bridge.isIgnoringBatteryOptimizations();
-    notifications = !!bridge.areNotificationsEnabled();
-  } catch {
-  }
-  const ready = battery && notifications;
-  status.textContent = ready ? t("backgroundAllowed") : t("backgroundBlocked");
-  status.classList.toggle("ok", ready);
-}
-
 function readCache() {
   const data = {};
   Object.entries(STORAGE_KEYS).forEach(([name, key]) => {
@@ -1511,6 +1616,7 @@ function writeCache(snapshot) {
   const values = {
     [STORAGE_KEYS.exams]: snapshot.exams || [],
     [STORAGE_KEYS.tasks]: snapshot.tasks || [],
+    [STORAGE_KEYS.flashcards]: snapshot.flashcards || [],
     [STORAGE_KEYS.pomodoro]: snapshot.pomodoro || defaultPomodoro,
     [STORAGE_KEYS.timer]: snapshot.timer || defaultTimer,
     [STORAGE_KEYS.theme]: snapshot.theme || "auto",
@@ -1564,12 +1670,15 @@ currentLanguage = detectLanguage(startup.language);
 
 let exams = Array.isArray(startup.exams) ? startup.exams : [];
 let tasks = Array.isArray(startup.tasks) ? startup.tasks.map(normalizeTask) : [];
+let flashcards = Array.isArray(startup.flashcards) ? startup.flashcards.map(normalizeFlashcard) : [];
 let pomodoro = normalizePomodoro(startup.pomodoro);
 let timer = normalizeTimer(startup.timer);
 
 let timerInterval = null;
 let editingExamId = null;
 let editingTaskId = null;
+let editingCardId = null;
+let studyState = { queue: [], total: 0, reviewed: 0, again: 0, good: 0, easy: 0, flipped: false, open: false };
 let pendingUpdate = null;
 let pendingStartupPermissions = false;
 let startupUpdateChecked = false;
@@ -1582,7 +1691,10 @@ const ui = {
   examSearch: "",
   examFilter: "all",
   taskSearch: "",
-  taskFilter: "all"
+  taskFilter: "all",
+  cardSearch: "",
+  cardDeck: "all",
+  cardFilter: "all"
 };
 
 function loadData(key) {
@@ -1601,6 +1713,7 @@ function buildSnapshot() {
     savedAt: new Date().toISOString(),
     exams: exams,
     tasks: tasks,
+    flashcards: flashcards,
     pomodoro: pomodoro,
     timer: timer,
     theme: getThemeMode(),
@@ -1762,6 +1875,49 @@ function normalizeTask(raw) {
     alarm: Boolean(task.alarm),
     notify: Boolean(task.notify)
   };
+}
+
+function normalizeFlashcard(raw) {
+  const card = raw && typeof raw === "object" ? raw : {};
+  const box = Number(card.box);
+  return {
+    ...card,
+    id: typeof card.id === "string" && card.id ? card.id : uid(),
+    front: typeof card.front === "string" ? card.front.slice(0, 500) : "",
+    back: typeof card.back === "string" ? card.back.slice(0, 1000) : "",
+    deck: typeof card.deck === "string" && card.deck.trim() ? card.deck.trim().slice(0, 40) : "",
+    examId: typeof card.examId === "string" ? card.examId : "",
+    createdAt: Number(card.createdAt) || Date.now(),
+    updatedAt: Number(card.updatedAt) || Number(card.createdAt) || Date.now(),
+    dueAt: Number(card.dueAt) || 0,
+    box: Number.isFinite(box) ? Math.min(CARD_MAX_BOX, Math.max(0, Math.round(box))) : 0,
+    reviews: Math.max(0, Number(card.reviews) || 0),
+    lapses: Math.max(0, Number(card.lapses) || 0),
+    lastReviewedAt: Number(card.lastReviewedAt) || 0
+  };
+}
+
+function cardDeckName(card) {
+  return (card && card.deck) || t("cards.defaultDeck");
+}
+
+function cardIsMastered(card) {
+  return (Number(card.box) || 0) >= CARD_MASTERED_BOX;
+}
+
+function cardIsDue(card) {
+  return !card.dueAt || card.dueAt <= Date.now();
+}
+
+function cardDueLabel(card) {
+  if (cardIsDue(card)) return t("cards.dueNowLabel");
+  const diff = card.dueAt - Date.now();
+  if (diff < DAY_MS) return t("cards.dueInMinutes", { n: Math.max(1, Math.ceil(diff / 60000)) });
+  return t("cards.dueIn", { n: Math.ceil(diff / DAY_MS) });
+}
+
+function cardExam(card) {
+  return exams.find((exam) => exam.id === card.examId) || null;
 }
 
 function techniqueLabel(key) {
@@ -2347,6 +2503,7 @@ function switchTab(tab) {
   buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
   closePrettySelectMenu();
+  if (tab === "cards") renderFlashcards();
   if (tab === "insights") renderInsights();
   if (timer.running) resumeAppTimer();
   forceScrollTop();
@@ -2375,6 +2532,9 @@ function activityDays() {
   exams.forEach((e) => {
     if (e.createdAt) days.add(dateKey(e.createdAt));
     if (e.completedAt) days.add(dateKey(e.completedAt));
+  });
+  flashcards.forEach((card) => {
+    if (card.lastReviewedAt) days.add(dateKey(card.lastReviewedAt));
   });
   return days;
 }
@@ -2410,6 +2570,7 @@ function renderDashboard() {
   const completed = exams.filter((e) => e.completed).length;
   const pendingTasks = tasks.filter((t) => !t.completed).length;
   const doneTasks = tasks.filter((t) => t.completed).length;
+  const dueCards = flashcards.filter(cardIsDue).length;
   const streak = calcStreak();
 
   setText("stat-upcoming", upcoming);
@@ -2417,6 +2578,7 @@ function renderDashboard() {
   setText("stat-pending", pendingTasks);
   setText("stat-done-tasks", doneTasks);
   setText("stat-focus-today", minutesLabel(focusMinutesForDay(todayKey())));
+  setText("stat-cards-due", dueCards);
   setText("stat-streak", streak + " " + t(streak === 1 ? "day" : "days"));
   setText("greet-date", formatGreetingDate());
   setText("dashboard-heading", greeting());
@@ -2677,6 +2839,223 @@ function populateTaskExamSelect(selectedId) {
   syncPrettySelects();
 }
 
+function populateCardExamSelect(selectedId) {
+  const select = document.getElementById("card-exam");
+  if (!select) return;
+  const current = selectedId !== undefined ? selectedId : select.value;
+  const ordered = [...exams].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    return a.date.localeCompare(b.date);
+  });
+  const options = [`<option value="">${escapeHtml(t("noExam"))}</option>`];
+  ordered.forEach((exam) => {
+    options.push(`<option value="${escapeHtml(exam.id)}">${escapeHtml(exam.subject + " · " + formatDate(exam.date))}</option>`);
+  });
+  select.innerHTML = options.join("");
+  if (current && ordered.some((exam) => exam.id === current)) select.value = current;
+  syncPrettySelects();
+}
+
+function populateCardDeckOptions() {
+  const filter = document.getElementById("card-deck-filter");
+  const list = document.getElementById("card-deck-options");
+  const decks = Array.from(new Set(flashcards.map(cardDeckName))).sort((a, b) => a.localeCompare(b));
+  if (list) {
+    list.innerHTML = decks.map((deck) => `<option value="${escapeHtml(deck)}"></option>`).join("");
+  }
+  if (!filter) return;
+  const current = ui.cardDeck;
+  const options = [`<option value="all">${escapeHtml(t("cards.allDecks"))}</option>`].concat(
+    decks.map((deck) => `<option value="${escapeHtml(deck)}">${escapeHtml(deck)}</option>`)
+  );
+  filter.innerHTML = options.join("");
+  filter.value = current !== "all" && decks.includes(current) ? current : "all";
+  ui.cardDeck = filter.value;
+  syncPrettySelects();
+}
+
+function renderCardStats() {
+  const due = flashcards.filter(cardIsDue).length;
+  const mastered = flashcards.filter(cardIsMastered).length;
+  setText("card-stat-total", flashcards.length);
+  setText("card-stat-due", due);
+  setText("card-stat-mastered", mastered);
+}
+
+function renderFlashcards() {
+  const list = document.getElementById("card-list");
+  const empty = document.getElementById("card-empty");
+  if (!list) return;
+  populateCardExamSelect();
+  populateCardDeckOptions();
+  renderCardStats();
+
+  const query = ui.cardSearch.trim().toLowerCase();
+  const sorted = [...flashcards]
+    .filter((card) => {
+      if (ui.cardFilter === "due" && !cardIsDue(card)) return false;
+      if (ui.cardFilter === "mastered" && !cardIsMastered(card)) return false;
+      if (ui.cardDeck !== "all" && cardDeckName(card) !== ui.cardDeck) return false;
+      if (!query) return true;
+      return [card.front, card.back, cardDeckName(card)].some((value) => String(value || "").toLowerCase().includes(query));
+    })
+    .sort((a, b) => {
+      const aDue = cardIsDue(a) ? 0 : 1;
+      const bDue = cardIsDue(b) ? 0 : 1;
+      if (aDue !== bDue) return aDue - bDue;
+      if (aDue === 0) return (a.dueAt || 0) - (b.dueAt || 0);
+      return (a.dueAt || 0) - (b.dueAt || 0);
+    });
+
+  list.innerHTML = "";
+  empty.classList.toggle("hidden", sorted.length > 0);
+  empty.textContent = flashcards.length && !sorted.length ? t("cards.noMatch") : t("cards.empty");
+  setText("card-count", t("cards.count", { n: flashcards.length }));
+
+  sorted.forEach((card) => {
+    const li = document.createElement("li");
+    li.className = "item flashcard-item";
+    const exam = cardExam(card);
+    const badge = cardIsMastered(card)
+      ? `<span class="badge done">${escapeHtml(t("cards.masteredBadge"))}</span>`
+      : cardIsDue(card)
+        ? `<span class="badge today">${escapeHtml(t("cards.dueBadge"))}</span>`
+        : `<span class="badge">${escapeHtml(cardDueLabel(card))}</span>`;
+    const examBadge = exam ? `<span class="badge exam">${escapeHtml(exam.subject)}</span>` : "";
+    li.innerHTML = `
+      <div class="item-main">
+        <p class="item-title">${escapeHtml(card.front)} ${badge}</p>
+        <p class="item-meta card-back-preview">${escapeHtml(card.back)}</p>
+        <p class="item-meta card-meta-line">
+          <span class="badge category">${escapeHtml(cardDeckName(card))}</span>${examBadge}
+          <span class="card-review-count">${escapeHtml(t("cards.reviewed", { n: card.reviews }))}</span>
+        </p>
+      </div>
+      <div class="item-actions">
+        <button class="secondary-btn" data-action="study-card" data-id="${card.id}">${escapeHtml(t("cards.study"))}</button>
+        <button class="secondary-btn" data-action="edit-card" data-id="${card.id}">${escapeHtml(t("edit"))}</button>
+        <button class="danger-btn" data-action="delete-card" data-id="${card.id}">${escapeHtml(t("delete"))}</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function studyCurrentCard() {
+  const id = studyState.queue[0];
+  return id ? flashcards.find((card) => card.id === id) || null : null;
+}
+
+function startCardStudy(cardId) {
+  const modal = document.getElementById("study-modal");
+  if (!modal) return;
+  const queue = cardId
+    ? flashcards.filter((card) => card.id === cardId).map((card) => card.id)
+    : flashcards.filter(cardIsDue).sort((a, b) => (a.dueAt || 0) - (b.dueAt || 0)).map((card) => card.id);
+  studyState = { queue, total: queue.length, reviewed: 0, again: 0, good: 0, easy: 0, flipped: false, open: true };
+  const wasHidden = modal.classList.contains("hidden");
+  modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
+  renderStudy();
+}
+
+function closeStudyModal() {
+  const modal = document.getElementById("study-modal");
+  if (!modal || modal.classList.contains("hidden")) return;
+  modal.classList.add("hidden");
+  unlockBodyScroll();
+  studyState.open = false;
+}
+
+function setStudyFlipped(flipped) {
+  studyState.flipped = Boolean(flipped);
+  const cardEl = document.getElementById("study-card");
+  const reveal = document.getElementById("study-reveal");
+  const grade = document.getElementById("study-grade");
+  if (cardEl) cardEl.classList.toggle("flipped", studyState.flipped);
+  if (reveal) reveal.classList.toggle("hidden", studyState.flipped);
+  if (grade) grade.classList.toggle("hidden", !studyState.flipped);
+}
+
+function renderStudy() {
+  const modal = document.getElementById("study-modal");
+  if (!modal || modal.classList.contains("hidden")) return;
+  const stage = document.getElementById("study-stage");
+  const empty = document.getElementById("study-empty");
+  const done = document.getElementById("study-done");
+  const hint = document.getElementById("study-hint");
+  const card = studyCurrentCard();
+  const hasSession = studyState.total > 0;
+
+  if (!card) {
+    if (stage) stage.classList.add("hidden");
+    if (hint) hint.classList.add("hidden");
+    if (empty) empty.classList.toggle("hidden", hasSession);
+    if (done) done.classList.toggle("hidden", !hasSession);
+    setText("study-progress", "");
+    setText("study-remaining", "");
+    if (hasSession) {
+      setText("study-done-body", t("cards.study.doneBody", { n: studyState.reviewed }));
+      const stats = document.getElementById("study-done-stats");
+      if (stats) {
+        stats.innerHTML = [
+          `<span class="study-stat again">${escapeHtml(t("cards.study.again"))} ${studyState.again}</span>`,
+          `<span class="study-stat good">${escapeHtml(t("cards.study.good"))} ${studyState.good}</span>`,
+          `<span class="study-stat easy">${escapeHtml(t("cards.study.easy"))} ${studyState.easy}</span>`
+        ].join("");
+      }
+    }
+    return;
+  }
+
+  if (stage) stage.classList.remove("hidden");
+  if (hint) hint.classList.remove("hidden");
+  if (empty) empty.classList.add("hidden");
+  if (done) done.classList.add("hidden");
+  setText("study-modal-subtitle", cardDeckName(card));
+  setText("study-progress", t("cards.study.progress", { current: Math.min(studyState.reviewed + 1, studyState.total), total: studyState.total }));
+  setText("study-remaining", t("cards.study.remaining", { n: studyState.queue.length }));
+  setText("study-front-text", card.front);
+  setText("study-back-text", card.back);
+  setStudyFlipped(studyState.flipped);
+}
+
+function revealStudyCard() {
+  if (!studyCurrentCard() || studyState.flipped) return;
+  setStudyFlipped(true);
+  const grade = document.getElementById("study-grade");
+  const firstGrade = grade ? grade.querySelector(".study-grade-btn") : null;
+  if (firstGrade) firstGrade.focus();
+}
+
+function gradeStudyCard(grade) {
+  const card = studyCurrentCard();
+  if (!card || !studyState.flipped) return;
+  const now = Date.now();
+  if (grade === "again") {
+    card.box = 0;
+    card.lapses += 1;
+    studyState.again += 1;
+  } else if (grade === "easy") {
+    card.box = Math.min(CARD_MAX_BOX, card.box + 2);
+    studyState.easy += 1;
+  } else {
+    card.box = Math.min(CARD_MAX_BOX, card.box + 1);
+    studyState.good += 1;
+  }
+  card.reviews += 1;
+  card.lastReviewedAt = now;
+  card.updatedAt = now;
+  card.dueAt = now + CARD_INTERVALS[card.box];
+  studyState.reviewed += 1;
+  studyState.queue.shift();
+  if (grade === "again") studyState.queue.push(card.id);
+  studyState.flipped = false;
+  saveData();
+  renderAll();
+  renderStudy();
+}
+
 function renderTodaySessions() {
   const list = document.getElementById("today-sessions");
   const today = pomodoro.sessions
@@ -2884,6 +3263,14 @@ function renderDetailModal() {
     content = `<div class="detail-hero"><strong>${current} ${escapeHtml(t(current === 1 ? "day" : "days"))}</strong><span>${escapeHtml(t("detail.streak"))}</span></div>` +
       `<p class="detail-note">${escapeHtml(t("detail.bestStreak"))}: ${escapeHtml(String(best))} ${escapeHtml(t("days"))}</p>` +
       `<div class="detail-days">${days.map((day) => `<div class="detail-day ${day.active ? "active" : ""}"><span>${escapeHtml(day.label)}</span><strong>${day.minutes ? escapeHtml(minutesLabel(day.minutes)) : "—"}</strong></div>`).join("")}</div>`;
+  } else if (kind === "cardsDue") {
+    const due = flashcards.filter(cardIsDue).sort((a, b) => (a.dueAt || 0) - (b.dueAt || 0));
+    title.textContent = t("detail.cardsDue");
+    subtitle.textContent = t("detail.subtitle", { n: due.length });
+    content = due.length
+      ? due.map((card) => `<div class="detail-item"><div class="detail-item-main"><strong>${escapeHtml(card.front)}</strong><p>${escapeHtml(cardDeckName(card))} · ${escapeHtml(cardDueLabel(card))}</p></div></div>`).join("")
+      : `<p class="detail-empty">${escapeHtml(t("cards.study.empty"))}</p>`;
+    footer = `<button type="button" class="secondary-btn" data-detail-action="open-tab" data-tab="cards">${escapeHtml(t("detail.openCards"))}</button>`;
   } else {
     closeDetailModal();
     return;
@@ -2983,6 +3370,7 @@ function setupDetailModal() {
       if (!confirm(t("delete") + "?")) return;
       exams = exams.filter((item) => item.id !== id);
       tasks.forEach((task) => { if (task.examId === id) task.examId = ""; });
+      flashcards.forEach((card) => { if (card.examId === id) card.examId = ""; });
       if (editingExamId === id) clearExamEdit();
     }
     saveData();
@@ -3003,6 +3391,7 @@ function renderAll() {
   renderDashboard();
   renderExams();
   renderTasks();
+  renderFlashcards();
   renderTodaySessions();
   renderInsights();
 }
@@ -3133,6 +3522,175 @@ function setupTaskPlanner() {
   }
   renderBreakList();
   updateSchedulePreview();
+}
+
+function resetCardForm() {
+  editingCardId = null;
+  const form = document.getElementById("card-form");
+  if (form) form.reset();
+  setText("card-form-title", t("cards.addCard"));
+  setText("card-submit", t("cards.addCard"));
+  const cancel = document.getElementById("card-cancel-edit");
+  if (cancel) cancel.classList.add("hidden");
+  populateCardExamSelect("");
+}
+
+function startCardEdit(id) {
+  const card = flashcards.find((item) => item.id === id);
+  if (!card) return;
+  editingCardId = id;
+  const front = document.getElementById("card-front");
+  const back = document.getElementById("card-back");
+  const deck = document.getElementById("card-deck");
+  if (front) front.value = card.front;
+  if (back) back.value = card.back;
+  if (deck) deck.value = card.deck || "";
+  populateCardExamSelect(card.examId || "");
+  setText("card-form-title", t("cards.editCard"));
+  setText("card-submit", t("saveChanges"));
+  const cancel = document.getElementById("card-cancel-edit");
+  if (cancel) cancel.classList.remove("hidden");
+  if (front) front.focus();
+  syncPrettySelects();
+}
+
+function setupFlashcards() {
+  const form = document.getElementById("card-form");
+  if (!form) return;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const front = document.getElementById("card-front").value.trim();
+    const back = document.getElementById("card-back").value.trim();
+    const deck = document.getElementById("card-deck").value.trim();
+    const examId = document.getElementById("card-exam").value;
+    if (!front || !back) {
+      showToast(t("cards.needBoth"), "error");
+      return;
+    }
+    if (editingCardId) {
+      const card = flashcards.find((item) => item.id === editingCardId);
+      if (card) {
+        Object.assign(card, { front, back, deck, examId, updatedAt: Date.now() });
+        const index = flashcards.findIndex((item) => item.id === card.id);
+        if (index >= 0) flashcards[index] = normalizeFlashcard(card);
+      }
+      showToast(t("cards.updated"), "success");
+    } else {
+      flashcards.push(normalizeFlashcard({
+        id: uid(),
+        front,
+        back,
+        deck,
+        examId,
+        createdAt: Date.now(),
+        dueAt: Date.now()
+      }));
+      showToast(t("cards.added"), "success");
+    }
+    saveData();
+    resetCardForm();
+    renderAll();
+  });
+
+  const cancel = document.getElementById("card-cancel-edit");
+  if (cancel) cancel.addEventListener("click", resetCardForm);
+
+  const reviewDue = document.getElementById("cards-review-due");
+  if (reviewDue) reviewDue.addEventListener("click", () => startCardStudy());
+
+  const list = document.getElementById("card-list");
+  if (list) {
+    list.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const action = button.getAttribute("data-action");
+      const id = button.getAttribute("data-id");
+      if (action === "study-card") {
+        startCardStudy(id);
+        return;
+      }
+      if (action === "edit-card") {
+        startCardEdit(id);
+        switchTab("cards");
+        return;
+      }
+      if (action === "delete-card") {
+        if (!confirm(t("cards.deleteConfirm"))) return;
+        flashcards = flashcards.filter((card) => card.id !== id);
+        if (editingCardId === id) resetCardForm();
+        if (studyState.queue.indexOf(id) >= 0) {
+          studyState.queue = studyState.queue.filter((cardId) => cardId !== id);
+          studyState.total = studyState.reviewed + studyState.queue.length;
+          if (studyState.open) renderStudy();
+        }
+        saveData();
+        renderAll();
+        showToast(t("cards.deleted"), "success");
+      }
+    });
+  }
+
+  const search = document.getElementById("card-search");
+  if (search) {
+    search.addEventListener("input", (event) => {
+      ui.cardSearch = event.target.value;
+      renderFlashcards();
+    });
+  }
+  const deckFilter = document.getElementById("card-deck-filter");
+  if (deckFilter) {
+    deckFilter.addEventListener("change", (event) => {
+      ui.cardDeck = event.target.value;
+      renderFlashcards();
+    });
+  }
+  const statusFilter = document.getElementById("card-status-filter");
+  if (statusFilter) {
+    statusFilter.addEventListener("change", (event) => {
+      ui.cardFilter = event.target.value;
+      renderFlashcards();
+    });
+  }
+
+  const studyCard = document.getElementById("study-card");
+  if (studyCard) studyCard.addEventListener("click", revealStudyCard);
+  const reveal = document.getElementById("study-reveal");
+  if (reveal) reveal.addEventListener("click", revealStudyCard);
+  const grade = document.getElementById("study-grade");
+  if (grade) {
+    grade.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-grade]");
+      if (!button) return;
+      gradeStudyCard(button.getAttribute("data-grade"));
+    });
+  }
+  const close = document.getElementById("study-modal-close");
+  if (close) close.addEventListener("click", closeStudyModal);
+  const doneBtn = document.getElementById("study-done-btn");
+  if (doneBtn) doneBtn.addEventListener("click", closeStudyModal);
+  const emptyBtn = document.getElementById("study-empty-btn");
+  if (emptyBtn) emptyBtn.addEventListener("click", closeStudyModal);
+  const modal = document.getElementById("study-modal");
+  if (modal) {
+    modal.addEventListener("click", (event) => {
+      if (event.target && event.target.getAttribute("data-close-study") === "true") closeStudyModal();
+    });
+  }
+  document.addEventListener("keydown", (event) => {
+    if (!studyState.open) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeStudyModal();
+      return;
+    }
+    const target = event.target;
+    if (target && ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(target.tagName)) return;
+    if ((event.key === " " || event.key === "Enter") && studyCurrentCard() && !studyState.flipped) {
+      event.preventDefault();
+      revealStudyCard();
+    }
+  });
 }
 
 function setupForms() {
@@ -3275,6 +3833,9 @@ function setupActions() {
       exams = exams.filter((x) => x.id !== id);
       tasks.forEach((task) => {
         if (task.examId === id) task.examId = "";
+      });
+      flashcards.forEach((card) => {
+        if (card.examId === id) card.examId = "";
       });
       if (editingExamId === id) clearExamEdit();
     } else if (action === "edit-exam") {
@@ -3565,6 +4126,7 @@ function setupQuickActions() {
       switchTab(tab);
       if (tab === "exams") setTimeout(() => document.getElementById("exam-subject").focus(), 0);
       if (tab === "tasks") setTimeout(() => document.getElementById("task-text").focus(), 0);
+      if (tab === "cards") setTimeout(() => startCardStudy(), 0);
       if (tab === "focus") {
         if (timer.mode !== "focus") setMode("focus");
         if (activeTimerMode() !== "focus") startTimer();
@@ -4064,11 +4626,6 @@ function setupPomodoro() {
   });
   document.getElementById("reset-timer").addEventListener("click", resetTimer);
   document.getElementById("skip-timer").addEventListener("click", () => completeSession(false));
-  const backgroundButton = document.getElementById("background-access-btn");
-  if (backgroundButton) {
-    backgroundButton.addEventListener("click", requestBackgroundAccess);
-  }
-  updateBackgroundStatus();
 
   document.getElementById("pomodoro-settings").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -4193,14 +4750,12 @@ function restoreTimer() {
 function resumeAppTimer() {
   if (!timer.running || !timer.endsAt) {
     renderTimer();
-    updateBackgroundStatus();
     return;
   }
   if (syncActiveTimerFromClock()) return;
   renderTimer();
   startNativeTimer();
   startTicking();
-  updateBackgroundStatus();
 }
 
 window.ExamBuddyOnResume = resumeAppTimer;
@@ -4338,7 +4893,7 @@ function runStartupUpdateCheck() {
   checkForUpdates(false, { startup: true });
 }
 
-const SPLASH_DURATION_MS = 2200;
+const SPLASH_DURATION_MS = 5000;
 
 function setupSplash() {
   const navStart = window.performance && performance.timing && performance.timing.navigationStart;
@@ -4628,6 +5183,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTheme();
   setupTabs();
   setupForms();
+  setupFlashcards();
   setupTaskPlanner();
   setupActions();
   setupFilters();

@@ -59,8 +59,8 @@ const CARD_MASTERED_BOX = 4;
 const CARD_MAX_BOX = 5;
 const CARD_INTERVALS = [10 * 60 * 1000, DAY_MS, 3 * DAY_MS, 7 * DAY_MS, 16 * DAY_MS, 35 * DAY_MS];
 
-const APP_VERSION_NAME = "2.3.0";
-const APP_VERSION_CODE = 15;
+const APP_VERSION_NAME = "2.3.1";
+const APP_VERSION_CODE = 16;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -408,7 +408,7 @@ const I18N = {
     "about.privacyHint": "Your data never leaves this device",
     "about.licencesHint": "Sounds, fonts and libraries",
     "about.updateHint": "Always get the latest release",
-    version: "Version 2.3.0",
+    version: "Version 2.3.1",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -933,7 +933,7 @@ const I18N = {
     "about.privacyHint": "ඔබේ දත්ත කිසිදා මෙම උපාංගයෙන් පිට නොයයි",
     "about.licencesHint": "ශබ්ද, අකුරු සහ පුස්තකාල",
     "about.updateHint": "නවතම සංස්කරණය සැමවිටම ලබා ගන්න",
-    version: "Version 2.3.0",
+    version: "Version 2.3.1",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -4467,36 +4467,6 @@ function setupCreateModals() {
   });
 }
 
-function setupCreateButtons() {
-  const examCreate = document.getElementById("exam-create-btn");
-  if (examCreate) {
-    examCreate.addEventListener("click", () => {
-      const panel = document.querySelector(".tab-panel.active");
-      const tab = panel ? panel.id : "";
-      if (tab !== "exams") switchTab("exams");
-      openExamCreateModal();
-    });
-  }
-  const taskCreate = document.getElementById("task-create-btn");
-  if (taskCreate) {
-    taskCreate.addEventListener("click", () => {
-      const panel = document.querySelector(".tab-panel.active");
-      const tab = panel ? panel.id : "";
-      if (tab !== "tasks") switchTab("tasks");
-      openTaskCreateModal();
-    });
-  }
-  const cardCreate = document.getElementById("card-create-btn");
-  if (cardCreate) {
-    cardCreate.addEventListener("click", () => {
-      const panel = document.querySelector(".tab-panel.active");
-      const tab = panel ? panel.id : "";
-      if (tab !== "cards") switchTab("cards");
-      openCardCreateModal();
-    });
-  }
-}
-
 function positionToastContainer() {
   const header = document.querySelector(".app-header");
   const tabs = document.querySelector(".tabs");
@@ -5369,7 +5339,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 2.3.0</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 2.3.1</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -5746,7 +5716,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilters();
   setupPrettySelects();
   setupQuickActions();
-  setupCreateButtons();
   setupCreateFab();
   setupCreateModals();
   setupPomodoro();

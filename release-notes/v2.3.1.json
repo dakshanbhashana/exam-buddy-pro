@@ -1,0 +1,15 @@
+{
+  "versionCode": 16,
+  "versionName": "2.3.1",
+  "changelog": {
+    "en": [
+      "Removed the duplicate Create button from the Exams, Tasks and Flashcards list headers.",
+      "Creation now happens only through the floating Create button with the bottom-sheet popup."
+    ],
+    "si": [
+      "විභාග, කාර්යයන් හා කාඩ්පත් ලැයිස්තු පැහැදිලි කිරීමේ ඉලක්කමේ ද්විත්ව Create බොත්ම ඉවත් කර ඇත.",
+      "නිර්මාණය කිරීම පියාපත් + Create බොත්මක් හරහා පහළ-බිත්ති පොප් එකෙන් පමණයි."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v2.3.1\n\nRemoved the duplicate Create buttons from the Exams, Tasks and Flashcards list headers. Creation now happens only through the floating Create button with the bottom-sheet popup.\n\n### What's new\n- Header Create buttons removed from the Exams, Tasks and Flashcards list cards.\n\n### Fixes\n- Exams, Tasks and Flashcards creation now uses the floating + Create button with the bottom-sheet popup only.\n"
+}

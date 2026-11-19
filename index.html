@@ -308,6 +308,11 @@
         <span class="pill" data-i18n="pomodoroTechnique">Pomodoro technique</span>
       </div>
 
+      <div id="focus-block-banner" class="focus-block-banner hidden" role="status" aria-live="polite">
+        <span class="permission-banner-dot" aria-hidden="true"></span>
+        <span id="focus-block-banner-text" data-i18n="focusModeActive">Focus Mode Active - Notifications Blocked</span>
+      </div>
+
       <div class="focus-layout">
         <div class="card timer-card">
           <div class="mode-switch" role="group" data-i18n-aria="timerMode" aria-label="Timer mode">
@@ -330,6 +335,7 @@
 
           <div class="timer-controls">
             <button type="button" id="start-pause" class="primary-btn primary-lg" data-i18n="startFocus">Start focus</button>
+            <button type="button" id="stop-focus" class="secondary-btn" data-i18n="stopFocus">Stop</button>
             <button type="button" id="reset-timer" class="secondary-btn icon-btn" data-i18n-aria="resetTimer" data-i18n-title="resetTimer" aria-label="Reset timer" title="Reset timer">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
             </button>
@@ -338,6 +344,7 @@
             </button>
           </div>
 
+          <p id="focus-block-status" class="focus-block-status hidden"></p>
           <div class="cycle-row">
             <span class="item-meta" data-i18n="sessionsUntil">Sessions until long break</span>
             <div id="session-dots" class="session-dots" data-i18n-aria="sessionDots" aria-label="Completed focus sessions in this cycle"></div>
@@ -378,6 +385,47 @@
             <ul id="today-sessions" class="mini-list"></ul>
             <p id="sessions-empty" class="empty-state" data-i18n="sessionsEmpty">Finish a focus session to see it here.</p>
           </div>
+        </div>
+      </div>
+
+      <div class="card" id="focus-settings">
+        <div class="card-title-row">
+          <h3 data-i18n="focusSettings">Focus Settings</h3>
+        </div>
+        <p class="item-meta" data-i18n="focusSettingsDesc">Tune what happens during focus sessions.</p>
+        <div class="focus-settings-list">
+          <label class="switch-row">
+            <span class="switch-row-copy">
+              <strong data-i18n="focusBlockCalls">Calls Blocking</strong>
+              <small data-i18n="focusBlockCallsDesc">Block phone calls during a focus session.</small>
+            </span>
+            <input type="checkbox" id="focus-block-calls" class="switch-input" data-focus-toggle="blockCalls">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span class="switch-row-copy">
+              <strong data-i18n="focusBlockNotifications">Notification Blocking</strong>
+              <small data-i18n="focusBlockNotificationsDesc">Mute app notifications during a focus session.</small>
+            </span>
+            <input type="checkbox" id="focus-block-notifications" class="switch-input" data-focus-toggle="blockNotifications">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span class="switch-row-copy">
+              <strong data-i18n="focusDoNotDisturb">Do Not Disturb ON</strong>
+              <small data-i18n="focusDoNotDisturbDesc">Silence calls and notifications with Do Not Disturb.</small>
+            </span>
+            <input type="checkbox" id="focus-dnd" class="switch-input" data-focus-toggle="doNotDisturb">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span class="switch-row-copy">
+              <strong data-i18n="focusAutoStart">Auto 25min / 5min</strong>
+              <small data-i18n="focusAutoStartDesc">Automatically start the next focus after the break.</small>
+            </span>
+            <input type="checkbox" id="focus-auto-start" class="switch-input" checked data-focus-toggle="autoStartNextCycle">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
         </div>
       </div>
     </section>
@@ -871,6 +919,23 @@
         <button type="button" id="alarm-overlay-snooze" class="secondary-btn full-btn" data-i18n="alarmSnoozeAction">Snooze</button>
       </div>
       <p class="alarm-overlay-note" data-i18n="alarmOverlayNote">The alarm stops automatically after one minute.</p>
+    </div>
+  </div>
+
+  <div id="focus-permission-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="focus-permission-title">
+    <div class="about-modal-backdrop" data-close-focus-permission="true"></div>
+    <div class="about-modal-card">
+      <div class="about-modal-head">
+        <h3 id="focus-permission-title" data-i18n="focusPermissionTitle">Focus mode permission</h3>
+        <button type="button" id="focus-permission-close" class="about-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="about-modal-body">
+        <p id="focus-permission-body" data-i18n="focusPermissionDesc">Need Do Not Disturb permission to block calls/notifications.</p>
+      </div>
+      <div class="about-modal-actions">
+        <button type="button" id="focus-permission-grant" class="primary-btn" data-i18n="focusPermissionGrant">Grant Permission</button>
+        <button type="button" id="focus-permission-later" class="secondary-btn" data-i18n="focusPermissionLater">Later</button>
+      </div>
     </div>
   </div>
 

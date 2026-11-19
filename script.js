@@ -5,7 +5,8 @@ const STORAGE_KEYS = {
   theme: "examBuddy_theme",
   language: "examBuddy_language",
   pomodoro: "examBuddy_pomodoro",
-  timer: "examBuddy_timer"
+  timer: "examBuddy_timer",
+  focusSettings: "examBuddy_focusSettings"
 };
 
 const DEFAULT_SETTINGS = {
@@ -19,6 +20,13 @@ const DEFAULT_SETTINGS = {
   alarmVibrate: true,
   alarmBluetooth: true,
   alarmSnooze: 5
+};
+
+const DEFAULT_FOCUS_SETTINGS = {
+  blockCalls: false,
+  blockNotifications: false,
+  doNotDisturb: false,
+  autoStartNextCycle: true
 };
 
 const ALARM_TONE_NAMES = ["classic", "mechanical", "beep"];
@@ -431,6 +439,27 @@ const I18N = {
     focusDone: "Focus session complete — take a break!",
     breakDone: "Break over — ready to focus?",
     settingsSaved: "Timer settings saved",
+    focusSettings: "Focus Settings",
+    focusSettingsDesc: "Tune what happens during focus sessions.",
+    focusBlockCalls: "Calls Blocking",
+    focusBlockCallsDesc: "Block phone calls during a focus session.",
+    focusBlockNotifications: "Notification Blocking",
+    focusBlockNotificationsDesc: "Mute app notifications during a focus session.",
+    focusDoNotDisturb: "Do Not Disturb ON",
+    focusDoNotDisturbDesc: "Silence calls and notifications with Do Not Disturb.",
+    focusAutoStart: "Auto 25min / 5min",
+    focusAutoStartDesc: "Automatically start the next focus after the break.",
+    focusBlockingStatus: "Blocking: {list}",
+    focusModeActive: "Focus Mode Active - Notifications Blocked",
+    focusBreakTime: "Break Time - Notifications Unblocked",
+    focusEnded: "Focus Ended - All Unblocked",
+    focusBlockedCount: "{n} notifications blocked during focus",
+    focusPermissionTitle: "Focus mode permission",
+    focusPermissionDesc: "Need Do Not Disturb permission to block calls/notifications.",
+    focusPermissionGrant: "Grant Permission",
+    focusPermissionLater: "Later",
+    focusPermissionGrantInstruction: "Open Android settings to grant Do Not Disturb permission.",
+    stopFocus: "Stop",
     "permissions.eyebrow": "Quick setup",
     "permissions.title": "Let's set up Exam Buddy",
     "permissions.subtitle": "Allow these to keep reminders, the focus timer and updates working while you study.",
@@ -935,6 +964,27 @@ const I18N = {
     focusDone: "අවධාන සැසිය සම්පූර්ණයි — විවේකයක් ගන්න!",
     breakDone: "විවේකය අවසන් — නැවත අවධානය යොමු කරන්නද?",
     settingsSaved: "කාලමාන සැකසුම් සුරකිනු ලැබීය",
+    focusSettings: "Focus සැකසුම්",
+    focusSettingsDesc: "අවධාන සැසි අතරදී සිදුවන දේ කාර්යබහුල කරන්න.",
+    focusBlockCalls: "ඇමතුම් වැළැක්වීම්",
+    focusBlockCallsDesc: "අවධාන සැසි අතරදී දුරකථන ඇමතුම් වැළැක්වන්න.",
+    focusBlockNotifications: "දැනුම්දීම් වැළැක්වීම්",
+    focusBlockNotificationsDesc: "අවධාන සැසි අතරදී යෙදුම් දැනුම්දීම් නිශ්ශබ්ද කරන්න.",
+    focusDoNotDisturb: "අවධානය යොමු නොකරන බව",
+    focusDoNotDisturbDesc: "Do Not Disturb භාවිතයෙන් ඇමතුම් සහ දැනුම්දීම් සම සන්සුන් කරන්න.",
+    focusAutoStart: "ස්වයංක්‍රීය 25/5",
+    focusAutoStartDesc: "විවේකයෙන් පසු ඊළඟ අවධානය චක්‍රය ස්වයංක්‍රීයව ආරම්භ කරන්න.",
+    focusBlockingStatus: "වැළැක්වීම්: {list}",
+    focusModeActive: "Focus මොඩයි — දැනුම්දීම් අවහිර කර ඇත",
+    focusBreakTime: "විවේක කාලය — දැනුම්දීම් අනහිර කර ඇත",
+    focusEnded: "Focus අවසන් — සියල්ල අනහිරයි",
+    focusBlockedCount: "අවධානය අතරතුර {n} දැනුම්දීම් වැළැක්විණි",
+    focusPermissionTitle: "Focus මොඩයි අවසරය",
+    focusPermissionDesc: "ඇමතුම්/දැනුම්දීම් වැළැක්වීමට Do Not Disturb අවසරය අවශ්‍යයි.",
+    focusPermissionGrant: "අවසර දෙන්න",
+    focusPermissionLater: "පසුව",
+    focusPermissionGrantInstruction: "Do Not Disturb අවසරය දීමට Android සැකසුම් වෙත යන්න.",
+    stopFocus: "නැවතුණා",
     "permissions.eyebrow": "ඉක්මන් සැකසුම",
     "permissions.title": "Exam Buddy සකසමු",
     "permissions.subtitle": "මතක් කිරීම්, අවධාන කාලමානය සහ යාවත්කාලීන නිවැරදිව ක්‍රියා කරවීමට මේවාට අවසර දෙන්න.",
@@ -1287,6 +1337,38 @@ function syncAlarmSettingsToNative() {
   }
 }
 
+function nativeDnd() {
+  try {
+    const bridge = window.Android;
+    if (bridge && typeof bridge.setDND === "function") return bridge;
+    if (bridge && typeof bridge.requestDNDPermission === "function") return bridge;
+  } catch {
+  }
+  return null;
+}
+
+function setNativeDnd(enabled) {
+  const bridge = nativeDnd();
+  if (!bridge) return false;
+  try {
+    bridge.setDND(Boolean(enabled));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function requestNativeDndPermission() {
+  const bridge = nativeDnd();
+  if (!bridge || typeof bridge.requestDNDPermission !== "function") return false;
+  try {
+    bridge.requestDNDPermission();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function nativePermissions() {
   try {
     const bridge = window.ExamBuddyPermissions;
@@ -1621,6 +1703,7 @@ function writeCache(snapshot) {
     [STORAGE_KEYS.flashcards]: snapshot.flashcards || [],
     [STORAGE_KEYS.pomodoro]: snapshot.pomodoro || defaultPomodoro,
     [STORAGE_KEYS.timer]: snapshot.timer || defaultTimer,
+    [STORAGE_KEYS.focusSettings]: snapshot.focusSettings || { ...DEFAULT_FOCUS_SETTINGS },
     [STORAGE_KEYS.theme]: snapshot.theme || "auto",
     [STORAGE_KEYS.language]: snapshot.language || "en"
   };
@@ -1675,6 +1758,7 @@ let tasks = Array.isArray(startup.tasks) ? startup.tasks.map(normalizeTask) : []
 let flashcards = Array.isArray(startup.flashcards) ? startup.flashcards.map(normalizeFlashcard) : [];
 let pomodoro = normalizePomodoro(startup.pomodoro);
 let timer = normalizeTimer(startup.timer);
+let focusSettings = normalizeFocusSettings(startup.focusSettings);
 
 let timerInterval = null;
 let editingExamId = null;
@@ -1688,6 +1772,9 @@ let breakDraft = [];
 let autoTechnique = true;
 let firedReminders = new Set();
 let reminderInterval = null;
+let isFocusBlocked = false;
+let focusBlockedCount = 0;
+let focusDndPromptSeen = false;
 
 let taskSearchRenderTimer = null;
 let cardSearchRenderTimer = null;
@@ -1721,6 +1808,7 @@ function buildSnapshot() {
     flashcards: flashcards,
     pomodoro: pomodoro,
     timer: timer,
+    focusSettings: focusSettings,
     theme: getThemeMode(),
     language: getLanguage()
   };
@@ -2315,7 +2403,7 @@ function checkTaskReminders() {
       firedReminders.add(key);
       showToast(event.title, "success");
       if (task.alarm) playChime(true);
-      if (task.notify && typeof Notification !== "undefined") {
+      if (task.notify && !isFocusBlocked && typeof Notification !== "undefined") {
         try {
           new Notification(event.title, { body: event.body });
         } catch (e) {
@@ -2434,6 +2522,19 @@ function normalizeTimer(raw) {
     running,
     endsAt: running ? raw.endsAt : null,
     saved
+  };
+}
+
+function normalizeFocusSettings(raw) {
+  const base = { ...DEFAULT_FOCUS_SETTINGS };
+  if (!raw || typeof raw !== "object") return base;
+  return {
+    blockCalls: Boolean(raw.blockCalls),
+    blockNotifications: Boolean(raw.blockNotifications),
+    doNotDisturb: Boolean(raw.doNotDisturb),
+    autoStartNextCycle: raw.autoStartNextCycle === undefined
+      ? DEFAULT_FOCUS_SETTINGS.autoStartNextCycle
+      : Boolean(raw.autoStartNextCycle)
   };
 }
 
@@ -4406,6 +4507,10 @@ function positionToastContainer() {
 }
 
 function showToast(message, type = "info") {
+  if (isFocusBlocked) {
+    focusBlockedCount += 1;
+    return;
+  }
   const container = document.getElementById("toast-container");
   if (!container) return;
   positionToastContainer();
@@ -4550,6 +4655,9 @@ function startTimer() {
   saveTimer();
   renderTimer();
   startTicking();
+  if (timer.mode === "focus") applyFocusBlocking();
+  else if (isFocusBlocked) releaseFocusBlocking();
+  renderFocusBlockingState();
 }
 
 function pauseTimer() {
@@ -4573,12 +4681,30 @@ function resetTimer() {
     stopNativeTimer();
     stopTicking();
   }
+  if (timer.mode === "focus") releaseFocusBlocking();
   timer.remaining = durationFor(timer.mode);
   if (!timer.saved) timer.saved = timerSavedDefaults();
   timer.saved[timer.mode] = timer.remaining;
   saveTimer();
   renderTimer();
   showToast(t("timerReset"));
+}
+
+function stopFocusSession() {
+  timer.running = false;
+  timer.activeMode = null;
+  timer.endsAt = null;
+  stopTicking();
+  stopNativeTimer();
+  timer.mode = "focus";
+  timer.remaining = durationFor("focus");
+  if (!timer.saved) timer.saved = timerSavedDefaults();
+  timer.saved.focus = timer.remaining;
+  releaseFocusBlocking();
+  saveTimer();
+  renderTimer();
+  showToast(t("focusEnded"));
+  switchTab("focus");
 }
 
 function setMode(mode) {
@@ -4599,6 +4725,14 @@ function completeSession(log) {
   timer.endsAt = null;
   stopTicking();
   stopNativeTimer();
+
+  if (finishedMode === "focus") {
+    releaseFocusBlocking();
+    if (log) showFocusBanner(t("focusBreakTime"));
+    if (log && focusBlockedCount > 0) {
+      showToast(t("focusBlockedCount", { n: focusBlockedCount }), "info");
+    }
+  }
 
   if (log) {
     pomodoro.sessions.push({
@@ -4627,7 +4761,9 @@ function completeSession(log) {
   }
 
   setMode(nextMode);
-  const autoStart = nextMode === "focus" ? pomodoro.settings.autoFocus : pomodoro.settings.autoBreaks;
+  const autoStart = nextMode === "focus"
+    ? Boolean(focusSettings.autoStartNextCycle)
+    : Boolean(pomodoro.settings.autoBreaks);
   if (autoStart && log) startTimer();
 
   saveData();
@@ -4636,6 +4772,7 @@ function completeSession(log) {
 }
 
 function playChime(force) {
+  if (isFocusBlocked) return;
   if (!force && !pomodoro.settings.sound) return;
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -4873,6 +5010,9 @@ function renderTimer() {
     ? `${formatClock(timerRemainingFor(active))} · ${t(MODES[active].label)} — ${t("appTitle")}`
     : t("appTitle");
   if (document.title !== nextTitle) document.title = nextTitle;
+  const stopFocusButton = document.getElementById("stop-focus");
+  if (stopFocusButton) stopFocusButton.classList.toggle("hidden", timer.mode !== "focus");
+  renderFocusBlockingState();
 }
 
 function setupPomodoro() {
@@ -4887,6 +5027,9 @@ function setupPomodoro() {
   });
   document.getElementById("reset-timer").addEventListener("click", resetTimer);
   document.getElementById("skip-timer").addEventListener("click", () => completeSession(false));
+  document.getElementById("stop-focus").addEventListener("click", () => {
+    if (timer.mode === "focus") stopFocusSession();
+  });
 
   document.getElementById("pomodoro-settings").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -4956,6 +5099,146 @@ function setupPomodoro() {
   });
 }
 
+function saveFocusSettings() {
+  saveData();
+}
+
+function focusBlockingEnabled() {
+  return Boolean(focusSettings.blockCalls || focusSettings.blockNotifications || focusSettings.doNotDisturb);
+}
+
+function focusBlockingStatusText() {
+  if (!(timer.mode === "focus" && isFocusBlocked)) return "";
+  const reasons = [];
+  if (focusSettings.blockCalls) reasons.push("Calls");
+  if (focusSettings.blockNotifications) reasons.push("Notifications");
+  if (focusSettings.doNotDisturb) reasons.push("DND");
+  if (!reasons.length) return "";
+  return t("focusBlockingStatus", { list: reasons.join(" • ") });
+}
+
+function showFocusBanner(text) {
+  const banner = document.getElementById("focus-block-banner");
+  const label = document.getElementById("focus-block-banner-text");
+  if (label) label.textContent = text;
+  if (banner) banner.classList.remove("hidden");
+}
+
+function applyFocusBlocking() {
+  const enabled = timer.mode === "focus" && focusBlockingEnabled();
+  isFocusBlocked = enabled;
+  focusBlockedCount = 0;
+  const banner = document.getElementById("focus-block-banner");
+  if (enabled) {
+    showFocusBanner(t("focusModeActive"));
+    setNativeDnd(true);
+  } else if (banner) {
+    banner.classList.add("hidden");
+  }
+}
+
+function releaseFocusBlocking() {
+  isFocusBlocked = false;
+  setNativeDnd(false);
+  const banner = document.getElementById("focus-block-banner");
+  if (banner) banner.classList.add("hidden");
+}
+
+function renderFocusBlockingState() {
+  const status = document.getElementById("focus-block-status");
+  const statusText = focusBlockingStatusText();
+  if (status) {
+    if (statusText) {
+      status.textContent = statusText;
+      status.classList.remove("hidden");
+    } else {
+      status.classList.add("hidden");
+    }
+  }
+}
+
+function handleFocusToggle(key, on) {
+  if (key === "autoStartNextCycle") {
+    focusSettings.autoStartNextCycle = Boolean(on);
+    saveFocusSettings();
+    renderTimer();
+    return;
+  }
+  focusSettings[key] = Boolean(on);
+  saveFocusSettings();
+  applyFocusBlocking();
+  if (on && !focusDndPromptSeen) {
+    focusDndPromptSeen = true;
+    openFocusPermissionModal();
+  }
+  renderTimer();
+}
+
+function openFocusPermissionModal() {
+  const modal = document.getElementById("focus-permission-modal");
+  if (!modal) return;
+  const wasHidden = modal.classList.contains("hidden");
+  const body = document.getElementById("focus-permission-body");
+  if (body) body.textContent = t("focusPermissionDesc");
+  modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
+}
+
+function closeFocusPermissionModal() {
+  const modal = document.getElementById("focus-permission-modal");
+  if (modal) modal.classList.add("hidden");
+  unlockBodyScroll();
+}
+
+function grantFocusPermission() {
+  closeFocusPermissionModal();
+  const granted = requestNativeDndPermission();
+  if (!granted) showToast(t("focusPermissionGrantInstruction"), "info");
+}
+
+function dismissFocusPermissionModal() {
+  closeFocusPermissionModal();
+}
+
+function setupFocusPermissionModal() {
+  const grant = document.getElementById("focus-permission-grant");
+  if (grant) grant.addEventListener("click", grantFocusPermission);
+  const later = document.getElementById("focus-permission-later");
+  if (later) later.addEventListener("click", dismissFocusPermissionModal);
+  const close = document.getElementById("focus-permission-close");
+  if (close) close.addEventListener("click", dismissFocusPermissionModal);
+  const modal = document.getElementById("focus-permission-modal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target && e.target.getAttribute("data-close-focus-permission") === "true") dismissFocusPermissionModal();
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") dismissFocusPermissionModal();
+  });
+}
+
+function setupFocusSettings() {
+  const container = document.getElementById("focus-settings");
+  if (!container) return;
+  container.querySelectorAll("[data-focus-toggle]").forEach((input) => {
+    input.addEventListener("change", () => {
+      handleFocusToggle(input.getAttribute("data-focus-toggle") || "", input.checked);
+    });
+  });
+}
+
+function applyFocusSettingsToForm() {
+  const calls = document.getElementById("focus-block-calls");
+  const notifications = document.getElementById("focus-block-notifications");
+  const dnd = document.getElementById("focus-dnd");
+  const autoStart = document.getElementById("focus-auto-start");
+  if (calls) calls.checked = Boolean(focusSettings.blockCalls);
+  if (notifications) notifications.checked = Boolean(focusSettings.blockNotifications);
+  if (dnd) dnd.checked = Boolean(focusSettings.doNotDisturb);
+  if (autoStart) autoStart.checked = Boolean(focusSettings.autoStartNextCycle);
+}
+
 function applyAlarmSettingsToForm() {
   const tone = document.getElementById("alarm-tone");
   if (tone) tone.value = String(alarmToneValue());
@@ -5005,6 +5288,7 @@ function restoreTimer() {
     timer.endsAt = null;
     stopNativeTimer();
   }
+  if (timer.running && (timer.activeMode || timer.mode) === "focus") applyFocusBlocking();
   renderTimer();
 }
 
@@ -5466,6 +5750,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCreateFab();
   setupCreateModals();
   setupPomodoro();
+  setupFocusSettings();
+  setupFocusPermissionModal();
   setupAlarmOverlay();
   setupBackToTop();
   setupAbout();
@@ -5477,6 +5763,7 @@ document.addEventListener("DOMContentLoaded", () => {
   positionToastContainer();
   window.addEventListener("resize", positionToastContainer);
   applySettingsToForm();
+  applyFocusSettingsToForm();
   restoreTimer();
   renderAll();
   persistSnapshot();

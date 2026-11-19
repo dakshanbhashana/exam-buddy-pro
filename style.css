@@ -1921,6 +1921,40 @@ input:focus, select:focus {
 .switch-input:checked + .switch { background: var(--grad-primary); box-shadow: 0 4px 12px var(--glow); }
 .switch-input:checked + .switch::after { background: #fff; }
 
+/* Focus settings + blocking */
+.focus-block-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--card) 82%);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.focus-block-status {
+  text-align: center;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0;
+}
+.focus-settings-list { margin-bottom: 0.4rem; }
+.focus-settings-list .switch-row { border-bottom: 1px solid var(--border); padding: 0.55rem 0; }
+.focus-settings-list .switch-row:last-child { border-bottom: none; }
+.focus-settings-list .switch-row strong { display: block; color: var(--text-strong); font-size: 0.9rem; }
+.focus-settings-list .switch-row small { display: block; color: var(--muted); font-size: 0.74rem; margin-top: 0.15rem; line-height: 1.4; }
+.about-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
 /* Insights */
 .bar-fill {
   transform-origin: bottom;

@@ -51,8 +51,8 @@ const CARD_MASTERED_BOX = 4;
 const CARD_MAX_BOX = 5;
 const CARD_INTERVALS = [10 * 60 * 1000, DAY_MS, 3 * DAY_MS, 7 * DAY_MS, 16 * DAY_MS, 35 * DAY_MS];
 
-const APP_VERSION_NAME = "2.1.0";
-const APP_VERSION_CODE = 13;
+const APP_VERSION_NAME = "2.2.0";
+const APP_VERSION_CODE = 14;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -92,6 +92,7 @@ const I18N = {
     "tab.focus": "Focus",
     "tab.insights": "Insights",
     "tab.about": "About",
+    create: "Create",
     today: "Today",
     tomorrow: "Tomorrow",
     welcome: "Welcome back",
@@ -399,7 +400,7 @@ const I18N = {
     "about.privacyHint": "Your data never leaves this device",
     "about.licencesHint": "Sounds, fonts and libraries",
     "about.updateHint": "Always get the latest release",
-    version: "Version 2.1.0",
+    version: "Version 2.2.0",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -440,7 +441,7 @@ const I18N = {
     "permissions.allowed": "Allowed",
     "permissions.denied": "Not allowed",
     "permissions.openSettings": "Settings",
-    "permissions.manage": "Notifications, alarms & app access",
+    "permissions.manage": "App access",
     "permissions.banner": "Some access is missing — tap to finish setup.",
     "permissions.saved": "Setup updated",
     "permissions.notSupported": "This access is only available in the Android app.",
@@ -595,6 +596,7 @@ const I18N = {
     "tab.focus": "අවධානය",
     "tab.insights": "තීක්ෂ්ණ බුද්ධිය",
     "tab.about": "පිළිබඳ",
+    create: "එකතු කරන්න",
     today: "අද",
     tomorrow: "හෙට",
     welcome: "නැවතත් සාදරයෙන් පිළිගනිමු",
@@ -902,7 +904,7 @@ const I18N = {
     "about.privacyHint": "ඔබේ දත්ත කිසිදා මෙම උපාංගයෙන් පිට නොයයි",
     "about.licencesHint": "ශබ්ද, අකුරු සහ පුස්තකාල",
     "about.updateHint": "නවතම සංස්කරණය සැමවිටම ලබා ගන්න",
-    version: "Version 2.1.0",
+    version: "Version 2.2.0",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -943,7 +945,7 @@ const I18N = {
     "permissions.allowed": "අවසර දී ඇත",
     "permissions.denied": "අවසර නැත",
     "permissions.openSettings": "සැකසුම්",
-    "permissions.manage": "දැනුම්දීම්, ඇලාම් සහ යෙදුම් අවසර",
+    "permissions.manage": "යෙදුම් අවසර",
     "permissions.banner": "සමහර අවසර අඩුයි — සැකසුම සම්පූර්ණ කිරීමට තට්ටු කරන්න.",
     "permissions.saved": "සැකසුම යාවත්කාලීන විය",
     "permissions.notSupported": "මෙම අවසරය Android යෙදුමේ පමණක් ලබා ගත හැක.",
@@ -1687,6 +1689,9 @@ let autoTechnique = true;
 let firedReminders = new Set();
 let reminderInterval = null;
 
+let taskSearchRenderTimer = null;
+let cardSearchRenderTimer = null;
+
 const ui = {
   examSearch: "",
   examFilter: "all",
@@ -1731,17 +1736,23 @@ function writeFile(snapshot) {
   }
 }
 
-function persistSnapshot() {
+let snapshotDirty = false;
+
+function persistSnapshot(force = true) {
+  if (!force && !snapshotDirty) return true;
   const snapshot = buildSnapshot();
+  snapshotDirty = false;
   writeCache(snapshot);
   return writeFile(snapshot);
 }
 
 function saveData() {
+  snapshotDirty = true;
   persistSnapshot();
 }
 
 function saveTimer() {
+  snapshotDirty = true;
   persistSnapshot();
 }
 
@@ -2503,11 +2514,22 @@ function switchTab(tab) {
   buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
   closePrettySelectMenu();
+  if (tab === "dashboard") {
+    renderDashboard();
+    startCountdownLoop();
+  } else {
+    stopCountdownLoop();
+  }
+  if (tab === "exams") renderExams();
+  if (tab === "tasks") renderTasks();
   if (tab === "cards") renderFlashcards();
+  if (tab === "focus") {
+    renderTodaySessions();
+    renderSessionDots();
+  }
   if (tab === "insights") renderInsights();
   if (timer.running) resumeAppTimer();
   forceScrollTop();
-  requestAnimationFrame(forceScrollTop);
 }
 
 function setupTabs() {
@@ -2639,6 +2661,25 @@ function updateCountdown() {
   setText("cd-hours", pad(hours));
   setText("cd-mins", pad(mins));
   setText("cd-secs", pad(secs));
+}
+
+let countdownLoop = null;
+
+function startCountdownLoop() {
+  if (countdownLoop) return;
+  countdownLoop = setInterval(() => {
+    if (document.hidden) return;
+    const panel = document.getElementById("dashboard");
+    if (!panel || !panel.classList.contains("active")) return;
+    updateCountdown();
+  }, 1000);
+}
+
+function stopCountdownLoop() {
+  if (countdownLoop) {
+    clearInterval(countdownLoop);
+    countdownLoop = null;
+  }
 }
 
 function renderTodayPlan() {
@@ -2964,7 +3005,9 @@ function closeStudyModal() {
   if (!modal || modal.classList.contains("hidden")) return;
   modal.classList.add("hidden");
   unlockBodyScroll();
+  const wasOpen = studyState.open;
   studyState.open = false;
+  if (wasOpen) renderAll();
 }
 
 function setStudyFlipped(flipped) {
@@ -3052,7 +3095,7 @@ function gradeStudyCard(grade) {
   if (grade === "again") studyState.queue.push(card.id);
   studyState.flipped = false;
   saveData();
-  renderAll();
+  renderCardStats();
   renderStudy();
 }
 
@@ -3389,11 +3432,19 @@ function setupDetailModal() {
 
 function renderAll() {
   renderDashboard();
-  renderExams();
-  renderTasks();
-  renderFlashcards();
-  renderTodaySessions();
-  renderInsights();
+  const active = document.querySelector(".tab-panel.active");
+  const tab = active ? active.id : "dashboard";
+  if (tab === "exams" || tab === "tasks") {
+    renderExams();
+    renderTasks();
+  } else if (tab === "cards") {
+    renderFlashcards();
+  } else if (tab === "focus") {
+    renderTodaySessions();
+    renderSessionDots();
+  } else if (tab === "insights") {
+    renderInsights();
+  }
 }
 
 function clearExamEdit() {
@@ -3635,7 +3686,8 @@ function setupFlashcards() {
   if (search) {
     search.addEventListener("input", (event) => {
       ui.cardSearch = event.target.value;
-      renderFlashcards();
+      clearTimeout(cardSearchRenderTimer);
+      cardSearchRenderTimer = setTimeout(() => renderFlashcards(), 250);
     });
   }
   const deckFilter = document.getElementById("card-deck-filter");
@@ -3900,7 +3952,8 @@ function setupFilters() {
   });
   document.getElementById("task-search").addEventListener("input", (e) => {
     ui.taskSearch = e.target.value;
-    renderTasks();
+    clearTimeout(taskSearchRenderTimer);
+    taskSearchRenderTimer = setTimeout(() => renderTasks(), 250);
   });
   document.getElementById("task-filter").addEventListener("change", (e) => {
     ui.taskFilter = e.target.value;
@@ -4137,6 +4190,43 @@ function setupQuickActions() {
     switchTab("exams");
     setTimeout(() => document.getElementById("exam-subject").focus(), 0);
   });
+}
+
+function setupCreateButtons() {
+  const examCreate = document.getElementById("exam-create-btn");
+  if (examCreate) {
+    examCreate.addEventListener("click", () => {
+      clearExamEdit();
+      switchTab("exams");
+      setTimeout(() => document.getElementById("exam-subject").focus(), 60);
+    });
+  }
+  const taskCreate = document.getElementById("task-create-btn");
+  if (taskCreate) {
+    taskCreate.addEventListener("click", () => {
+      resetTaskForm();
+      switchTab("tasks");
+      setTimeout(() => {
+        const form = document.getElementById("task-form");
+        if (form) form.scrollIntoView({ block: "start" });
+        const field = document.getElementById("task-text");
+        if (field) field.focus();
+      }, 60);
+    });
+  }
+  const cardCreate = document.getElementById("card-create-btn");
+  if (cardCreate) {
+    cardCreate.addEventListener("click", () => {
+      resetCardForm();
+      switchTab("cards");
+      setTimeout(() => {
+        const form = document.getElementById("card-form");
+        if (form) form.scrollIntoView({ block: "start" });
+        const field = document.getElementById("card-front");
+        if (field) field.focus();
+      }, 60);
+    });
+  }
 }
 
 function positionToastContainer() {
@@ -4416,19 +4506,15 @@ function parseAlarmState(raw) {
 }
 
 function updateAlarmOverlayClock() {
-  const time = document.getElementById("alarm-overlay-time");
-  if (time) {
-    const now = new Date();
-    time.textContent = pad(now.getHours()) + ":" + pad(now.getMinutes());
-  }
+  const now = new Date();
+  setText("alarm-overlay-time", pad(now.getHours()) + ":" + pad(now.getMinutes()));
 }
 
 function updateAlarmOverlayCountdown() {
-  const countdown = document.getElementById("alarm-overlay-countdown");
-  if (!countdown || !alarmOverlayState) return;
+  if (!alarmOverlayState) return;
   const stopAt = Number(alarmOverlayState.autoStopAt) || (Date.now() + 60000);
   const seconds = Math.max(0, Math.ceil((stopAt - Date.now()) / 1000));
-  countdown.textContent = t("alarmAutoStop", { n: seconds });
+  setText("alarm-overlay-countdown", t("alarmAutoStop", { n: seconds }));
   if (seconds <= 0) hideAlarmOverlay();
 }
 
@@ -4457,7 +4543,7 @@ function showAlarmOverlay(raw) {
   alarmOverlayInterval = setInterval(() => {
     updateAlarmOverlayClock();
     updateAlarmOverlayCountdown();
-  }, 500);
+  }, 1000);
 }
 
 function hideAlarmOverlay() {
@@ -4570,9 +4656,15 @@ function setupAlarmOverlay() {
   refreshFullScreenAlarmAccess();
 }
 
+let lastSessionDotsFilled = -1;
+
 function renderSessionDots() {
   const filled = timer.mode === "long" ? 4 : pomodoro.focusCount % 4;
-  document.getElementById("session-dots").innerHTML = Array.from({ length: 4 }, (_, i) =>
+  if (filled === lastSessionDotsFilled) return;
+  lastSessionDotsFilled = filled;
+  const dots = document.getElementById("session-dots");
+  if (!dots) return;
+  dots.innerHTML = Array.from({ length: 4 }, (_, i) =>
     `<span class="session-dot ${i < filled ? "filled" : ""}"></span>`
   ).join("");
 }
@@ -4594,8 +4686,13 @@ function renderTimer() {
   );
 
   const ring = document.getElementById("timer-ring-progress");
-  ring.style.strokeDasharray = String(CIRCUMFERENCE);
-  ring.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - remaining / duration));
+  if (ring) {
+    const offset = String(CIRCUMFERENCE * (1 - remaining / duration));
+    if (ring.style.strokeDashoffset !== offset) {
+      ring.style.strokeDasharray = String(CIRCUMFERENCE);
+      ring.style.strokeDashoffset = offset;
+    }
+  }
 
   document.querySelectorAll(".mode-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.mode === timer.mode);
@@ -4605,13 +4702,10 @@ function renderTimer() {
     displayedRunning ? t("pause") : remaining < duration ? t("resume") : t("startMode", { mode: modeLabel })
   );
   renderSessionDots();
-  if (active) {
-    const activeLabel = t(MODES[active].label);
-    const activeRemaining = timerRemainingFor(active);
-    document.title = `${formatClock(activeRemaining)} · ${activeLabel} — ${t("appTitle")}`;
-  } else {
-    document.title = t("appTitle");
-  }
+  const nextTitle = active
+    ? `${formatClock(timerRemainingFor(active))} · ${t(MODES[active].label)} — ${t("appTitle")}`
+    : t("appTitle");
+  if (document.title !== nextTitle) document.title = nextTitle;
 }
 
 function setupPomodoro() {
@@ -4770,11 +4864,14 @@ function resumeReminders() {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     stopTicking();
+    stopCountdownLoop();
     return;
   }
   resumeAppTimer();
   resumeReminders();
   refreshPermissionUi();
+  const panel = document.getElementById("dashboard");
+  if (panel && panel.classList.contains("active")) startCountdownLoop();
 });
 window.addEventListener("pageshow", () => {
   resumeAppTimer();
@@ -4790,8 +4887,17 @@ window.addEventListener("focus", () => {
 function setupBackToTop() {
   const btn = document.getElementById("back-to-top");
   if (!btn) return;
-  const update = () => btn.classList.toggle("show", window.scrollY > 320);
-  window.addEventListener("scroll", update, { passive: true });
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    btn.classList.toggle("show", window.scrollY > 320);
+  };
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
   update();
   btn.addEventListener("click", () => scrollToTop());
 }
@@ -4812,7 +4918,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 2.1.0</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 2.2.0</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -4866,7 +4972,7 @@ function setupAutoSave() {
     const now = Date.now();
     if (!force && now - last < 1200) return;
     last = now;
-    try { persistSnapshot(); } catch {}
+    try { persistSnapshot(false); } catch {}
   };
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) flush(true);
@@ -4893,7 +4999,7 @@ function runStartupUpdateCheck() {
   checkForUpdates(false, { startup: true });
 }
 
-const SPLASH_DURATION_MS = 5000;
+const SPLASH_DURATION_MS = 1200;
 
 function setupSplash() {
   const navStart = window.performance && performance.timing && performance.timing.navigationStart;
@@ -5189,6 +5295,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilters();
   setupPrettySelects();
   setupQuickActions();
+  setupCreateButtons();
   setupPomodoro();
   setupAlarmOverlay();
   setupBackToTop();
@@ -5199,7 +5306,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupExternalLinks();
   setupAutoSave();
   positionToastContainer();
-  window.addEventListener("scroll", positionToastContainer, { passive: true });
   window.addEventListener("resize", positionToastContainer);
   applySettingsToForm();
   restoreTimer();
@@ -5208,7 +5314,7 @@ document.addEventListener("DOMContentLoaded", () => {
   syncAllTaskReminders();
   startReminderLoop();
   updateCountdown();
-  setInterval(updateCountdown, 1000);
+  startCountdownLoop();
   checkTaskReminders();
   setText("footer-year", "© " + new Date().getFullYear());
 });

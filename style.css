@@ -70,7 +70,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 html, body {
@@ -231,7 +231,6 @@ body.modal-open { overflow: hidden; }
   position: absolute;
   inset: 0;
   background: rgba(20, 5, 10, 0.6);
-  backdrop-filter: blur(3px);
 }
 .about-modal-card {
   position: relative;
@@ -663,6 +662,9 @@ h3 {
 }
 
 .card-title-row h3 { margin-bottom: 0.75rem; }
+
+.create-btn { margin-left: auto; }
+.secondary-btn.create-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
 
 .pill {
   display: inline-block;
@@ -1573,7 +1575,6 @@ body {
   height: 340px;
   top: -190px;
   right: 6%;
-  animation: floatBlob 11s ease-in-out infinite;
 }
 .app-header::after {
   width: 260px;
@@ -1581,7 +1582,6 @@ body {
   bottom: -190px;
   left: 22%;
   opacity: 0.55;
-  animation: floatBlob 9s ease-in-out infinite reverse;
 }
 .header-inner { position: relative; z-index: 1; }
 .app-header h1 { text-shadow: 0 2px 14px rgba(0, 0, 0, 0.12); }
@@ -1637,7 +1637,6 @@ body {
   width: 45%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transform: translateX(-130%);
-  animation: tabShine 4.5s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1755,7 +1754,6 @@ body {
   margin-right: 0.4rem;
   background: var(--success);
   box-shadow: 0 0 0 0 var(--success);
-  animation: pulseDot 1.8s ease-out infinite;
   vertical-align: middle;
 }
 @keyframes pulseDot {
@@ -1774,12 +1772,11 @@ body {
   border-color: var(--primary);
 }
 .cd-unit span { transition: transform 0.2s ease; }
-#cd-secs { animation: softPulse 1s ease-in-out infinite; }
+#cd-secs { animation: none; }
 .progress-fill, .mini-fill {
   position: relative;
   background: linear-gradient(90deg, var(--primary), var(--primary-2), var(--success), var(--primary));
-  background-size: 200% 100%;
-  animation: shimmer 4s linear infinite;
+  background-size: 100% 100%;
 }
 
 /* Quick actions */
@@ -1840,7 +1837,7 @@ body {
 .secondary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px var(--glow); }
 .danger-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(220, 38, 38, 0.18); }
 .ghost-btn:hover { transform: translateX(2px); }
-.quick-btn, .tab-btn, .icon-btn { will-change: transform; }
+
 
 /* Form fields */
 input[type="text"], input[type="date"], input[type="search"], input[type="number"], select {
@@ -1888,7 +1885,6 @@ input:focus, select:focus {
   background: radial-gradient(ellipse at center, var(--glow), transparent 68%);
   opacity: 0.5;
   pointer-events: none;
-  animation: breathe 5s ease-in-out infinite;
 }
 .timer-card.celebrate { animation: celebrate 0.85s ease; }
 .mode-btn {
@@ -1907,13 +1903,11 @@ input:focus, select:focus {
   inset: 14%;
   border-radius: 50%;
   background: radial-gradient(circle, var(--glow), transparent 70%);
-  filter: blur(14px);
   pointer-events: none;
-  animation: breathe 4.5s ease-in-out infinite;
 }
 .timer-ring { position: relative; z-index: 1; }
 .ring-center { z-index: 2; }
-.ring-progress { filter: drop-shadow(0 0 6px var(--glow-strong)); }
+.ring-progress { filter: none; }
 .timer-time { transition: transform 0.2s ease; }
 .timer-controls .icon-btn:hover { transform: rotate(20deg) scale(1.06); }
 .session-dot {
@@ -1973,14 +1967,12 @@ input:focus, select:focus {
   height: 280px;
   top: -150px;
   right: -40px;
-  animation: floatBlob 10s ease-in-out infinite;
 }
 .about-hero::after {
   width: 220px;
   height: 220px;
   bottom: -160px;
   left: 16%;
-  animation: floatBlob 8s ease-in-out infinite reverse;
 }
 .about-hero > * { position: relative; z-index: 1; }
 .about-badge {
@@ -2720,8 +2712,6 @@ input[type="time"] {
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(225, 29, 72, 0.34), rgba(20, 5, 10, 0.72) 72%),
     rgba(20, 5, 10, 0.62);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
 }
 
 .permission-card {
@@ -2933,6 +2923,8 @@ input[type="time"] {
   display: grid;
   gap: 0.55rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   padding-right: 0.15rem;
 }
 
@@ -3449,8 +3441,6 @@ body.alarm-open {
   background:
     radial-gradient(110% 80% at 50% 0%, rgba(225, 29, 72, 0.42), rgba(20, 5, 10, 0.82) 70%),
     rgba(20, 5, 10, 0.72);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
 }
 
 .alarm-overlay.hidden {
@@ -3485,7 +3475,6 @@ body.alarm-open {
   border-radius: 50%;
   transform: translateX(-50%);
   background: radial-gradient(circle, rgba(225, 29, 72, 0.55), transparent 68%);
-  animation: alarmPulse 2s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -3913,7 +3902,7 @@ body {
     radial-gradient(900px 520px at 110% -4%, rgba(236, 72, 153, 0.12), transparent 60%),
     radial-gradient(760px 560px at 50% 108%, rgba(251, 191, 36, 0.1), transparent 65%),
     var(--bg);
-  background-attachment: fixed;
+  background-attachment: scroll;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Sinhala", "Iskoola Pota", "Nirmala UI", "FM Abhaya", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -3925,7 +3914,7 @@ body {
     radial-gradient(900px 520px at 110% -4%, rgba(190, 24, 93, 0.2), transparent 60%),
     radial-gradient(760px 560px at 50% 108%, rgba(180, 83, 9, 0.12), transparent 65%),
     var(--bg);
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 h1, h2, h3, h4, h5 {
@@ -4056,8 +4045,6 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.22);
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 24px rgba(6, 4, 22, 0.2);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
 }
 
 .theme-toggle:hover,
@@ -4082,8 +4069,6 @@ main {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.86);
   box-shadow: 0 18px 46px rgba(30, 27, 75, 0.2);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
   scrollbar-width: none;
 }
 
@@ -4140,8 +4125,6 @@ main {
   border-radius: 24px;
   padding: 1.2rem;
   box-shadow: var(--shadow);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
 }
 
 [data-theme="dark"] .card {
@@ -4267,8 +4250,6 @@ main {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
 .next-card .cd-unit span {
@@ -4701,8 +4682,6 @@ input:focus, select:focus, textarea:focus {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.72rem;
   font-weight: 700;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
 .abx-chip-dot {
@@ -5192,8 +5171,6 @@ input:focus, select:focus, textarea:focus {
 /* ---------- Modals ---------- */
 .about-modal-backdrop {
   background: rgba(9, 7, 22, 0.62);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
 .about-modal-card {
@@ -5256,8 +5233,6 @@ input:focus, select:focus, textarea:focus {
 /* ---------- Alarm overlay ---------- */
 .alarm-overlay-backdrop {
   background: rgba(9, 7, 22, 0.7);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
 .alarm-overlay-card {
@@ -5286,8 +5261,6 @@ input:focus, select:focus, textarea:focus {
   background: rgba(255, 255, 255, 0.96);
   color: var(--text);
   box-shadow: var(--shadow-lg);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
 }
 
 [data-theme="dark"] .toast { background: rgba(21, 26, 48, 0.96); }
@@ -5395,3 +5368,37 @@ input:focus, select:focus, textarea:focus {
 
   .splash-progress-fill { width: 100%; }
 }
+
+/* ---------- Performance: keep launch and idle states light ---------- */
+.splash-aurora,
+.splash-logo-wrap::before,
+.splash-logo {
+  filter: none;
+  animation: none;
+}
+
+.splash-orbit-a,
+.splash-orbit-b,
+.splash-status::after {
+  animation: none;
+}
+
+.splash-progress-fill {
+  animation: splashFill 1.2s linear forwards;
+  box-shadow: none;
+}
+
+.permission-banner-dot {
+  animation: none;
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.18);
+}
+
+.permission-spark,
+.abx-chip-dot,
+.abx-ring-a,
+.abx-ring-b,
+.abx-spark-a,
+.abx-spark-b {
+  animation: none;
+}
+

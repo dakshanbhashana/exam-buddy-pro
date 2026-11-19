@@ -1,28 +1,24 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 13,
-  "versionName": "2.1.0",
+  "versionCode": 14,
+  "versionName": "2.2.0",
   "minSdk": 21,
   "publishedAt": "2026-11-19",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "Added flashcards with question and answer cards grouped into decks.",
-      "Link a deck to an exam so revision stays focused on the right subject.",
-      "Study mode reveals the answer, then grades each card Again, Good or Easy.",
-      "A Leitner-style spaced-repetition schedule brings hard cards back in the same session and spaces out cards you know.",
-      "Search cards, filter by deck or status, and see due and mastered counts.",
-      "Flashcards now feed the dashboard card stat, your study streak and the local backup snapshot."
+      "Added a quick Create button on the Exams, Tasks and Flashcards pages.",
+      "Task and exam details now scroll smoothly and stay easy to read in the detail view.",
+      "Startup is faster with the trimmed splash screen and lighter UI animations.",
+      "Task and card search now re-render lists with debounced input while typing."
     ],
     "si": [
-      "ප්‍රශ්නය සහ පිළිතුර සහිත ෆ්ලෑෂ් කාඩ්පත්, තට්ටු වලට කාණ්ඩගත කර එක් කර ඇත.",
-      "නිවැරදි විෂයට අවධානය යොමු කර ගැනීමට තට්ටුවක් විභාගයකට සම්බන්ධ කළ හැක.",
-      "අධ්‍යයන ප්‍රකාරයේ පිළිතුර පෙන්වා, එක් එක් කාඩ්පත නැවත, හොඳයි හෝ පහසු ලෙස ශ්‍රේණිගත කරන්න.",
-      "Leitner ක්‍රමයේ ප්‍රතිපුනරුත්ථාපන කාලසටහනක් අපහසු කාඩ්පත් එම සැසියේම නැවත ගෙන එන අතර දන්නා කාඩ්පත් දිගු කාලයකට පසුව ගෙන එයි.",
-      "කාඩ්පත් සොයන්න, තට්ටුව හෝ තත්ත්වය අනුව පෙරන්න, සහ ඉගෙන ගත යුතු සහ හොඳින් දත් ගණන බලන්න.",
-      "ෆ්ලෑෂ් කාඩ්පත් දැන් උපකරණ පුවරුවේ කාඩ්පත් ගණන, අධ්‍යයන අඛණ්ඩතාව සහ දේශීය උපස්ථ දත්තවලට එක් වේ."
+      "ඉක්මන් නිර්මාණ බොත්මක්ම එකතු කර ඇත.",
+      "කාර්යය සහ විභාග විස්තර පහසුවෙන් දැනගන්න.",
+      "යෙදුම ආරම්භ වේගවත් විය.",
+      "කාඩ්පම්ත සෙවුම් තද අදහස්."
     ]
   }
 }

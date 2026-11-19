@@ -1,0 +1,19 @@
+{
+  "versionCode": 14,
+  "versionName": "2.2.0",
+  "changelog": {
+    "en": [
+      "Added a quick Create button on the Exams, Tasks and Flashcards pages.",
+      "Task and exam details now scroll smoothly and stay easy to read in the detail view.",
+      "Startup is faster with the trimmed splash screen and lighter UI animations.",
+      "Task and card search now re-render lists with debounced input while typing."
+    ],
+    "si": [
+      "ඉක්මන් නිර්මාණ බොත්මක්ම එකතු කර ඇත.",
+      "කාර්යය සහ විභාග විස්තර පහසුවෙන් දැනගන්න.",
+      "යෙදුම ආරම්භ වේගවත් විය.",
+      "කාඩ්පම්ත සෙවුම් තද අදහස්."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v2.2.0\n\nLighter startup, smoother lists and a faster way to create exams, tasks and flashcards.\n\n### What's new\n- Quick Create button on the Exams, Tasks and Flashcards pages.\n- Task and exam details scroll smoothly in the detail view.\n- Lighter startup with the trimmed splash screen and lighter UI animations.\n- Task and card search re-render lists with debounced input while typing.\n\n### Improvements\n- Smoother focus timer ring updates and session dots.\n- Faster tab switching with panel level rendering.\n- Faster task list rendering while typing in search.\n"
+}

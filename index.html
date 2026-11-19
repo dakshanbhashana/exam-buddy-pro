@@ -249,6 +249,7 @@
         <div class="card-title-row">
           <h3 data-i18n="examList">Exam List</h3>
           <span id="exam-count" class="pill">0 exams</span>
+          <button type="button" id="exam-create-btn" class="secondary-btn create-btn" data-i18n="create">Create</button>
         </div>
         <div class="toolbar">
           <input type="search" id="exam-search" data-i18n-placeholder="examSearchPlaceholder" data-i18n-aria="searchExams" placeholder="Search exams or notes..." aria-label="Search exams">
@@ -369,6 +370,7 @@
         <div class="card-title-row">
           <h3 data-i18n="taskList">Task List</h3>
           <button type="button" id="clear-completed" class="ghost-btn" data-i18n="clearCompleted">Clear completed</button>
+          <button type="button" id="task-create-btn" class="secondary-btn create-btn" data-i18n="create">Create</button>
         </div>
         <div class="toolbar">
           <input type="search" id="task-search" data-i18n-placeholder="taskSearchPlaceholder" data-i18n-aria="searchTasks" placeholder="Search tasks..." aria-label="Search tasks">
@@ -441,6 +443,7 @@
         <div class="card-title-row">
           <h3 data-i18n="cards.yourCards">Your cards</h3>
           <span id="card-count" class="pill">0</span>
+          <button type="button" id="card-create-btn" class="secondary-btn create-btn" data-i18n="create">Create</button>
         </div>
         <div class="toolbar">
           <input type="search" id="card-search" data-i18n-placeholder="cards.searchPlaceholder" data-i18n-aria="cards.searchLabel" placeholder="Search cards or decks..." aria-label="Search cards">
@@ -523,29 +526,7 @@
               <span class="switch" aria-hidden="true"></span>
             </label>
             <div class="setting-divider"></div>
-            <h4 class="setting-subtitle" data-i18n="alarmSettings">Task alarm</h4>
-            <label>
-              <span data-i18n="alarmTone">Alarm ringtone</span>
-              <select id="alarm-tone">
-                <option value="0" data-i18n="alarmToneClassic">Classic bell</option>
-                <option value="1" data-i18n="alarmToneMechanical">Mechanical clock</option>
-                <option value="2" data-i18n="alarmToneBeep">Alert beep</option>
-              </select>
-            </label>
-            <label class="switch-row"><span data-i18n="alarmVibrate">Vibrate with alarm</span>
-              <input type="checkbox" id="alarm-vibrate" class="switch-input" checked>
-              <span class="switch" aria-hidden="true"></span>
-            </label>
-            <label class="switch-row"><span data-i18n="alarmBluetooth">Bluetooth only when connected</span>
-              <input type="checkbox" id="alarm-bluetooth" class="switch-input" checked>
-              <span class="switch" aria-hidden="true"></span>
-            </label>
-            <label><span data-i18n="alarmSnooze">Snooze (minutes)</span><input type="number" id="alarm-snooze" min="1" max="30" value="5"></label>
-            <button type="button" id="alarm-test-btn" class="secondary-btn full-btn" data-i18n="alarmTest">Test alarm</button>
-            <button type="button" id="alarm-fullscreen-btn" class="secondary-btn full-btn hidden" data-i18n="alarmFullScreenAccess">Allow full-screen alarms</button>
-            <p class="hint" data-i18n="alarmHint">Alarms ring loudly even when the app is closed, and play through Bluetooth when a device is connected. They stop automatically after one minute.</p>
-            <div class="setting-divider"></div>
-            <button type="button" id="permissions-btn" class="secondary-btn full-btn" data-i18n="permissions.manage">Notifications, alarms &amp; app access</button>
+            <button type="button" id="permissions-btn" class="secondary-btn full-btn" data-i18n="permissions.manage">App access</button>
             <button type="submit" class="primary-btn full-btn" data-i18n="saveSettings">Save settings</button>
           </form>
 
@@ -618,7 +599,7 @@
           <p class="abx-lead" data-i18n="brandSubtitle">Plan smarter. Focus deeper. Ace every exam.</p>
           <div class="abx-meta">
             <span class="abx-chip"><span class="abx-chip-dot" aria-hidden="true"></span><span data-i18n="about.subtitle">Sinhala English study app</span></span>
-            <span class="abx-chip abx-chip-version" data-i18n="version">Version 2.1.0</span>
+            <span class="abx-chip abx-chip-version" data-i18n="version">Version 2.2.0</span>
           </div>
         </div>
         <div class="abx-hero-art" aria-hidden="true">
@@ -723,7 +704,7 @@
         </div>
       </article>
 
-      <p class="abx-foot"><span data-i18n="developedBy">Developed by Dakshan Bhashna</span><span data-i18n="version">Version 2.1.0</span></p>
+      <p class="abx-foot"><span data-i18n="developedBy">Developed by Dakshan Bhashna</span><span data-i18n="version">Version 2.2.0</span></p>
     </section>
   </main>
 
@@ -732,7 +713,7 @@
   </button>
 
   <footer class="app-footer">
-    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 2.1.0</span></p>
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 2.2.0</span></p>
   </footer>
 
   <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">

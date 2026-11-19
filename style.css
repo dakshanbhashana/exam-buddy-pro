@@ -5402,3 +5402,52 @@ input:focus, select:focus, textarea:focus {
   animation: none;
 }
 
+/* ---------- Create FAB ---------- */
+.fab {
+  position: fixed;
+  right: calc(18px + env(safe-area-inset-right, 0px));
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--grad-primary);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 38px var(--glow-strong);
+  z-index: 70;
+  cursor: pointer;
+}
+
+.fab-icon { font-size: 2rem; line-height: 1; transform: translateY(-2px); }
+
+/* ---------- Create bottom-sheet modal ---------- */
+.create-modal { align-items: flex-end; padding: 0; }
+.create-modal .about-modal-backdrop { background: rgba(9, 7, 22, 0.72); }
+.create-modal-card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  border-radius: 22px 22px 0 0;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  padding: 1.15rem 1.15rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
+}
+.create-modal-card > form.card { background: transparent; border: none; box-shadow: none; padding: 0; }
+.about-modal-head-actions { display: flex; align-items: center; gap: 0.5rem; }
+.create-modal .about-modal-head { margin-bottom: 0.85rem; }
+
+/* ---------- Dashboard next exam: display-only static card ---------- */
+.next-card { cursor: default; }
+.next-card:hover { transform: none; box-shadow: var(--shadow); border-color: var(--border); }
+.next-card:hover::before { opacity: 0; }
+.next-card:focus-visible { outline: none; }
+

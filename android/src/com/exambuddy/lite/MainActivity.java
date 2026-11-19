@@ -70,6 +70,7 @@ public class MainActivity extends Activity {
     private ActivityResultLauncher exactAlarmLauncher;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean backPromptShown = false;
+    private boolean createModalOpen = false;
     private static volatile boolean appVisible = false;
     private static volatile MainActivity instance = null;
 
@@ -1219,12 +1220,39 @@ public class MainActivity extends Activity {
             }
             return dataPrefs().getString(KEY_SNAPSHOT, null);
         }
+
+        @JavascriptInterface
+        public void setCreateModalOpen(boolean open) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    createModalOpen = open;
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean isCreateModalOpen() {
+            return createModalOpen;
+        }
     }
 
     @Override
     public void onBackPressed() {
         if (TimerService.isRunning()) {
             handleTimerBackPress();
+            return;
+        }
+        if (createModalOpen) {
+            final WebView view = webView;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (view != null) {
+                        view.evaluateJavascript("if(window.ExamBuddyCreateModalClose)window.ExamBuddyCreateModalClose();", null);
+                    }
+                }
+            });
             return;
         }
         if (webView.canGoBack()) {

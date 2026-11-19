@@ -162,7 +162,7 @@
       </div>
 
       <div class="dashboard-split">
-        <div class="card highlight-card next-card" data-detail="nextExam" role="button" tabindex="0">
+        <div class="card highlight-card next-card">
           <div class="card-title-row">
             <h3 data-i18n="nextExam">Next Exam</h3>
             <span class="pill" data-i18n="liveCountdown">Live countdown</span>
@@ -211,39 +211,6 @@
 
     <section id="exams" class="tab-panel">
       <h2 data-i18n="exams.title">Exams</h2>
-      <form id="exam-form" class="card form-card">
-        <div class="card-title-row">
-          <h3 id="exam-form-title" data-i18n="addExam">Add Exam</h3>
-          <button type="button" id="exam-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
-        </div>
-        <div class="form-grid">
-          <label>
-            <span data-i18n="subject">Subject</span>
-            <input type="text" id="exam-subject" required data-i18n-placeholder="subjectPlaceholder" data-i18n-aria="examName" placeholder="e.g. Mathematics" aria-label="Exam name">
-          </label>
-          <label>
-            <span data-i18n="date">Date</span>
-            <input type="date" id="exam-date" required data-i18n-aria="examDate" aria-label="Exam date">
-          </label>
-          <label>
-            <span data-i18n="category">Category</span>
-            <select id="exam-category">
-              <option value="General" data-i18n="category.general">General</option>
-              <option value="Mathematics" data-i18n="category.mathematics">Mathematics</option>
-              <option value="Science" data-i18n="category.science">Science</option>
-              <option value="Language" data-i18n="category.language">Language</option>
-              <option value="History" data-i18n="category.history">History</option>
-              <option value="Other" data-i18n="category.other">Other</option>
-            </select>
-          </label>
-          <label class="full-width">
-            <span data-i18n="notes">Notes (optional)</span>
-            <input type="text" id="exam-notes" data-i18n-placeholder="notesPlaceholder" placeholder="Chapters, topics, room...">
-          </label>
-        </div>
-        <button type="submit" id="exam-submit" class="primary-btn" data-i18n="addExam">Add Exam</button>
-        <p id="exam-limit-hint" class="hint exam-limit-hint"></p>
-      </form>
 
       <div class="card">
         <div class="card-title-row">
@@ -268,104 +235,6 @@
     <section id="tasks" class="tab-panel">
       <p class="eyebrow" data-i18n="toDo">To-Do</p>
       <h2 data-i18n="tasks.title">Study Tasks</h2>
-      <form id="task-form" class="card form-card task-form-card">
-        <div class="card-title-row">
-          <h3 id="task-form-title" data-i18n="addTask">Add Task</h3>
-          <button type="button" id="task-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
-        </div>
-        <div class="form-grid">
-          <label class="full-width">
-            <span data-i18n="taskLabel">Task</span>
-            <input type="text" id="task-text" required data-i18n-placeholder="taskPlaceholder" placeholder="e.g. Revise chapter 5">
-          </label>
-          <label>
-            <span data-i18n="linkedExam">Exam (optional)</span>
-            <select id="task-exam">
-              <option value="" data-i18n="noExam">No exam</option>
-            </select>
-          </label>
-          <label>
-            <span data-i18n="priority">Priority</span>
-            <select id="task-priority">
-              <option value="low" data-i18n="low">Low</option>
-              <option value="medium" selected data-i18n="medium">Medium</option>
-              <option value="high" data-i18n="high">High</option>
-            </select>
-          </label>
-          <label>
-            <span data-i18n="startDate">Start date</span>
-            <input type="date" id="task-start-date">
-          </label>
-          <label>
-            <span data-i18n="startTime">Start time</span>
-            <input type="time" id="task-start-time">
-          </label>
-          <label>
-            <span data-i18n="endTime">Lesson finish time</span>
-            <input type="time" id="task-end-time">
-          </label>
-          <label>
-            <span data-i18n="due">Due (optional)</span>
-            <input type="date" id="task-due">
-          </label>
-          <label>
-            <span data-i18n="technique">Study technique</span>
-            <select id="task-technique">
-              <option value="pomodoro" data-i18n="technique.pomodoro">Pomodoro 25/5</option>
-              <option value="deep50" data-i18n="technique.deep50">Deep work 50/10</option>
-              <option value="ultradian" data-i18n="technique.ultradian">Ultradian 90/20</option>
-              <option value="fiftyTwo" data-i18n="technique.fiftyTwo">52/17 focus</option>
-              <option value="timeblock" data-i18n="technique.timeblock">Time blocking</option>
-              <option value="custom" data-i18n="technique.custom">Custom plan</option>
-            </select>
-          </label>
-          <label>
-            <span data-i18n="studyMethod">Study method</span>
-            <select id="task-method">
-              <option value="none" data-i18n="method.none">None</option>
-              <option value="activeRecall" data-i18n="method.activeRecall">Active recall</option>
-              <option value="spaced" data-i18n="method.spaced">Spaced repetition</option>
-              <option value="feynman" data-i18n="method.feynman">Feynman technique</option>
-              <option value="interleaving" data-i18n="method.interleaving">Interleaving</option>
-              <option value="sq3r" data-i18n="method.sq3r">SQ3R reading</option>
-            </select>
-          </label>
-        </div>
-        <p id="technique-hint" class="hint technique-hint"></p>
-        <div class="reminder-toggles">
-          <label class="switch-row">
-            <span data-i18n="alarm">Alarm</span>
-            <input type="checkbox" id="task-alarm" class="switch-input">
-            <span class="switch" aria-hidden="true"></span>
-          </label>
-          <label class="switch-row">
-            <span data-i18n="notification">Notification</span>
-            <input type="checkbox" id="task-notify" class="switch-input">
-            <span class="switch" aria-hidden="true"></span>
-          </label>
-        </div>
-        <div class="break-editor">
-          <div class="card-title-row break-title-row">
-            <h4 data-i18n="breaks">Breaks</h4>
-            <div class="break-actions">
-              <button type="button" id="auto-plan-breaks" class="ghost-btn" data-i18n="autoPlan">Auto-plan</button>
-              <button type="button" id="add-break" class="ghost-btn" data-i18n="addBreak">+ Add break</button>
-            </div>
-          </div>
-          <div id="break-list" class="break-list"></div>
-          <p id="break-empty" class="hint" data-i18n="breakEmpty">Add tea, food or rest breaks inside your study window.</p>
-          <div class="break-quick-row">
-            <span class="break-quick-label" data-i18n="smart.quickAdd">Quick add</span>
-            <button type="button" class="chip-btn" data-quick-break="tea" data-i18n="smart.tea">Tea 10 min</button>
-            <button type="button" class="chip-btn" data-quick-break="food" data-i18n="smart.food">Food 30 min</button>
-            <button type="button" class="chip-btn" data-quick-break="rest" data-i18n="smart.rest">Rest 15 min</button>
-          </div>
-        </div>
-        <p id="auto-technique-note" class="auto-technique-note hidden"></p>
-        <div id="task-schedule-preview" class="schedule-preview"></div>
-        <button type="submit" id="task-submit" class="primary-btn full-btn" data-i18n="addTask">Add Task</button>
-      </form>
-
       <div class="card">
         <div class="card-title-row">
           <h3 data-i18n="taskList">Task List</h3>
@@ -410,35 +279,6 @@
         </div>
       </div>
 
-      <form id="card-form" class="card form-card">
-        <div class="card-title-row">
-          <h3 id="card-form-title" data-i18n="cards.addCard">Add card</h3>
-          <button type="button" id="card-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
-        </div>
-        <div class="form-grid">
-          <label class="full-width">
-            <span data-i18n="cards.front">Question</span>
-            <textarea id="card-front" rows="2" maxlength="500" required data-i18n-placeholder="cards.frontPlaceholder" placeholder="e.g. What is the powerhouse of the cell?"></textarea>
-          </label>
-          <label class="full-width">
-            <span data-i18n="cards.back">Answer</span>
-            <textarea id="card-back" rows="3" maxlength="1000" required data-i18n-placeholder="cards.backPlaceholder" placeholder="e.g. The mitochondria"></textarea>
-          </label>
-          <label>
-            <span data-i18n="cards.deck">Deck</span>
-            <input type="text" id="card-deck" maxlength="40" list="card-deck-options" data-i18n-placeholder="cards.deckPlaceholder" placeholder="e.g. Biology">
-            <datalist id="card-deck-options"></datalist>
-          </label>
-          <label>
-            <span data-i18n="cards.linkedExam">Exam (optional)</span>
-            <select id="card-exam">
-              <option value="" data-i18n="noExam">No exam</option>
-            </select>
-          </label>
-        </div>
-        <button type="submit" id="card-submit" class="primary-btn" data-i18n="cards.addCard">Add card</button>
-      </form>
-
       <div class="card">
         <div class="card-title-row">
           <h3 data-i18n="cards.yourCards">Your cards</h3>
@@ -455,7 +295,7 @@
           </select>
         </div>
         <ul id="card-list" class="item-list"></ul>
-        <p id="card-empty" class="empty-state" data-i18n="cards.empty">No flashcards yet. Add your first card above.</p>
+        <p id="card-empty" class="empty-state" data-i18n="cards.empty">No flashcards yet. Add your first card.</p>
       </div>
     </section>
 
@@ -599,7 +439,7 @@
           <p class="abx-lead" data-i18n="brandSubtitle">Plan smarter. Focus deeper. Ace every exam.</p>
           <div class="abx-meta">
             <span class="abx-chip"><span class="abx-chip-dot" aria-hidden="true"></span><span data-i18n="about.subtitle">Sinhala English study app</span></span>
-            <span class="abx-chip abx-chip-version" data-i18n="version">Version 2.2.0</span>
+            <span class="abx-chip abx-chip-version" data-i18n="version">Version 2.3.0</span>
           </div>
         </div>
         <div class="abx-hero-art" aria-hidden="true">
@@ -704,7 +544,7 @@
         </div>
       </article>
 
-      <p class="abx-foot"><span data-i18n="developedBy">Developed by Dakshan Bhashna</span><span data-i18n="version">Version 2.2.0</span></p>
+      <p class="abx-foot"><span data-i18n="developedBy">Developed by Dakshan Bhashna</span><span data-i18n="version">Version 2.3.0</span></p>
     </section>
   </main>
 
@@ -713,7 +553,7 @@
   </button>
 
   <footer class="app-footer">
-    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 2.2.0</span></p>
+    <p><span data-i18n="footerText">Exam Buddy Pro — your data stays private on this device.</span> <span id="footer-year"></span> · <span data-i18n="version">Version 2.3.0</span></p>
   </footer>
 
   <div id="about-modal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
@@ -752,6 +592,201 @@
         <button type="button" id="update-later-btn" class="update-btn update-btn-ghost" data-i18n="update.later">Later</button>
         <button type="button" id="update-now-btn" class="update-btn update-btn-primary" data-i18n="update.now">Update now</button>
       </div>
+    </div>
+  </div>
+
+  <button type="button" id="exam-fab" class="fab" data-fab="exams" aria-label="Add exam">
+    <span class="fab-icon" aria-hidden="true">+</span>
+  </button>
+  <button type="button" id="task-fab" class="fab" data-fab="tasks" aria-label="Add task">
+    <span class="fab-icon" aria-hidden="true">+</span>
+  </button>
+  <button type="button" id="card-fab" class="fab" data-fab="cards" aria-label="Add card">
+    <span class="fab-icon" aria-hidden="true">+</span>
+  </button>
+
+  <div id="exam-create-modal" class="about-modal create-modal hidden" role="dialog" aria-modal="true" aria-labelledby="exam-form-title">
+    <div class="about-modal-backdrop" data-close-create="true"></div>
+    <div class="create-modal-card">
+      <div class="about-modal-head">
+        <h3 id="exam-form-title" data-i18n="addExam">Add Exam</h3>
+        <div class="about-modal-head-actions">
+          <button type="button" id="exam-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+          <button type="button" id="exam-modal-close" class="about-modal-close" aria-label="Close">×</button>
+        </div>
+      </div>
+      <form id="exam-form" class="card form-card">
+        <div class="form-grid">
+          <label>
+            <span data-i18n="subject">Subject</span>
+            <input type="text" id="exam-subject" required data-i18n-placeholder="subjectPlaceholder" data-i18n-aria="examName" placeholder="e.g. Mathematics" aria-label="Exam name">
+          </label>
+          <label>
+            <span data-i18n="date">Date</span>
+            <input type="date" id="exam-date" required data-i18n-aria="examDate" aria-label="Exam date">
+          </label>
+          <label>
+            <span data-i18n="category">Category</span>
+            <select id="exam-category">
+              <option value="General" data-i18n="category.general">General</option>
+              <option value="Mathematics" data-i18n="category.mathematics">Mathematics</option>
+              <option value="Science" data-i18n="category.science">Science</option>
+              <option value="Language" data-i18n="category.language">Language</option>
+              <option value="History" data-i18n="category.history">History</option>
+              <option value="Other" data-i18n="category.other">Other</option>
+            </select>
+          </label>
+          <label class="full-width">
+            <span data-i18n="notes">Notes (optional)</span>
+            <input type="text" id="exam-notes" data-i18n-placeholder="notesPlaceholder" placeholder="Chapters, topics, room...">
+          </label>
+        </div>
+        <button type="submit" id="exam-submit" class="primary-btn" data-i18n="addExam">Add Exam</button>
+        <p id="exam-limit-hint" class="hint exam-limit-hint"></p>
+      </form>
+    </div>
+  </div>
+
+  <div id="task-create-modal" class="about-modal create-modal hidden" role="dialog" aria-modal="true" aria-labelledby="task-form-title">
+    <div class="about-modal-backdrop" data-close-create="true"></div>
+    <div class="create-modal-card">
+      <div class="about-modal-head">
+        <h3 id="task-form-title" data-i18n="addTask">Add Task</h3>
+        <div class="about-modal-head-actions">
+          <button type="button" id="task-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+          <button type="button" id="task-modal-close" class="about-modal-close" aria-label="Close">×</button>
+        </div>
+      </div>
+      <form id="task-form" class="card form-card task-form-card">
+        <div class="form-grid">
+          <label class="full-width">
+            <span data-i18n="taskLabel">Task</span>
+            <input type="text" id="task-text" required data-i18n-placeholder="taskPlaceholder" placeholder="e.g. Revise chapter 5">
+          </label>
+          <label>
+            <span data-i18n="linkedExam">Exam (optional)</span>
+            <select id="task-exam">
+              <option value="" data-i18n="noExam">No exam</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="priority">Priority</span>
+            <select id="task-priority">
+              <option value="low" data-i18n="low">Low</option>
+              <option value="medium" selected data-i18n="medium">Medium</option>
+              <option value="high" data-i18n="high">High</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="startDate">Start date</span>
+            <input type="date" id="task-start-date">
+          </label>
+          <label>
+            <span data-i18n="startTime">Start time</span>
+            <input type="time" id="task-start-time">
+          </label>
+          <label>
+            <span data-i18n="endTime">Lesson finish time</span>
+            <input type="time" id="task-end-time">
+          </label>
+          <label>
+            <span data-i18n="due">Due (optional)</span>
+            <input type="date" id="task-due">
+          </label>
+          <label>
+            <span data-i18n="technique">Study technique</span>
+            <select id="task-technique">
+              <option value="pomodoro" data-i18n="technique.pomodoro">Pomodoro 25/5</option>
+              <option value="deep50" data-i18n="technique.deep50">Deep work 50/10</option>
+              <option value="ultradian" data-i18n="technique.ultradian">Ultradian 90/20</option>
+              <option value="fiftyTwo" data-i18n="technique.fiftyTwo">52/17 focus</option>
+              <option value="timeblock" data-i18n="technique.timeblock">Time blocking</option>
+              <option value="custom" data-i18n="technique.custom">Custom plan</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="studyMethod">Study method</span>
+            <select id="task-method">
+              <option value="none" data-i18n="method.none">None</option>
+              <option value="activeRecall" data-i18n="method.activeRecall">Active recall</option>
+              <option value="spaced" data-i18n="method.spaced">Spaced repetition</option>
+              <option value="feynman" data-i18n="method.feynman">Feynman technique</option>
+              <option value="interleaving" data-i18n="method.interleaving">Interleaving</option>
+              <option value="sq3r" data-i18n="method.sq3r">SQ3R reading</option>
+            </select>
+          </label>
+        </div>
+        <p id="technique-hint" class="hint technique-hint"></p>
+        <div class="reminder-toggles">
+          <label class="switch-row">
+            <span data-i18n="alarm">Alarm</span>
+            <input type="checkbox" id="task-alarm" class="switch-input">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span data-i18n="notification">Notification</span>
+            <input type="checkbox" id="task-notify" class="switch-input">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="break-editor">
+          <div class="card-title-row break-title-row">
+            <h4 data-i18n="breaks">Breaks</h4>
+            <div class="break-actions">
+              <button type="button" id="auto-plan-breaks" class="ghost-btn" data-i18n="autoPlan">Auto-plan</button>
+              <button type="button" id="add-break" class="ghost-btn" data-i18n="addBreak">+ Add break</button>
+            </div>
+          </div>
+          <div id="break-list" class="break-list"></div>
+          <p id="break-empty" class="hint" data-i18n="breakEmpty">Add tea, food or rest breaks inside your study window.</p>
+          <div class="break-quick-row">
+            <span class="break-quick-label" data-i18n="smart.quickAdd">Quick add</span>
+            <button type="button" class="chip-btn" data-quick-break="tea" data-i18n="smart.tea">Tea 10 min</button>
+            <button type="button" class="chip-btn" data-quick-break="food" data-i18n="smart.food">Food 30 min</button>
+            <button type="button" class="chip-btn" data-quick-break="rest" data-i18n="smart.rest">Rest 15 min</button>
+          </div>
+        </div>
+        <p id="auto-technique-note" class="auto-technique-note hidden"></p>
+        <div id="task-schedule-preview" class="schedule-preview"></div>
+        <button type="submit" id="task-submit" class="primary-btn full-btn" data-i18n="addTask">Add Task</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="card-create-modal" class="about-modal create-modal hidden" role="dialog" aria-modal="true" aria-labelledby="card-form-title">
+    <div class="about-modal-backdrop" data-close-create="true"></div>
+    <div class="create-modal-card">
+      <div class="about-modal-head">
+        <h3 id="card-form-title" data-i18n="cards.addCard">Add card</h3>
+        <div class="about-modal-head-actions">
+          <button type="button" id="card-cancel-edit" class="ghost-btn hidden" data-i18n="cancelEdit">Cancel edit</button>
+          <button type="button" id="card-modal-close" class="about-modal-close" aria-label="Close">×</button>
+        </div>
+      </div>
+      <form id="card-form" class="card form-card">
+        <div class="form-grid">
+          <label class="full-width">
+            <span data-i18n="cards.front">Question</span>
+            <textarea id="card-front" rows="2" maxlength="500" required data-i18n-placeholder="cards.frontPlaceholder" placeholder="e.g. What is the powerhouse of the cell?"></textarea>
+          </label>
+          <label class="full-width">
+            <span data-i18n="cards.back">Answer</span>
+            <textarea id="card-back" rows="3" maxlength="1000" required data-i18n-placeholder="cards.backPlaceholder" placeholder="e.g. The mitochondria"></textarea>
+          </label>
+          <label>
+            <span data-i18n="cards.deck">Deck</span>
+            <input type="text" id="card-deck" maxlength="40" list="card-deck-options" data-i18n-placeholder="cards.deckPlaceholder" placeholder="e.g. Biology">
+            <datalist id="card-deck-options"></datalist>
+          </label>
+          <label>
+            <span data-i18n="cards.linkedExam">Exam (optional)</span>
+            <select id="card-exam">
+              <option value="" data-i18n="noExam">No exam</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" id="card-submit" class="primary-btn" data-i18n="cards.addCard">Add card</button>
+      </form>
     </div>
   </div>
 

@@ -1,0 +1,15 @@
+{
+  "versionCode": 15,
+  "versionName": "2.3.0",
+  "changelog": {
+    "en": [
+      "Dashboard Next Exam card no longer opens a detail modal on tap.",
+      "Create exams, tasks and flashcards now open from a floating Create button with a bottom-sheet popup."
+    ],
+    "si": [
+      "ඩැෂ්බෝඩ් ඊළඟ විභාග කාඩ්පතට ටැප් කළොත් විස්තර මොඩලයක් විවෘත නොවේ.",
+      "විභාග, කාර්යයන් හා කාඩ්පත් නිර්මාණය කිරීමට පියාපත් Create බොත්මක් හරහා පහළ-බිත්ති පොප් අර්ථවත් වේ."
+    ]
+  },
+  "releaseNotes": "## Exam Buddy Pro v2.3.0\n\nThe Dashboard Next Exam card is now fully display-only, and creating exams, tasks and flashcards happens through a floating Create button with a bottom-sheet popup.\n\n### What's new\n- Floating Create button on the Exams, Tasks and Flashcards pages opens a bottom-sheet popup with the add form.\n- Dashboard Next Exam card no longer opens a detail modal on tap.\n\n### Fixes\n- Exam, task and card creation now save from the popup and refresh the list after saving.\n"
+}

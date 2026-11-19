@@ -1,24 +1,20 @@
 {
   "app": "Exam Buddy Pro",
   "package": "com.exambuddy.lite",
-  "versionCode": 14,
-  "versionName": "2.2.0",
+  "versionCode": 15,
+  "versionName": "2.3.0",
   "minSdk": 21,
   "publishedAt": "2026-11-19",
   "apkUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest/download/exam-buddy-lite.apk",
   "releaseNotesUrl": "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
   "changelog": {
     "en": [
-      "Added a quick Create button on the Exams, Tasks and Flashcards pages.",
-      "Task and exam details now scroll smoothly and stay easy to read in the detail view.",
-      "Startup is faster with the trimmed splash screen and lighter UI animations.",
-      "Task and card search now re-render lists with debounced input while typing."
+      "Dashboard Next Exam card no longer opens a detail modal on tap.",
+      "Create exams, tasks and flashcards now open from a floating Create button with a bottom-sheet popup."
     ],
     "si": [
-      "ඉක්මන් නිර්මාණ බොත්මක්ම එකතු කර ඇත.",
-      "කාර්යය සහ විභාග විස්තර පහසුවෙන් දැනගන්න.",
-      "යෙදුම ආරම්භ වේගවත් විය.",
-      "කාඩ්පම්ත සෙවුම් තද අදහස්."
+      "ඩැෂ්බෝඩ් ඊළඟ විභාග කාඩ්පතට ටැප් කළොත් විස්තර මොඩලයක් විවෘත නොවේ.",
+      "විභාග, කාර්යයන් හා කාඩ්පත් නිර්මාණය කිරීමට පියාපත් Create බොත්මක් හරහා පහළ-බිත්ති පොප් අර්ථවත් වේ."
     ]
   }
 }

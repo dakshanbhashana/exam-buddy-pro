@@ -51,8 +51,8 @@ const CARD_MASTERED_BOX = 4;
 const CARD_MAX_BOX = 5;
 const CARD_INTERVALS = [10 * 60 * 1000, DAY_MS, 3 * DAY_MS, 7 * DAY_MS, 16 * DAY_MS, 35 * DAY_MS];
 
-const APP_VERSION_NAME = "2.2.0";
-const APP_VERSION_CODE = 14;
+const APP_VERSION_NAME = "2.3.0";
+const APP_VERSION_CODE = 15;
 const UPDATE_CONFIG = {
   manifestUrl: "https://raw.githubusercontent.com/dakshanbhashana/exam-buddy-pro/main/version.json",
   releaseNotesUrl: "https://github.com/dakshanbhashana/exam-buddy-pro/releases/latest",
@@ -400,7 +400,7 @@ const I18N = {
     "about.privacyHint": "Your data never leaves this device",
     "about.licencesHint": "Sounds, fonts and libraries",
     "about.updateHint": "Always get the latest release",
-    version: "Version 2.2.0",
+    version: "Version 2.3.0",
     footerText: "Exam Buddy Pro — your data stays private on this device.",
     backToTop: "Back to top",
     "update.title": "Update available",
@@ -904,7 +904,7 @@ const I18N = {
     "about.privacyHint": "ඔබේ දත්ත කිසිදා මෙම උපාංගයෙන් පිට නොයයි",
     "about.licencesHint": "ශබ්ද, අකුරු සහ පුස්තකාල",
     "about.updateHint": "නවතම සංස්කරණය සැමවිටම ලබා ගන්න",
-    version: "Version 2.2.0",
+    version: "Version 2.3.0",
     footerText: "Exam Buddy Pro — ඔබේ දත්ත මෙම උපාංගයේ පුද්ගලිකව පවතී.",
     backToTop: "ඉහළට යන්න",
     "update.title": "යාවත්කාලීනයක් ඇත",
@@ -2513,6 +2513,7 @@ function switchTab(tab) {
   const panels = document.querySelectorAll(".tab-panel");
   buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
+  updateCreateFab(tab);
   closePrettySelectMenu();
   if (tab === "dashboard") {
     renderDashboard();
@@ -3492,6 +3493,7 @@ function startExamEdit(id) {
   document.getElementById("exam-cancel-edit").classList.remove("hidden");
   document.getElementById("exam-subject").focus();
   syncPrettySelects();
+  showExamCreateModal();
 }
 
 function startTaskEdit(id, focusBreaks) {
@@ -3517,13 +3519,11 @@ function startTaskEdit(id, focusBreaks) {
   setText("task-submit", t("saveChanges"));
   document.getElementById("task-cancel-edit").classList.remove("hidden");
   if (focusBreaks) {
-    document.getElementById("task-text").focus();
     const breakList = document.getElementById("break-list");
     if (breakList) breakList.scrollIntoView({ behavior: "smooth", block: "center" });
-  } else {
-    document.getElementById("task-text").focus();
   }
   syncPrettySelects();
+  showTaskCreateModal();
 }
 
 function setupTaskPlanner() {
@@ -3603,6 +3603,7 @@ function startCardEdit(id) {
   if (cancel) cancel.classList.remove("hidden");
   if (front) front.focus();
   syncPrettySelects();
+  showCardCreateModal();
 }
 
 function setupFlashcards() {
@@ -3640,12 +3641,12 @@ function setupFlashcards() {
       showToast(t("cards.added"), "success");
     }
     saveData();
-    resetCardForm();
+    closeCardCreateModal();
     renderAll();
   });
 
   const cancel = document.getElementById("card-cancel-edit");
-  if (cancel) cancel.addEventListener("click", resetCardForm);
+  if (cancel) cancel.addEventListener("click", closeCardCreateModal);
 
   const reviewDue = document.getElementById("cards-review-due");
   if (reviewDue) reviewDue.addEventListener("click", () => startCardStudy());
@@ -3769,7 +3770,7 @@ function setupForms() {
       showToast(t("examAdded"), "success");
     }
     saveData();
-    e.target.reset();
+    closeExamCreateModal();
     renderAll();
     syncPrettySelects();
   });
@@ -3857,16 +3858,15 @@ function setupForms() {
 
     if (savedTask) syncTaskReminders(savedTask, true);
     saveData();
-    resetTaskForm();
+    closeTaskCreateModal();
     renderAll();
   });
 
   document.getElementById("exam-cancel-edit").addEventListener("click", () => {
-    clearExamEdit();
-    document.getElementById("exam-form").reset();
+    closeExamCreateModal();
   });
   document.getElementById("task-cancel-edit").addEventListener("click", () => {
-    resetTaskForm();
+    closeTaskCreateModal();
   });
 }
 
@@ -4177,8 +4177,8 @@ function setupQuickActions() {
     btn.addEventListener("click", () => {
       const tab = btn.dataset.quick;
       switchTab(tab);
-      if (tab === "exams") setTimeout(() => document.getElementById("exam-subject").focus(), 0);
-      if (tab === "tasks") setTimeout(() => document.getElementById("task-text").focus(), 0);
+      if (tab === "exams") setTimeout(() => openExamCreateModal(), 0);
+      if (tab === "tasks") setTimeout(() => openTaskCreateModal(), 0);
       if (tab === "cards") setTimeout(() => startCardStudy(), 0);
       if (tab === "focus") {
         if (timer.mode !== "focus") setMode("focus");
@@ -4188,7 +4188,181 @@ function setupQuickActions() {
   });
   document.getElementById("quick-add-exam").addEventListener("click", () => {
     switchTab("exams");
-    setTimeout(() => document.getElementById("exam-subject").focus(), 0);
+    setTimeout(() => openExamCreateModal(), 0);
+  });
+}
+
+function updateCreateFab(tab) {
+  const map = { exams: "exam-fab", tasks: "task-fab", cards: "card-fab" };
+  Object.keys(map).forEach((key) => {
+    const fab = document.getElementById(map[key]);
+    if (!fab) return;
+    fab.classList.toggle("hidden", tab !== key);
+  });
+}
+
+function setupCreateFab() {
+  const examFab = document.getElementById("exam-fab");
+  const taskFab = document.getElementById("task-fab");
+  const cardFab = document.getElementById("card-fab");
+  if (examFab) examFab.addEventListener("click", () => openExamCreateModal());
+  if (taskFab) taskFab.addEventListener("click", () => openTaskCreateModal());
+  if (cardFab) cardFab.addEventListener("click", () => openCardCreateModal());
+  updateCreateFab((document.querySelector(".tab-panel.active") || {}).id || "dashboard");
+}
+
+function showExamCreateModal() {
+  const modal = document.getElementById("exam-create-modal");
+  if (!modal) return;
+  const wasHidden = modal.classList.contains("hidden");
+  modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
+  syncCreateModalNativeState(true);
+  setTimeout(() => {
+    const subject = document.getElementById("exam-subject");
+    if (subject) subject.focus();
+  }, 60);
+}
+
+function openExamCreateModal() {
+  clearExamEdit();
+  showExamCreateModal();
+}
+
+function closeExamCreateModal() {
+  const modal = document.getElementById("exam-create-modal");
+  const wasOpen = modal ? !modal.classList.contains("hidden") : false;
+  if (modal) modal.classList.add("hidden");
+  if (wasOpen) unlockBodyScroll();
+  syncCreateModalNativeState(false);
+  clearExamEdit();
+  const form = document.getElementById("exam-form");
+  if (form) form.reset();
+}
+
+function showTaskCreateModal() {
+  const modal = document.getElementById("task-create-modal");
+  if (!modal) return;
+  const wasHidden = modal.classList.contains("hidden");
+  modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
+  syncCreateModalNativeState(true);
+  setTimeout(() => {
+    const field = document.getElementById("task-text");
+    if (field) field.focus();
+  }, 60);
+}
+
+function openTaskCreateModal() {
+  resetTaskForm();
+  showTaskCreateModal();
+}
+
+function closeTaskCreateModal() {
+  const modal = document.getElementById("task-create-modal");
+  const wasOpen = modal ? !modal.classList.contains("hidden") : false;
+  if (modal) modal.classList.add("hidden");
+  if (wasOpen) unlockBodyScroll();
+  syncCreateModalNativeState(false);
+  resetTaskForm();
+}
+
+function showCardCreateModal() {
+  const modal = document.getElementById("card-create-modal");
+  if (!modal) return;
+  const wasHidden = modal.classList.contains("hidden");
+  modal.classList.remove("hidden");
+  if (wasHidden) lockBodyScroll();
+  syncCreateModalNativeState(true);
+  setTimeout(() => {
+    const front = document.getElementById("card-front");
+    if (front) front.focus();
+  }, 60);
+}
+
+function openCardCreateModal() {
+  resetCardForm();
+  showCardCreateModal();
+}
+
+function closeCardCreateModal() {
+  const modal = document.getElementById("card-create-modal");
+  const wasOpen = modal ? !modal.classList.contains("hidden") : false;
+  if (modal) modal.classList.add("hidden");
+  if (wasOpen) unlockBodyScroll();
+  syncCreateModalNativeState(false);
+  resetCardForm();
+}
+
+function syncCreateModalNativeState(open) {
+  const bridge = window.ExamBuddyFileBridge;
+  if (!bridge || typeof bridge.setCreateModalOpen !== "function") return;
+  try {
+    bridge.setCreateModalOpen(Boolean(open));
+  } catch (err) {
+  }
+}
+
+function closeActiveCreateModal() {
+  const examModal = document.getElementById("exam-create-modal");
+  const taskModal = document.getElementById("task-create-modal");
+  const cardModal = document.getElementById("card-create-modal");
+  if (examModal && !examModal.classList.contains("hidden")) {
+    closeExamCreateModal();
+    return;
+  }
+  if (taskModal && !taskModal.classList.contains("hidden")) {
+    closeTaskCreateModal();
+    return;
+  }
+  if (cardModal && !cardModal.classList.contains("hidden")) {
+    closeCardCreateModal();
+    return;
+  }
+}
+
+window.ExamBuddyCreateModalClose = closeActiveCreateModal;
+
+function setupCreateModals() {
+  const examModal = document.getElementById("exam-create-modal");
+  const taskModal = document.getElementById("task-create-modal");
+  const cardModal = document.getElementById("card-create-modal");
+  const examClose = document.getElementById("exam-modal-close");
+  const taskClose = document.getElementById("task-modal-close");
+  const cardClose = document.getElementById("card-modal-close");
+
+  const bindBackdropClose = (modal, closeFn) => {
+    if (!modal) return;
+    modal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-create]")) closeFn();
+    });
+  };
+  bindBackdropClose(examModal, closeExamCreateModal);
+  bindBackdropClose(taskModal, closeTaskCreateModal);
+  bindBackdropClose(cardModal, closeCardCreateModal);
+
+  const bindCloseButton = (button, closeFn) => {
+    if (!button) return;
+    button.addEventListener("click", closeFn);
+  };
+  bindCloseButton(examClose, closeExamCreateModal);
+  bindCloseButton(taskClose, closeTaskCreateModal);
+  bindCloseButton(cardClose, closeCardCreateModal);
+
+  const createModalBindings = [
+    { modal: examModal, close: closeExamCreateModal },
+    { modal: taskModal, close: closeTaskCreateModal },
+    { modal: cardModal, close: closeCardCreateModal }
+  ];
+  createModalBindings.forEach((binding) => {
+    const modal = binding.modal;
+    if (!modal) return;
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (modal.classList.contains("hidden")) return;
+      event.preventDefault();
+      binding.close();
+    });
   });
 }
 
@@ -4196,35 +4370,28 @@ function setupCreateButtons() {
   const examCreate = document.getElementById("exam-create-btn");
   if (examCreate) {
     examCreate.addEventListener("click", () => {
-      clearExamEdit();
-      switchTab("exams");
-      setTimeout(() => document.getElementById("exam-subject").focus(), 60);
+      const panel = document.querySelector(".tab-panel.active");
+      const tab = panel ? panel.id : "";
+      if (tab !== "exams") switchTab("exams");
+      openExamCreateModal();
     });
   }
   const taskCreate = document.getElementById("task-create-btn");
   if (taskCreate) {
     taskCreate.addEventListener("click", () => {
-      resetTaskForm();
-      switchTab("tasks");
-      setTimeout(() => {
-        const form = document.getElementById("task-form");
-        if (form) form.scrollIntoView({ block: "start" });
-        const field = document.getElementById("task-text");
-        if (field) field.focus();
-      }, 60);
+      const panel = document.querySelector(".tab-panel.active");
+      const tab = panel ? panel.id : "";
+      if (tab !== "tasks") switchTab("tasks");
+      openTaskCreateModal();
     });
   }
   const cardCreate = document.getElementById("card-create-btn");
   if (cardCreate) {
     cardCreate.addEventListener("click", () => {
-      resetCardForm();
-      switchTab("cards");
-      setTimeout(() => {
-        const form = document.getElementById("card-form");
-        if (form) form.scrollIntoView({ block: "start" });
-        const field = document.getElementById("card-front");
-        if (field) field.focus();
-      }, 60);
+      const panel = document.querySelector(".tab-panel.active");
+      const tab = panel ? panel.id : "";
+      if (tab !== "cards") switchTab("cards");
+      openCardCreateModal();
     });
   }
 }
@@ -4918,7 +5085,7 @@ function openAboutModal(kind) {
   } else {
     title.textContent = t("about.licences");
     body.innerHTML = `
-      <p><strong>Exam Buddy Pro</strong> — Version 2.2.0</p>
+      <p><strong>Exam Buddy Pro</strong> — Version 2.3.0</p>
       <p>Developed by Dakshan Bhashna.</p>
       <ul>
         <li>Built with HTML, CSS, and JavaScript.</li>
@@ -5296,6 +5463,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPrettySelects();
   setupQuickActions();
   setupCreateButtons();
+  setupCreateFab();
+  setupCreateModals();
   setupPomodoro();
   setupAlarmOverlay();
   setupBackToTop();
